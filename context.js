@@ -1,17 +1,19 @@
 import { createContext, use, useContext, useEffect, useMemo, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
+import { useAppStorage } from './appStorageProvider';
+import { getEffectiveDate } from './src/helpers';
 
 const DataContext = createContext(null);
 
-const shouldPayNextMonth = (bill) => {
+const shouldPayNextMonth = (bill, monthOffset = 0) => {
   if (!bill.inMonths || !bill.firstMonth) {
     return true;
   }
 
   const startDate = bill.firstMonth.seconds ? new Date(bill.firstMonth.seconds * 1000) : new Date(bill.firstMonth);
 
-  const today = new Date();
+  const today = getEffectiveDate(monthOffset);
   const nextMonthDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
 
   const yearDiff = nextMonthDate.getFullYear() - startDate.getFullYear();
@@ -22,6 +24,7 @@ const shouldPayNextMonth = (bill) => {
   return cuotaNumero > 0 && cuotaNumero <= bill.inMonths;
 };
 export const DataProvider = ({ children }) => {
+  const { monthOffset } = useAppStorage();
   const [accounts, setAccounts] = useState([]);
   const [bills, setBills] = useState([]);
   const [appMeta, setAppMeta] = useState([]);
@@ -92,12 +95,12 @@ export const DataProvider = ({ children }) => {
 
     nextMonth.bills = bills.filter((b) => {
       if (b.type !== 'planned') return false;
-      return shouldPayNextMonth(b);
+      return shouldPayNextMonth(b, monthOffset);
     });
     nextMonth.afterPayments = nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + b.amount, 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + b.amount, 0);
 
     return { m_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
-  }, [accounts, bills, appMeta]);
+  }, [accounts, bills, appMeta, monthOffset]);
   return <DataContext.Provider value={{ accounts, bills, appMeta, balances }}>{children}</DataContext.Provider>;
 };
 

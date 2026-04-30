@@ -9,6 +9,7 @@ const defaultState = {
     aylin: { name: 'aylin', theme: 'pink_blue' },
   },
   currentUser: 'aylin',
+  monthOffset: 0,
 };
 
 const AppStorageContext = createContext(null);
@@ -23,7 +24,8 @@ export const AppStorageProvider = ({ children }) => {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
-          setAppStorage(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          setAppStorage({ ...defaultState, ...parsed });
         }
       } catch (error) {
         console.log('Error loading storage:', error);
@@ -86,6 +88,22 @@ export const AppStorageProvider = ({ children }) => {
 
   const currentUser = appStorage.users[appStorage.currentUser];
 
+  const monthOffset = appStorage.monthOffset ?? 0;
+
+  const setMonthOffset = (offset) => {
+    setAppStorage((prev) => ({
+      ...prev,
+      monthOffset: offset,
+    }));
+  };
+
+  const toggleMonthOffset = () => {
+    setAppStorage((prev) => ({
+      ...prev,
+      monthOffset: (prev.monthOffset ?? 0) === 0 ? 1 : 0,
+    }));
+  };
+
   return (
     <AppStorageContext.Provider
       value={{
@@ -94,6 +112,9 @@ export const AppStorageProvider = ({ children }) => {
         updateTheme,
         setCurrentUser,
         isReady,
+        monthOffset,
+        setMonthOffset,
+        toggleMonthOffset,
       }}
     >
       {children}

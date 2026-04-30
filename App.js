@@ -53,8 +53,8 @@ export default function App() {
   };
 
   return (
-    <DataProvider>
-      <AppStorageProvider>
+    <AppStorageProvider>
+      <DataProvider>
         <SafeAreaProvider>
           <GradientBackground>
             {page === 'home' && <Home setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />}
@@ -66,7 +66,7 @@ export default function App() {
             {/* <MainBar /> */}
           </GradientBackground>
         </SafeAreaProvider>
-      </AppStorageProvider>
-    </DataProvider>
+      </DataProvider>
+    </AppStorageProvider>
   );
 }

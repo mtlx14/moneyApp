@@ -1,6 +1,7 @@
 import { View, Text, Dimensions, Platform, TextInput, Pressable, ScrollView, Easing } from 'react-native';
 import { useTheme } from '../theme/useTheme.js';
 import { useData } from '../../context.js';
+import { useAppStorage } from '../../appStorageProvider.js';
 import { useEffect, useRef, useState } from 'react';
 import Animated, { FadeIn, FadeOut, runOnJS, SlideInRight, SlideOutRight, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -18,6 +19,7 @@ const windowWidth = Dimensions.get('window').width;
 export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
   const { balances, bills } = useData();
+  const { monthOffset } = useAppStorage();
   const [activeField, setActiveField] = useState(null);
 
   return (
@@ -109,7 +111,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                                 fontSize: fS.subsText,
                               }}
                             >
-                              {`${bill.label} ${bill.inMonths > 0 ? currentInstallment(bill.firstMonth) + '/' + bill.inMonths : ''}`}
+                              {`${bill.label} ${bill.inMonths > 0 ? currentInstallment(bill.firstMonth, monthOffset) + '/' + bill.inMonths : ''}`}
                             </Text>
                           </View>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>

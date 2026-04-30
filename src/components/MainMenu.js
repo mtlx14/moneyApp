@@ -6,12 +6,14 @@ import Animated, { FadeIn, FadeInDown, FadeInLeft, FadeInRight, FadeInUp, FadeOu
 import { BlurView } from 'expo-blur';
 import React from 'react';
 import { fS } from '../theme/theme';
+import { useAppStorage } from '../../appStorageProvider';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
 export default function MainMenu({ page, navigate }) {
   const theme = useTheme();
+  const { monthOffset, toggleMonthOffset } = useAppStorage();
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -23,6 +25,7 @@ export default function MainMenu({ page, navigate }) {
     // { name: 'fixed_expenses', label: 'Gastos fijos' },
     // { name: 'planned_expenses', label: 'Gastos planificados' },
     { name: 'matias_accounts', label: 'Cuentas de Matías' },
+    { name: 'toggle_month', label: monthOffset === 0 ? 'Mes siguiente' : 'Mes actual' },
   ];
 
   const visibleButtons = page === 'home' ? buttons.filter((btn) => btn.name !== 'home') : buttons;
@@ -54,9 +57,15 @@ export default function MainMenu({ page, navigate }) {
                   {index > 0 && <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>}
                   <Pressable
                     onPress={() => {
-                      (navigate(btn.name, btn.name === 'home' ? 0 : 1), setMenuOpen(false));
+                      if (btn.name === 'toggle_month') {
+                        toggleMonthOffset();
+                        setMenuOpen(false);
+                      } else {
+                        navigate(btn.name, btn.name === 'home' ? 0 : 1);
+                        setMenuOpen(false);
+                      }
                     }}
-                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: page === btn.name ? theme.bg.menuAccentColor : theme.bg.tr_1 }}
+                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: btn.name === 'toggle_month' && monthOffset !== 0 ? theme.bg.menuAccentColor : page === btn.name ? theme.bg.menuAccentColor : theme.bg.tr_1 }}
                   >
                     <Text style={{ color: theme.text._2, fontSize: fS.mainMenu }}>{btn.label}</Text>
                   </Pressable>

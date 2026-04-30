@@ -25,6 +25,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
   const { accounts, balances, appMeta, bills } = useData();
   const { currentUser } = useAppStorage();
   const { isReady } = useAppStorage();
+  const { monthOffset } = useAppStorage();
   const [localInfo, setLocalInfo] = useState({
     activeField: null,
     activeFieldAmount: null,
@@ -242,7 +243,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                   <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
                   <View key={bill.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                    <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{`${bill.emoji}   ${bill.label} ${bill.inMonths > 0 ? currentInstallment(bill.firstMonth) + 1 + '/' + bill.inMonths : ''}`}</Text>
+                    <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{`${bill.emoji}   ${bill.label} ${bill.inMonths > 0 ? currentInstallment(bill.firstMonth, monthOffset) + 1 + '/' + bill.inMonths : ''}`}</Text>
 
                     <AnimatedSwapTextS type={'debt'} value={bill.amount} />
                   </View>

@@ -1,7 +1,14 @@
 import { Timestamp } from 'firebase/firestore';
 
-export function currentInstallment(firstMonth) {
-  const now = new Date();
+export function getEffectiveDate(monthOffset = 0) {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + monthOffset);
+  return d;
+}
+
+export function currentInstallment(firstMonth, monthOffset = 0) {
+  const now = getEffectiveDate(monthOffset);
   const first = firstMonth.toDate();
 
   const yearDiff = now.getFullYear() - first.getFullYear();
@@ -31,14 +38,14 @@ export function getYear(timestamp) {
   return year;
 }
 
-export function getNextMonth() {
-  const now = new Date();
+export function getNextMonth(monthOffset = 0) {
+  const now = getEffectiveDate(monthOffset);
   const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const month = (nextMonthDate.getMonth() + 1).toString().padStart(2, '0');
   return month;
 }
-export function getYearOfNextMonth() {
-  const now = new Date();
+export function getYearOfNextMonth(monthOffset = 0) {
+  const now = getEffectiveDate(monthOffset);
   const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return nextMonthDate.getFullYear().toString();
 }
