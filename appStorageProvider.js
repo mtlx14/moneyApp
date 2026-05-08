@@ -10,7 +10,10 @@ const defaultState = {
   },
   currentUser: 'aylin',
   monthOffset: 0,
+  monthOffsetActivatedAt: null,
 };
+
+const monthKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
 const AppStorageContext = createContext(null);
 
@@ -24,8 +27,12 @@ export const AppStorageProvider = ({ children }) => {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
-          const parsed = JSON.parse(stored);
-          setAppStorage({ ...defaultState, ...parsed });
+          const parsed = { ...defaultState, ...JSON.parse(stored) };
+          if (parsed.monthOffset === 1 && parsed.monthOffsetActivatedAt && parsed.monthOffsetActivatedAt !== monthKey()) {
+            parsed.monthOffset = 0;
+            parsed.monthOffsetActivatedAt = null;
+          }
+          setAppStorage(parsed);
         }
       } catch (error) {
         console.log('Error loading storage:', error);
@@ -98,10 +105,14 @@ export const AppStorageProvider = ({ children }) => {
   };
 
   const toggleMonthOffset = () => {
-    setAppStorage((prev) => ({
-      ...prev,
-      monthOffset: (prev.monthOffset ?? 0) === 0 ? 1 : 0,
-    }));
+    setAppStorage((prev) => {
+      const next = (prev.monthOffset ?? 0) === 0 ? 1 : 0;
+      return {
+        ...prev,
+        monthOffset: next,
+        monthOffsetActivatedAt: next === 1 ? monthKey() : null,
+      };
+    });
   };
 
   return (

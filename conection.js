@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
+import { Platform } from 'react-native';
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,4 +19,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export default getFirestore();
+export default initializeFirestore(
+  app,
+  Platform.OS === 'web'
+    ? { experimentalForceLongPolling: true }
+    : { experimentalAutoDetectLongPolling: true },
+);

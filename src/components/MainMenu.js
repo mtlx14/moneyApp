@@ -25,7 +25,7 @@ export default function MainMenu({ page, navigate }) {
     // { name: 'fixed_expenses', label: 'Gastos fijos' },
     // { name: 'planned_expenses', label: 'Gastos planificados' },
     { name: 'matias_accounts', label: 'Cuentas de Matías' },
-    { name: 'toggle_month', label: monthOffset === 0 ? 'Mes siguiente' : 'Mes actual' },
+    { name: 'toggle_month', label: monthOffset === 0 ? 'Ir al mes siguiente' : 'Ir al mes actual' },
   ];
 
   const visibleButtons = page === 'home' ? buttons.filter((btn) => btn.name !== 'home') : buttons;
