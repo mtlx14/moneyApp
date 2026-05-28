@@ -33,9 +33,12 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
     }
   };
 
+  const Wrap = Platform.OS === 'web' ? View : Pressable;
+  const wrapProps = Platform.OS === 'web' ? {} : { onPress: Keyboard.dismiss };
+
   return (
     <Animated.View entering={FadeInDown} style={[{ position: 'absolute', width: windowWidth, height: windowHeight, top: 0, left: 0 }]}>
-      <Pressable onPress={Keyboard.dismiss}>
+      <Wrap {...wrapProps}>
         <Animated.View entering={FadeInDown} style={[{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'center', alignItems: 'center' }]}>
           <BlurView intensity={30} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
             {fields.map((field, index) => {
@@ -86,7 +89,7 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
             )}
           </Animated.View>
         </Animated.View>
-      </Pressable>
+      </Wrap>
     </Animated.View>
   );
 }
