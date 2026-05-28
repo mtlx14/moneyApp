@@ -35,8 +35,8 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
           {activeField ? (
             <ModalEditSub bill={activeField} onCancel={() => setActiveField(null)} />
           ) : (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ScrollView>
+            <View>
+              <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle * 1.2, fontWeight: 400 }}>Suscripciones</Text>
                 </View>
@@ -104,7 +104,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </Animated.View>
+            </View>
           )}
         </Animated.View>
       </GoBackScroll>

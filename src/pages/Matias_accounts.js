@@ -60,8 +60,8 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
       <GoBackScroll navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {!localInfo.activeField && (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ScrollView>
+            <View>
+              <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Matías</Text>
                 </View>
@@ -160,7 +160,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </Animated.View>
+            </View>
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} />}
