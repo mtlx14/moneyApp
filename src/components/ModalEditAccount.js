@@ -47,7 +47,8 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
     if (Platform.OS === 'web') {
       const ok = window.confirm('¿Estas seguro que quieres eliminar este gasto?');
       if (ok) {
-        handleOnPress();
+        deleteBill({ bill: currentBill });
+        onCancel();
       }
     } else {
       Alert.alert('Eliminar gasto', '¿Estas seguro que quieres eliminar este gasto?', [

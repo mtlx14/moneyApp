@@ -25,7 +25,8 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
     if (Platform.OS === 'web') {
       const ok = window.confirm('¿Estas seguro que quieres eliminar esta suscripción?');
       if (ok) {
-        handleOnPress();
+        deleteBill({ bill: currentBill });
+        onCancel();
       }
     } else {
       Alert.alert('Eliminar suscripción', '¿Estas seguro que quieres eliminar esta suscripción?', [
