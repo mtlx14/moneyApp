@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { getEffectiveDate } from './src/helpers';
+import { getEffectiveDate, projectedAmount } from './src/helpers';
 
 const DataContext = createContext(null);
 
@@ -91,13 +91,19 @@ export const DataProvider = ({ children }) => {
     const totalAfterPayments = matiasTotal + aylinTotal - billsBalances.toPay;
     const nextMonth = {};
 
-    nextMonth.beforePayments = totalAfterPayments + accounts.find((a) => a.id === 'account_aylin_salary')?.balance + accounts.find((a) => a.id === 'account_matias_salary')?.balance;
+    const salaries = (accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0) + (accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0);
+
+    // con el offset activado la proyección se corre un mes más, así que entra
+    // un sueldo extra por cada mes adicional
+    nextMonth.extraSalaries = salaries * monthOffset;
+    nextMonth.beforePayments = totalAfterPayments + salaries + nextMonth.extraSalaries;
 
     nextMonth.bills = bills.filter((b) => {
       if (b.type !== 'planned') return false;
       return shouldPayNextMonth(b, monthOffset);
     });
-    nextMonth.afterPayments = nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + b.amount, 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + b.amount, 0);
+    nextMonth.afterPayments =
+      nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + projectedAmount(b, monthOffset), 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + projectedAmount(b, monthOffset), 0);
 
     return { m_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
   }, [accounts, bills, appMeta, monthOffset]);

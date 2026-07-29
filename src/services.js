@@ -1,4 +1,4 @@
-import { setDoc, doc, deleteDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { setDoc, doc, deleteDoc, serverTimestamp, arrayUnion, deleteField } from 'firebase/firestore';
 import db from '../conection.js';
 
 export function updateAccountBalance({ account, balance }) {
@@ -34,6 +34,9 @@ export function updateBill({ bill }) {
     doc(db, 'bills', bill.id),
     {
       ...bill,
+      // nextAmount en null significa "sacar el monto de mes 2" del documento,
+      // con merge: true los campos ausentes no se borran solos
+      ...('nextAmount' in bill && bill.nextAmount == null ? { nextAmount: deleteField() } : {}),
     },
     {
       merge: true,

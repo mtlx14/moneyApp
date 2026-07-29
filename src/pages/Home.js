@@ -14,8 +14,10 @@ import { updateAccountBalance, updateChanges } from '../services.js';
 import { useAppStorage } from '../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../theme/theme.js';
-import { currentInstallment } from '../helpers.js';
+import { monthName, projectedAmount } from '../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
+import NextMonthBillRow from '../components/NextMonthBillRow.js';
+import CollapsibleRow from '../components/CollapsibleRow.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
@@ -30,6 +32,9 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
     activeField: null,
     activeFieldAmount: null,
   });
+
+  // página visible del scroll horizontal: 0 mes actual, 1 proyección del mes siguiente
+  const [page, setPage] = useState(0);
 
   const [showChanges, setShowChanges] = useState([]);
   const changesOpacity = useSharedValue(1);
@@ -75,7 +80,18 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
   return (
     <Animated.View style={{ height: windowHeight, width: windowWidth }} entering={nAnimations.en} exiting={nAnimations.ex}>
-      <ScrollView horizontal pagingEnabled={true} showsHorizontalScrollIndicator={false} bounces={false} style={{ width: windowWidth }}>
+      <ScrollView
+        horizontal
+        pagingEnabled={true}
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        scrollEventThrottle={32}
+        onScroll={(e) => {
+          const nextPage = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
+          if (nextPage !== page) setPage(nextPage);
+        }}
+        style={{ width: windowWidth }}
+      >
         <View>
           <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
@@ -215,6 +231,18 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0} />
               </Pressable>
+
+              {/* sueldos del mes extra que agrega el offset ------------------------------------ */}
+
+              <CollapsibleRow open={monthOffset >= 1}>
+                <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
+                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💰' + '  ' + 'Sueldos mes 2'}</Text>
+
+                  <AnimatedSwapTextS type={'income'} value={balances.nextMonth.extraSalaries || 0} />
+                </View>
+              </CollapsibleRow>
             </View>
             <View
               style={{
@@ -235,21 +263,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
               <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
 
-              <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + b.amount, 0)} />
+              <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + projectedAmount(b, monthOffset), 0)} />
             </Pressable>
-            {balances?.nextMonth?.bills.map((bill) => {
-              return (
-                <View key={bill.id}>
-                  <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
-
-                  <View key={bill.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                    <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{`${bill.emoji}   ${bill.label} ${bill.inMonths > 0 ? currentInstallment(bill.firstMonth, monthOffset) + 1 + '/' + bill.inMonths : ''}`}</Text>
-
-                    <AnimatedSwapTextS type={'debt'} value={bill.amount} />
-                  </View>
-                </View>
-              );
-            })}
+            {/* se montan todos los planeados y cada fila se abre o cierra según si entra en el mes siguiente */}
+            {bills
+              .filter((b) => b.type === 'planned')
+              .map((bill) => {
+                return <NextMonthBillRow key={bill.id} bill={bill} included={!!balances?.nextMonth?.bills?.some((b) => b.id === bill.id)} monthOffset={monthOffset} />;
+              })}
             <View
               style={{
                 backgroundColor: theme.bg.tr_1,
@@ -273,6 +294,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       {/* modals ------------------------------------ */}
 
       {!localInfo.activeField && <UserTag />}
+
+      {/* mes de la página que se está viendo, en la fila del globo de usuario ------------------------------------ */}
+
+      {!localInfo.activeField && (
+        <View style={{ position: 'absolute', top: 20, right: 20, height: windowWidth * 0.07, justifyContent: 'center' }}>
+          <Text style={{ color: theme.text._2, fontSize: fS.userTagName }}>{monthName(page + monthOffset)}</Text>
+        </View>
+      )}
       {localInfo.activeField && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} />}
       {showChanges?.length > 0 && <OkToChanges user={currentUser} setShowChanges={setShowChanges} />}
 

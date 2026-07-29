@@ -9,6 +9,7 @@ import { useData } from '../../context';
 import { deleteBill, updateBill } from '../services';
 import { Image } from 'expo-image';
 import { createTimestamp, getMonth, getNextMonth, getYear, getYearOfNextMonth } from '../helpers';
+import { Keyboard as CustomKeyboard } from './Keyboard';
 
 export default function ModalEditAccount({ bill = {}, onCancel }) {
   const windowWidth = Dimensions.get('window').width;
@@ -16,6 +17,8 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
   const { bills } = useData();
   const theme = useTheme();
   const [currentBill, setCurrentBill] = useState(bill);
+  const [amountKeyboard, setAmountKeyboard] = useState(null); // 'amount' | 'nextAmount'
+  const [hasNextAmount, setHasNextAmount] = useState(bill.nextAmount != null);
   const [date, setDate] = useState({
     m: getMonth(bill.firstMonth),
     y: getYear(bill.firstMonth),
@@ -54,6 +57,48 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
     }
   };
 
+  // "mes 2": monto solo para el mes siguiente al proyectado, no aplica en cuotas
+  const inInstallments = fields.name.includes('inMonths');
+  const canHaveNextAmount = !inInstallments;
+
+  // la fila de mes 2 crece/achica en alto y el cuadro la sigue, el contenido entra con fade
+  const nextAmountRowHeight = windowWidth * 0.12 + 1;
+  const nextAmountProgress = useSharedValue(bill.nextAmount != null ? 1 : 0);
+
+  useEffect(() => {
+    nextAmountProgress.value = withTiming(hasNextAmount ? 1 : 0, { duration: 250, easing: Easing.out(Easing.quad) });
+  }, [hasNextAmount]);
+
+  const nextAmountRowStyle = useAnimatedStyle(() => ({
+    height: nextAmountProgress.value * nextAmountRowHeight,
+    overflow: 'hidden',
+  }));
+
+  const nextAmountContentStyle = useAnimatedStyle(() => ({
+    opacity: nextAmountProgress.value,
+  }));
+
+  const openKeyboard = (field) => {
+    if (Platform.OS !== 'web') Keyboard.dismiss();
+    setAmountKeyboard(field);
+  };
+
+  const addNextAmount = () => {
+    setHasNextAmount(true);
+    setCurrentBill((prev) => ({ ...prev, nextAmount: prev.nextAmount ?? 0 }));
+    openKeyboard('nextAmount');
+  };
+
+  const removeNextAmount = () => {
+    setHasNextAmount(false);
+    if (amountKeyboard === 'nextAmount') setAmountKeyboard(null);
+    setCurrentBill((prev) => {
+      const { nextAmount, ...rest } = prev;
+      // si el gasto guardado ya tenía mes 2, se marca en null para borrarlo en firestore
+      return bill.nextAmount != null ? { ...rest, nextAmount: null } : rest;
+    });
+  };
+
   const Wrap = Platform.OS === 'web' ? View : Pressable;
   const wrapProps = Platform.OS === 'web' ? {} : { onPress: Keyboard.dismiss };
 
@@ -69,7 +114,9 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
               return (
                 <Animated.View
                   key={field}
-                  layout={LinearTransition}
+                  // el monto no cambia de posición y su fila de mes 2 anima su propio alto,
+                  // el layout acá le competiría a esa animación
+                  layout={field === 'amount' ? undefined : LinearTransition}
                   entering={FadeIn.duration(300)} // Entrada suave
                   exiting={FadeOut.duration(300)}
                 >
@@ -90,6 +137,29 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                       >
                         <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{rField}</Text>
                       </Pressable>
+                    ) : field === 'amount' ? (
+                      <>
+                        <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={() => openKeyboard('amount')}>
+                          <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{rField}</Text>
+                        </Pressable>
+                        {canHaveNextAmount && !hasNextAmount && (
+                          <Pressable
+                            onPress={() => addNextAmount()}
+                            style={{
+                              backgroundColor: theme.bg.tr_2,
+                              borderRadius: 100,
+                              height: windowWidth * 0.07,
+                              width: windowWidth * 0.07,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              alignSelf: 'center',
+                              marginRight: 10,
+                            }}
+                          >
+                            <Image style={{ height: windowWidth * 0.035, aspectRatio: 1 / 1, opacity: 0.9, transform: [{ rotate: '45deg' }] }} source={require('../../assets/icons/x.png')}></Image>
+                          </Pressable>
+                        )}
+                      </>
                     ) : field === 'firstMonth' ? (
                       <View style={{ flexDirection: 'row', height: '100%' }}>
                         <View style={{ flexDirection: 'row', height: '100%', alignItems: 'center' }}>
@@ -138,6 +208,37 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                       ></TextInput>
                     )}
                   </View>
+
+                  {/* fila mes 2 ------------------------------------ */}
+
+                  {field === 'amount' && canHaveNextAmount && (
+                    <Animated.View pointerEvents={hasNextAmount ? 'auto' : 'none'} style={nextAmountRowStyle}>
+                      <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>
+                      <Animated.View style={[{ alignItems: 'center', height: windowWidth * 0.12, backgroundColor: theme.bg.tr_1, justifyContent: 'flex-start', flexDirection: 'row' }, nextAmountContentStyle]}>
+                        <View style={{ backgroundColor: theme.bg.tr_1, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
+                          <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>Mes 2:</Text>
+                        </View>
+                        <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={() => openKeyboard('nextAmount')}>
+                          <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{currentBill.nextAmount ? String(currentBill.nextAmount) : ''}</Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => removeNextAmount()}
+                          style={{
+                            backgroundColor: theme.bg.tr_2,
+                            borderRadius: 100,
+                            height: windowWidth * 0.07,
+                            width: windowWidth * 0.07,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            alignSelf: 'center',
+                            marginRight: 10,
+                          }}
+                        >
+                          <Image style={{ height: windowWidth * 0.035, aspectRatio: 1 / 1, opacity: 0.9 }} source={require('../../assets/icons/x.png')}></Image>
+                        </Pressable>
+                      </Animated.View>
+                    </Animated.View>
+                  )}
                 </Animated.View>
               );
             })}
@@ -169,6 +270,8 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                         };
                       } else {
                         setDate({ m: getNextMonth(), y: getYearOfNextMonth() });
+                        // un gasto en cuotas no lleva monto de mes 2
+                        removeNextAmount();
 
                         return {
                           name: [...prev.name, 'inMonths', 'firstMonth'],
@@ -194,7 +297,8 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
 
             {(JSON.stringify(currentBill) !== JSON.stringify(bills.find((b) => b.id === currentBill.id)) || getMonth(bill.firstMonth) !== date.m || getYear(bill.firstMonth) !== date.y) &&
               fields.name.every((field) => (field === 'firstMonth' ? currentBill.firstMonth !== '' && currentBill.firstMonth !== null : currentBill[field] !== '' && currentBill[field] !== 0 && currentBill[field] !== undefined && currentBill[field] !== null)) &&
-              ('firstMonth' in currentBill ? currentBill.firstMonth !== '' : true) && (
+              ('firstMonth' in currentBill ? currentBill.firstMonth !== '' : true) &&
+              (hasNextAmount ? currentBill.nextAmount > 0 : true) && (
                 <Animated.View layout={LinearTransition} entering={SlideInRight} exiting={SlideOutRight}>
                   <Pressable
                     onPress={() => (
@@ -215,6 +319,20 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
           </Animated.View>
         </Animated.View>
       </Wrap>
+
+      {/* teclado personalizado para el monto ------------------------------------ */}
+
+      {amountKeyboard && (
+        <CustomKeyboard
+          key={amountKeyboard}
+          initialValue={currentBill[amountKeyboard] ? String(currentBill[amountKeyboard]) : '0'}
+          onChange={(nextValue) => setCurrentBill((prev) => ({ ...prev, [amountKeyboard]: Number(nextValue) }))}
+          onConfirm={(nextValue) => {
+            setCurrentBill((prev) => ({ ...prev, [amountKeyboard]: Number(nextValue) }));
+            setAmountKeyboard(null);
+          }}
+        />
+      )}
     </Animated.View>
   );
 }

@@ -8,6 +8,7 @@ import { fS } from '../theme/theme';
 import { useData } from '../../context';
 import { deleteBill, updateBill } from '../services';
 import { Image } from 'expo-image';
+import { Keyboard as CustomKeyboard } from './Keyboard';
 
 export default function ModalEditSub({ bill = {}, onCancel }) {
   const windowWidth = Dimensions.get('window').width;
@@ -15,6 +16,7 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
   const { bills } = useData();
   const theme = useTheme();
   const [currentBill, setCurrentBill] = useState(bill);
+  const [amountKeyboard, setAmountKeyboard] = useState(false);
 
   const fields = ['label', 'emoji', 'amount', 'payDay'];
   const fieldsLabels = ['Nombre', 'Emoji', 'Monto', 'Día de pago'];
@@ -52,18 +54,30 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
                       <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>{`${fieldsLabels[index]}:`}</Text>
                     </View>
 
-                    <TextInput
-                      style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
-                      value={rField}
-                      keyboardType={isNumber ? 'numeric' : 'default'}
-                      keyboardAppearance='dark'
-                      onChangeText={(text) =>
-                        setCurrentBill((prev) => ({
-                          ...prev,
-                          [field]: isNumber ? Number(text) : text,
-                        }))
-                      }
-                    ></TextInput>
+                    {field === 'amount' ? (
+                      <Pressable
+                        style={{ flex: 1, height: '100%', justifyContent: 'center' }}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') Keyboard.dismiss();
+                          setAmountKeyboard(true);
+                        }}
+                      >
+                        <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{rField}</Text>
+                      </Pressable>
+                    ) : (
+                      <TextInput
+                        style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
+                        value={rField}
+                        keyboardType={isNumber ? 'numeric' : 'default'}
+                        keyboardAppearance='dark'
+                        onChangeText={(text) =>
+                          setCurrentBill((prev) => ({
+                            ...prev,
+                            [field]: isNumber ? Number(text) : text,
+                          }))
+                        }
+                      ></TextInput>
+                    )}
                   </View>
                 </View>
               );
@@ -90,6 +104,19 @@ export default function ModalEditSub({ bill = {}, onCancel }) {
           </Animated.View>
         </Animated.View>
       </Wrap>
+
+      {/* teclado personalizado para el monto ------------------------------------ */}
+
+      {amountKeyboard && (
+        <CustomKeyboard
+          initialValue={currentBill.amount ? String(currentBill.amount) : '0'}
+          onChange={(nextValue) => setCurrentBill((prev) => ({ ...prev, amount: Number(nextValue) }))}
+          onConfirm={(nextValue) => {
+            setCurrentBill((prev) => ({ ...prev, amount: Number(nextValue) }));
+            setAmountKeyboard(false);
+          }}
+        />
+      )}
     </Animated.View>
   );
 }

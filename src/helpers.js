@@ -7,6 +7,18 @@ export function getEffectiveDate(monthOffset = 0) {
   return d;
 }
 
+// monto a usar en la proyección del mes siguiente: con el offset activado la
+// proyección apunta un mes más allá, así que se usa el monto de "mes 2" si existe
+export function projectedAmount(bill, monthOffset = 0) {
+  return monthOffset >= 1 && bill.nextAmount ? bill.nextAmount : bill.amount;
+}
+
+const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+export function monthName(monthOffset = 0) {
+  return MONTH_NAMES[getEffectiveDate(monthOffset).getMonth()];
+}
+
 export function currentInstallment(firstMonth, monthOffset = 0) {
   const now = getEffectiveDate(monthOffset);
   const first = firstMonth.toDate();
