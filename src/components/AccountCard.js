@@ -22,7 +22,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
         ? require('../../assets/images/card_pink-purple.png')
         : account.id === 'account_matias'
           ? require('../../assets/images/card_black-blue.png')
-          : account.id === 'account_aylin_salary'
+          : account.id === 'account_aylin_salary' || account.type === 'a_account'
             ? require('../../assets/images/card_pink-purple.png')
             : account.hasSubAccount
               ? require('../../assets/images/card_transparent.png')

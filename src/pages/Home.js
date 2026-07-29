@@ -17,7 +17,6 @@ import { fS } from '../theme/theme.js';
 import { monthName, projectedAmount } from '../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
-import CollapsibleRow from '../components/CollapsibleRow.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
@@ -100,7 +99,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
           <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
-              <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin' })} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
+              <Pressable onPress={() => navigate('aylin_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('aylin') && (
                   // <Animated.View
                   //   style={[
@@ -231,18 +230,6 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0} />
               </Pressable>
-
-              {/* sueldos del mes extra que agrega el offset ------------------------------------ */}
-
-              <CollapsibleRow open={monthOffset >= 1}>
-                <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💰' + '  ' + 'Sueldos mes 2'}</Text>
-
-                  <AnimatedSwapTextS type={'income'} value={balances.nextMonth.extraSalaries || 0} />
-                </View>
-              </CollapsibleRow>
             </View>
             <View
               style={{

@@ -14,6 +14,7 @@ import FixedExpenses from './src/pages/FixedExpenses.js';
 import Monthly_summary from './src/pages/Monthly_summary.js';
 import Subscriptions from './src/pages/Subscriptions.js';
 import Matias_accounts from './src/pages/Matias_accounts.js';
+import Aylin_accounts from './src/pages/Aylin_accounts.js';
 import { AppStorageProvider } from './appStorageProvider.js';
 import GradientBackground from './src/components/GradientBackground.js';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -62,6 +63,7 @@ export default function App() {
             {page === 'monthly_summary' && <Monthly_summary setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />}
             {page === 'subscriptions' && <Subscriptions navigate={navigate} setShowMenu={setShowMenu} nAnimations={nAnimations} />}
             {page === 'matias_accounts' && <Matias_accounts navigate={navigate} setShowMenu={setShowMenu} nAnimations={nAnimations} />}
+            {page === 'aylin_accounts' && <Aylin_accounts navigate={navigate} setShowMenu={setShowMenu} nAnimations={nAnimations} />}
             {showMenu && <MainMenu page={page} navigate={navigate} />}
             {/* <MainBar /> */}
           </GradientBackground>

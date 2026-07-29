@@ -49,13 +49,15 @@ export const DataProvider = ({ children }) => {
     };
   }, []);
 
-  const balances = useMemo(() => {
-    const m_account = {};
+  // saldos por dueño: las cuentas propias más lo que sumen sus sub-cuentas,
+  // descontando las marcadas como isNegative (guardan en positivo lo que se debe)
+  const accountsByType = (type, excludeIds = []) => {
+    const map = {};
 
     accounts
-      .filter((a) => a.type === 'm_account' && !a.hasSubAccount)
+      .filter((a) => a.type === type && !a.hasSubAccount && !excludeIds.includes(a.id))
       .forEach((a) => {
-        m_account[a.id] = {
+        map[a.id] = {
           id: a.id,
           name: a.name,
           balance: a.balance,
@@ -64,18 +66,28 @@ export const DataProvider = ({ children }) => {
     accounts
       .filter((a) => a.type === 'sub_account')
       .forEach((a) => {
-        if (!m_account[a.forAccount]) {
-          m_account[a.forAccount] = {
+        const parent = accounts.find((account) => account.id === a.forAccount);
+        if (!parent || parent.type !== type) return;
+
+        if (!map[a.forAccount]) {
+          map[a.forAccount] = {
             id: a.forAccount,
-            name: accounts.find((account) => account.id === a.forAccount).name,
+            name: parent.name,
             balance: 0,
           };
         }
-        m_account[a.forAccount].balance += a.balance;
+        map[a.forAccount].balance += a.balance;
       });
 
-    const matiasTotal = Object.values(m_account).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.isNegative).reduce((sum, acc) => sum + (acc.balance || 0), 0) * 2;
-    const aylinTotal = accounts.find((a) => a.id === 'account_aylin')?.balance || 0;
+    const total = Object.values(map).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.type === type && a.isNegative && !excludeIds.includes(a.id)).reduce((sum, acc) => sum + (acc.balance || 0), 0) * 2;
+
+    return { map, total };
+  };
+
+  const balances = useMemo(() => {
+    const { map: m_account, total: matiasTotal } = accountsByType('m_account');
+    // account_aylin quedó reemplazada por sus cuentas nuevas y el sueldo de home es solo estimado
+    const { map: a_account, total: aylinTotal } = accountsByType('a_account', ['account_aylin', 'account_aylin_salary']);
 
     const billsSub = bills.filter((b) => b.type === 'sub');
     const subscriptions = {
@@ -93,10 +105,7 @@ export const DataProvider = ({ children }) => {
 
     const salaries = (accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0) + (accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0);
 
-    // con el offset activado la proyección se corre un mes más, así que entra
-    // un sueldo extra por cada mes adicional
-    nextMonth.extraSalaries = salaries * monthOffset;
-    nextMonth.beforePayments = totalAfterPayments + salaries + nextMonth.extraSalaries;
+    nextMonth.beforePayments = totalAfterPayments + salaries;
 
     nextMonth.bills = bills.filter((b) => {
       if (b.type !== 'planned') return false;
@@ -105,7 +114,7 @@ export const DataProvider = ({ children }) => {
     nextMonth.afterPayments =
       nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + projectedAmount(b, monthOffset), 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + projectedAmount(b, monthOffset), 0);
 
-    return { m_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
+    return { m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
   }, [accounts, bills, appMeta, monthOffset]);
   return <DataContext.Provider value={{ accounts, bills, appMeta, balances }}>{children}</DataContext.Provider>;
 };

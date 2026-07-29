@@ -25,6 +25,7 @@ export default function MainMenu({ page, navigate }) {
     // { name: 'fixed_expenses', label: 'Gastos fijos' },
     // { name: 'planned_expenses', label: 'Gastos planificados' },
     { name: 'matias_accounts', label: 'Cuentas de Matías' },
+    { name: 'aylin_accounts', label: 'Cuentas de Aylin' },
     { name: 'toggle_month', label: monthOffset === 0 ? 'Ir al mes siguiente' : 'Ir al mes actual' },
   ];
 
