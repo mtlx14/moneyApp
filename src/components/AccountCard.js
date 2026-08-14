@@ -115,8 +115,12 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
               {localInfo.accountNameToRender}
             </Text>
             <TextInput
+              // el monto se edita con el teclado custom, el input es solo para mostrarlo
+              editable={false}
+              focusable={false}
               value={`${account?.isNegative ? '-' : ''}$${Number(amountValue).toLocaleString('es-CL')}`}
               style={{
+                pointerEvents: 'none',
                 height: windowHeight * 0.06,
                 borderRadius: 100,
                 textAlign: 'center',

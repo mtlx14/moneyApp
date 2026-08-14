@@ -3,7 +3,7 @@ import { BlurView } from 'expo-blur';
 import { Alert, Dimensions, Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../theme/useTheme';
 import Animated, { useSharedValue, withDelay, withTiming, Easing, useAnimatedStyle, FadeInDown, LinearTransition, FadeInRight, FadeOutRight, SlideInRight, SlideOutRight, FadeOut, FadeIn } from 'react-native-reanimated';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { fS } from '../theme/theme';
 import { useData } from '../../context';
 import { deleteBill, updateBill } from '../services';
@@ -11,9 +11,10 @@ import { Image } from 'expo-image';
 import { createTimestamp, getMonth, getNextMonth, getYear, getYearOfNextMonth } from '../helpers';
 import { Keyboard as CustomKeyboard } from './Keyboard';
 
-export default function ModalEditAccount({ bill = {}, onCancel }) {
-  const windowWidth = Dimensions.get('window').width;
-  const windowHeight = Dimensions.get('window').height;
+export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
+  // congeladas al montar: en web el teclado nativo achica window.innerHeight, y releerlas
+  // en cada render encoge el modal y lo corre hacia arriba mientras se escribe
+  const [{ width: windowWidth, height: windowHeight }] = useState(() => Dimensions.get('window'));
   const { bills } = useData();
   const theme = useTheme();
   const [currentBill, setCurrentBill] = useState(bill);
@@ -43,6 +44,14 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
   useEffect(() => {
     console.log(currentBill);
   }, [currentBill]);
+
+  // el menú estorba en el modal, se esconde mientras está abierto
+  useEffect(() => {
+    if (!setShowMenu) return;
+    setShowMenu(false);
+    return () => setShowMenu(true);
+  }, []);
+
   const confirmationAction = () => {
     if (Platform.OS === 'web') {
       const ok = window.confirm('¿Estas seguro que quieres eliminar este gasto?');
@@ -79,9 +88,57 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
     opacity: nextAmountProgress.value,
   }));
 
+  const openTimer = useRef(null);
+
+  // el navegador suelta el foco del input antes de que corra el onPress, así que para
+  // saber si había teclado nativo nos guardamos el estado en vez de mirar activeElement
+  const focusState = useRef({ focused: false, blurredAt: 0 });
+  // en estado además del ref porque el escudo depende de esto y el ref no re-renderiza
+  const [inputFocused, setInputFocused] = useState(false);
+
+  const inputFocusProps = {
+    onFocus: () => {
+      focusState.current = { focused: true, blurredAt: 0 };
+      setInputFocused(true);
+      // si el custom estaba abierto se cierra: no pueden convivir con el nativo
+      clearTimeout(openTimer.current);
+      setAmountKeyboard(null);
+    },
+    onBlur: () => {
+      focusState.current = { focused: false, blurredAt: Date.now() };
+      setInputFocused(false);
+    },
+  };
+
+  // hay teclado en pantalla, sea el custom o el del sistema
+  const keyboardOpen = !!amountKeyboard || inputFocused;
+
+  const closeKeyboards = () => {
+    clearTimeout(openTimer.current);
+    setAmountKeyboard(null);
+    if (Platform.OS === 'web') document.activeElement?.blur?.();
+    else Keyboard.dismiss();
+  };
+
+  const systemKeyboardOpen = () => {
+    if (Platform.OS !== 'web') return Keyboard.isVisible();
+    const { focused, blurredAt } = focusState.current;
+    return focused || Date.now() - blurredAt < 400;
+  };
+
+  useEffect(() => () => clearTimeout(openTimer.current), []);
+
   const openKeyboard = (field) => {
-    if (Platform.OS !== 'web') Keyboard.dismiss();
-    setAmountKeyboard(field);
+    clearTimeout(openTimer.current);
+
+    const wasOpen = systemKeyboardOpen();
+
+    if (Platform.OS === 'web') document.activeElement?.blur?.();
+    else Keyboard.dismiss();
+
+    // el teclado nativo tarda en cerrarse, si montamos el custom antes queda mal puesto
+    if (wasOpen) openTimer.current = setTimeout(() => setAmountKeyboard(field), 400);
+    else setAmountKeyboard(field);
   };
 
   const addNextAmount = () => {
@@ -105,8 +162,12 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
 
   return (
     <Animated.View entering={FadeInDown} style={[{ position: 'absolute', width: windowWidth, height: windowHeight, top: 0, left: 0 }]}>
-      <Wrap {...wrapProps}>
-        <Animated.View layout={LinearTransition} entering={FadeInDown} style={[{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'center', alignItems: 'center' }]}>
+      {/* con el teclado abierto, un toque fuera del modal solo lo cierra. Va detrás del
+          contenido, así lo de adentro del modal sigue funcionando normal */}
+      {keyboardOpen && <Pressable onPress={closeKeyboards} style={{ position: 'absolute', top: 0, left: 0, width: windowWidth, height: windowHeight }} />}
+
+      <Wrap {...wrapProps} pointerEvents={keyboardOpen ? 'box-none' : 'auto'}>
+        <Animated.View layout={LinearTransition} entering={FadeInDown} pointerEvents={keyboardOpen ? 'box-none' : 'auto'} style={[{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'center', alignItems: 'center' }]}>
           {/* <BlurView intensity={30} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}> */}
           <Animated.View layout={LinearTransition} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
             {fields.name.map((field, index) => {
@@ -128,11 +189,11 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                     </View>
                     {field === 'type' ? (
                       <Pressable
-                        style={{ flex: 1 }}
+                        style={{ flex: 1, height: '100%', justifyContent: 'center' }}
                         onPress={() =>
                           setCurrentBill((prev) => ({
                             ...prev,
-                            type: currentBill.type === 'fixed' ? 'planned' : 'fixed',
+                            type: prev.type === 'fixed' ? 'planned' : 'fixed',
                           }))
                         }
                       >
@@ -162,11 +223,12 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                         )}
                       </>
                     ) : field === 'firstMonth' ? (
-                      <View style={{ flexDirection: 'row', height: '100%' }}>
-                        <View style={{ flexDirection: 'row', height: '100%', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', height: '100%', flex: 1 }}>
+                        <View style={{ flexDirection: 'row', height: '100%', alignItems: 'center', flex: 1 }}>
                           <Text style={{ color: theme.text._3, fontSize: fS.modalTransfer, paddingLeft: 10 }}>Mes:</Text>
                           <TextInput
-                            style={{ color: theme.text._1, fontSize: fS.modalTransfer, height: '100%', paddingLeft: 10, paddingRight: 20 }}
+                            {...inputFocusProps}
+                            style={{ color: theme.text._1, fontSize: fS.modalTransfer, height: '100%', paddingLeft: 10, flex: 1 }}
                             value={date.m}
                             keyboardType={'numeric'}
                             keyboardAppearance='dark'
@@ -178,10 +240,11 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                             }
                           ></TextInput>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                           <Text style={{ color: theme.text._3, fontSize: fS.modalTransfer }}>Año:</Text>
                           <TextInput
-                            style={{ color: theme.text._1, fontSize: fS.modalTransfer, height: '100%', paddingHorizontal: 10 }}
+                            {...inputFocusProps}
+                            style={{ color: theme.text._1, fontSize: fS.modalTransfer, height: '100%', paddingHorizontal: 10, flex: 1 }}
                             value={date.y}
                             keyboardType={'numeric'}
                             keyboardAppearance='dark'
@@ -196,6 +259,7 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
                       </View>
                     ) : (
                       <TextInput
+                        {...inputFocusProps}
                         style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
                         value={rField}
                         keyboardType={isNumber ? 'numeric' : 'default'}
@@ -246,7 +310,9 @@ export default function ModalEditAccount({ bill = {}, onCancel }) {
           </Animated.View>
           {/* </BlurView> */}
 
-          <Animated.View layout={LinearTransition} style={{ marginRight: windowWidth * 0.2, marginTop: 10, flexDirection: 'row', justifyContent: 'flex-end', width: '100%', gap: 8 }}>
+          {/* los botones quedan fuera del modal: con el teclado abierto no reciben el
+              toque, se lo lleva el escudo de atrás y solo cierra el teclado */}
+          <Animated.View layout={LinearTransition} pointerEvents={keyboardOpen ? 'none' : 'auto'} style={{ marginRight: windowWidth * 0.2, marginTop: 10, flexDirection: 'row', justifyContent: 'flex-end', width: '100%', gap: 8 }}>
             {/* botón eliminar -------------------------- */}
             <Animated.View layout={LinearTransition}>
               <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.red, borderRadius: 100, height: windowWidth * 0.08, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>

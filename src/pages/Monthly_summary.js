@@ -3,7 +3,7 @@ import { useTheme } from '../theme/useTheme.js';
 import { useData } from '../../context.js';
 import { useAppStorage } from '../../appStorageProvider.js';
 import { useEffect, useRef, useState } from 'react';
-import Animated, { FadeIn, FadeOut, runOnJS, SlideInRight, SlideOutRight, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutRight, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import CheckButton from '../components/CheckButton.js';
 import UnmarkButton from '../components/UnmarkButton.js';
@@ -22,15 +22,25 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   const { monthOffset } = useAppStorage();
   const [activeField, setActiveField] = useState(null);
 
+  // la lista solo anima al volver del modal, no al entrar a la página
+  const cameFromModal = useRef(false);
+  const openModal = (field) => {
+    cameFromModal.current = true;
+    setActiveField(field);
+  };
+
   return (
     <>
       <GoBackScroll navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {activeField ? (
-            <ModalEditAccount bill={activeField} onCancel={() => setActiveField(null)} />
+            <ModalEditAccount bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
           ) : (
-            <View>
-              <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
+            // dos FadeInDown anidados igual que el modal: el recorrido se suma y las
+            // opacidades se multiplican, con uno solo la entrada no coincide
+            <Animated.View entering={cameFromModal.current ? FadeInDown : undefined}>
+              <Animated.View entering={cameFromModal.current ? FadeInDown : undefined}>
+                <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Resumen del mes</Text>
                 </View>
@@ -51,7 +61,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                       return (
                         <Pressable
                           onPress={() => {
-                            bill.type === 'subscriptions' ? navigate('subscriptions') : setActiveField(bill);
+                            bill.type === 'subscriptions' ? navigate('subscriptions') : openModal(bill);
                           }}
                           key={bill.label}
                           style={{ width: '100%', backgroundColor: theme.bg.tr_05, borderRadius: 10, height: windowWidth * 0.12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}
@@ -95,7 +105,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                     .sort((a, b) => a.order - b.order)
                     .map((bill) => {
                       return (
-                        <Pressable onPress={() => setActiveField(bill)} key={bill.label} style={{ width: '100%', backgroundColor: theme.bg.tr_05, borderRadius: 10, height: windowWidth * 0.12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+                        <Pressable onPress={() => openModal(bill)} key={bill.label} style={{ width: '100%', backgroundColor: theme.bg.tr_05, borderRadius: 10, height: windowWidth * 0.12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
                           <View style={{ flexDirection: 'row', gap: 10, paddingLeft: 5 }}>
                             <Text
                               style={{
@@ -131,13 +141,14 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                 </View>
                 <View style={{ flexDirection: 'row', marginLeft: windowWidth * 0.05, gap: 8 }}>
                   <UnmarkButton billToUpdate={'monthly_summary'} />
-                  <Pressable onPress={() => setActiveField({})} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 100, height: windowWidth * 0.09, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Pressable onPress={() => openModal({})} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 100, height: windowWidth * 0.09, width: windowWidth * 0.09, justifyContent: 'center', alignItems: 'center' }}>
                     <Image style={{ height: windowWidth * 0.045, aspectRatio: 1 / 1, opacity: 0.9, transform: [{ rotate: '45deg' }] }} source={require('../../assets/icons/x.png')}></Image>
                   </Pressable>
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
-              </ScrollView>
-            </View>
+                </ScrollView>
+              </Animated.View>
+            </Animated.View>
           )}
         </Animated.View>
       </GoBackScroll>

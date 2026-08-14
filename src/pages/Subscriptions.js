@@ -33,7 +33,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
       <GoBackScroll page='monthly_summary' navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {activeField ? (
-            <ModalEditSub bill={activeField} onCancel={() => setActiveField(null)} />
+            <ModalEditSub bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
           ) : (
             <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>

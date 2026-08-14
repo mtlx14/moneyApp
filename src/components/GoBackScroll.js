@@ -9,6 +9,9 @@ export default function GoBackScroll({ page = 'home', children, navigate }) {
   const didInitScroll = useRef(false);
 
   const goBackOpacity = useSharedValue(1);
+  // el handler sigue corriendo después de cruzar el umbral: sin esto navigate se llama
+  // en cada frame y el fade por frame le pisa el withTiming, que es lo que parpadea
+  const hasNavigated = useSharedValue(false);
 
   // En web, contentOffset no se aplica de forma fiable al montar.
   // Forzamos el scroll inicial cuando el contenido ya está medido.
@@ -19,10 +22,13 @@ export default function GoBackScroll({ page = 'home', children, navigate }) {
   };
 
   const handleGoBackScroll = useAnimatedScrollHandler((e) => {
+    if (hasNavigated.value) return;
+
     const { x } = e.contentOffset;
     goBackOpacity.value = x / (windowWidth * 0.5);
 
     if (x < windowWidth * 0.25) {
+      hasNavigated.value = true;
       runOnJS(navigate)(page, 0);
       goBackOpacity.value = withTiming(0, {
         duration: 100,
