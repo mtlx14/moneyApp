@@ -57,10 +57,20 @@ export const baseTheme = {
     menuAccentColor: 'rgb(40, 112, 205)',
     account: 'rgba(255, 255, 255, 0.05)',
     subAccount: 'rgba(1, 1, 1, 0.05)',
+    card: 'rgba(255, 255, 255, 0.05)',
   },
   fw: {
     home_acc_text: 300,
     home_acc_text_2: 300,
+  },
+  shadow: {
+    card: {
+      shadowColor: 'rgb(0, 0, 0)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 3,
+    },
   },
 };
 
@@ -225,8 +235,9 @@ export const beigeTheme = createTheme({
     red: 'rgb(184, 74, 66)',
   },
   bg: {
-    primary: 'rgb(233, 222, 202)',
-    primary_2: 'rgb(206, 189, 162)',
+    // fondo plano: primary y primary_2 iguales, sin gradiente
+    primary: '#F5F3ED',
+    primary_2: '#F5F3ED',
     blue: 'rgba(110, 142, 168, 0.7)',
     red: 'rgba(184, 74, 66, 0.5)',
     green: 'rgba(70, 130, 74, 0.55)',
@@ -243,9 +254,19 @@ export const beigeTheme = createTheme({
     menuAccentColor: 'rgba(160, 120, 82, 0.55)',
     account: 'rgba(255, 255, 255, 0.4)',
     subAccount: 'rgba(59, 48, 38, 0.05)',
+    card: '#FFFEFC',
   },
   fw: {
     home_acc_text: 500,
     home_acc_text_2: 400,
+  },
+  shadow: {
+    card: {
+      shadowColor: 'rgb(59, 48, 38)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 14,
+      elevation: 2,
+    },
   },
 });

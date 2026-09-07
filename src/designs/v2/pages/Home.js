@@ -92,9 +92,23 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         style={{ width: windowWidth }}
       >
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
-            <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
-            <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07, paddingBottom: windowWidth * 0.04 }, activeFieldOpacityAnimatedStyle]}>
+            <View
+              style={[
+                {
+                  width: '100%',
+                  alignItems: 'center',
+                  backgroundColor: theme.bg.card,
+                  borderRadius: 18,
+                  paddingVertical: windowWidth * 0.06,
+                  paddingHorizontal: windowWidth * 0.04,
+                },
+                theme.shadow.card,
+              ]}
+            >
+              <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
+              <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
+            </View>
           </Animated.View>
 
           <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
