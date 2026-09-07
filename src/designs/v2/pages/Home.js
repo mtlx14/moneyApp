@@ -94,8 +94,8 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         <View>
           <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07, marginTop: 56, marginBottom: 56 }, activeFieldOpacityAnimatedStyle]}>
             <View style={[{ width: '100%', alignItems: 'center', backgroundColor: theme.bg.card, borderRadius: 18, paddingVertical: 44, paddingHorizontal: 24 }, theme.shadow.card]}>
-              <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
-              <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
+              <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} color={theme.text.onCard} />
+              <Text style={{ color: theme.text.onCard, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
             </View>
           </Animated.View>
 

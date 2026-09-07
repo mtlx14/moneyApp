@@ -36,6 +36,7 @@ export const baseTheme = {
     _4: 'rgba(255, 255, 255, 0.2)',
     green: 'rgb(70, 228, 70)',
     red: 'rgb(245, 89, 89)',
+    onCard: 'rgba(255, 255, 255, 1)',
   },
   bg: {
     primary: 'rgb(35, 35, 35)',
@@ -234,6 +235,7 @@ export const beigeTheme = createTheme({
     _4: '#A09A95',
     green: 'rgb(70, 130, 74)',
     red: 'rgb(184, 74, 66)',
+    onCard: '#2C2B27',
   },
   bg: {
     // fondo plano: primary y primary_2 iguales, sin gradiente

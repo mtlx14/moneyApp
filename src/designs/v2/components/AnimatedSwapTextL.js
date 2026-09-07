@@ -4,8 +4,9 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, withSe
 import { useTheme } from '../../../theme/useTheme';
 import { fS, fW } from '../../../theme/theme';
 
-export default function AnimatedSwapTextL({ value }) {
+export default function AnimatedSwapTextL({ value, color }) {
   const theme = useTheme();
+  const textColor = color || theme.text._1;
 
   const [displayValue, setDisplayValue] = useState(value);
   const isFirstRender = useRef(true);
@@ -48,8 +49,8 @@ export default function AnimatedSwapTextL({ value }) {
         animatedStyle,
       ]}
     >
-      <Text style={{ color: theme.text._1, fontWeight: 200, fontSize: 20 }}>$</Text>
-      <Text style={{ color: theme.text._1, fontWeight: fW[100], fontSize: fS.animatedSwapTextL }}>{Number(displayValue).toLocaleString('es-CL')}</Text>
+      <Text style={{ color: textColor, fontWeight: 200, fontSize: 20 }}>$</Text>
+      <Text style={{ color: textColor, fontWeight: fW[100], fontSize: fS.animatedSwapTextL }}>{Number(displayValue).toLocaleString('es-CL')}</Text>
     </Animated.View>
   );
 }
