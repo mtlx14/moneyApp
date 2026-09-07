@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { getEffectiveDate, projectedAmount } from './src/helpers';
+import { amountForMonth, getEffectiveDate } from './src/helpers';
 
 const DataContext = createContext(null);
 
@@ -112,7 +112,7 @@ export const DataProvider = ({ children }) => {
       return shouldPayNextMonth(b, monthOffset);
     });
     nextMonth.afterPayments =
-      nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + projectedAmount(b, monthOffset), 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + projectedAmount(b, monthOffset), 0);
+      nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0);
 
     return { m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
   }, [accounts, bills, appMeta, monthOffset]);

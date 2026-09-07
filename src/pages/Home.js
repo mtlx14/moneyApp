@@ -14,7 +14,7 @@ import { updateAccountBalance, updateChanges } from '../services.js';
 import { useAppStorage } from '../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../theme/theme.js';
-import { monthName, projectedAmount } from '../helpers.js';
+import { amountForMonth, monthName } from '../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
 
@@ -250,7 +250,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
               <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
 
-              <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + projectedAmount(b, monthOffset), 0)} />
+              <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
             </Pressable>
             {/* se montan todos los planeados y cada fila se abre o cierra según si entra en el mes siguiente */}
             {bills
