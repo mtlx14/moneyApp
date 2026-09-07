@@ -235,7 +235,7 @@ export const beigeTheme = createTheme({
     _4: '#A09A95',
     green: 'rgb(70, 130, 74)',
     red: 'rgb(184, 74, 66)',
-    onCard: '#6B6B6B',
+    onCard: '#685E5E',
   },
   bg: {
     // fondo plano: primary y primary_2 iguales, sin gradiente
