@@ -17,6 +17,8 @@ import { fS } from '../../../theme/theme.js';
 import { amountForMonth, monthName } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
+import Rocket from '../components/icons/Rocket.js';
+import Flower from '../components/icons/Flower.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
@@ -133,7 +135,10 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Aylin'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Flower size={fS.homeSubText} color={theme.text._2} />
+                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Aylin</Text>
+                </View>
 
                 <AnimatedSwapTextS value={balances.aylinTotal} />
               </Pressable>
@@ -157,7 +162,10 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Matías'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Rocket size={fS.homeSubText} color={theme.text._2} />
+                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Matías</Text>
+                </View>
 
                 <AnimatedSwapTextS value={balances.matiasTotal} />
               </Pressable>
@@ -221,14 +229,20 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
               <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Flower size={fS.homeSubText} color={theme.text._2} />
+                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Sueldo Aylin</Text>
+                </View>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0} />
               </Pressable>
               <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Rocket size={fS.homeSubText} color={theme.text._2} />
+                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Sueldo Matías</Text>
+                </View>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0} />
               </Pressable>
