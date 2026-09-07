@@ -92,8 +92,8 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         style={{ width: windowWidth }}
       >
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
-            <View style={[{ alignItems: 'center', backgroundColor: theme.bg.card, borderRadius: 18, paddingVertical: 16, paddingHorizontal: 24 }, theme.shadow.card]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07 }, activeFieldOpacityAnimatedStyle]}>
+            <View style={[{ width: '100%', alignItems: 'center', backgroundColor: theme.bg.card, borderRadius: 18, paddingVertical: 32, paddingHorizontal: 24 }, theme.shadow.card]}>
               <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
               <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
             </View>
@@ -206,7 +206,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         </View>
         {/* NEXT MONTH */}
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07 }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
