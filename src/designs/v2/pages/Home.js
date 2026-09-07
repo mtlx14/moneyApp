@@ -137,7 +137,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
                 <AnimatedSwapTextS value={balances.aylinTotal} />
               </Pressable>
-              <View style={{ backgroundColor: theme.text._4, width: windowWidth * 0.86, height: 1, marginLeft: -windowWidth * 0.03 }}></View>
+              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.86, height: 1, marginLeft: -windowWidth * 0.03 }}></View>
 
               <Pressable onPress={() => navigate('matias_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('matias') && (
@@ -218,14 +218,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 <AnimatedSwapTextS value={balances.totalAfterPayments || 0} />
               </View>
 
-              <View style={{ backgroundColor: theme.text._4, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
+              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0} />
               </Pressable>
-              <View style={{ backgroundColor: theme.text._4, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
+              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>

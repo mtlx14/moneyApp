@@ -58,6 +58,7 @@ export const baseTheme = {
     account: 'rgba(255, 255, 255, 0.05)',
     subAccount: 'rgba(1, 1, 1, 0.05)',
     card: 'rgba(255, 255, 255, 0.05)',
+    divider: 'rgba(255, 255, 255, 0.2)',
   },
   fw: {
     home_acc_text: 300,
@@ -255,6 +256,8 @@ export const beigeTheme = createTheme({
     account: 'rgba(255, 255, 255, 0.4)',
     subAccount: 'rgba(59, 48, 38, 0.05)',
     card: '#FFFEFC',
+    // el mismo tono de los textos, pero suave: en sólido la línea pesa demasiado
+    divider: 'rgba(160, 154, 149, 0.4)',
   },
   fw: {
     home_acc_text: 500,
