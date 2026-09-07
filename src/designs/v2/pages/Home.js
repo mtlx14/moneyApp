@@ -133,7 +133,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Aylin'}</Text>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🌸' + '  ' + 'Aylin'}</Text>
 
                 <AnimatedSwapTextS value={balances.aylinTotal} />
               </Pressable>
@@ -157,7 +157,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Matías'}</Text>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🚀' + '  ' + 'Matías'}</Text>
 
                 <AnimatedSwapTextS value={balances.matiasTotal} />
               </Pressable>
@@ -180,7 +180,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
 
                 <AnimatedSwapTextS type={'debt'} value={`${balances.billsBalances.toPay || 0}`} />
               </Pressable>
@@ -199,7 +199,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
             </View>
           </View>
@@ -246,7 +246,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
             </View>
             <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
@@ -273,7 +273,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
             </View>
           </View>
