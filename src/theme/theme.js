@@ -27,6 +27,8 @@ export const fW = {
   600: isIos ? 600 : 100,
 };
 export const baseTheme = {
+  // Árbol de diseño que usa el tema: 'v1' (original) o 'v2' (rediseño).
+  design: 'v1',
   text: {
     _1: 'rgba(255, 255, 255, 1)',
     _2: 'rgba(255, 255, 255, 0.8)',
@@ -201,6 +203,46 @@ export const blueTheme = createTheme({
     primary_2: 'rgb(9, 32, 62)',
     primary: 'rgb(71, 106, 132)',
     menuAccentColor: 'rgba(37, 56, 108, 0.5)',
+  },
+  fw: {
+    home_acc_text: 500,
+    home_acc_text_2: 400,
+  },
+});
+
+// ---------------------------------------------------------------------------
+// Rediseño (v2)
+// ---------------------------------------------------------------------------
+export const beigeTheme = createTheme({
+  name: 'beige',
+  design: 'v2',
+  text: {
+    _1: 'rgba(59, 48, 38, 1)',
+    _2: 'rgba(59, 48, 38, 0.75)',
+    _3: 'rgba(59, 48, 38, 0.5)',
+    _4: 'rgba(59, 48, 38, 0.18)',
+    green: 'rgb(70, 130, 74)',
+    red: 'rgb(184, 74, 66)',
+  },
+  bg: {
+    primary: 'rgb(233, 222, 202)',
+    primary_2: 'rgb(206, 189, 162)',
+    blue: 'rgba(110, 142, 168, 0.7)',
+    red: 'rgba(184, 74, 66, 0.5)',
+    green: 'rgba(70, 130, 74, 0.55)',
+    green_03: 'rgba(70, 130, 74, 0.25)',
+    yellow: 'rgba(212, 163, 74, 0.6)',
+    keyboard: 'rgba(59, 48, 38, 0.06)',
+    keyboard_key: 'rgba(255, 255, 255, 0.45)',
+    tr_05: 'rgba(59, 48, 38, 0.04)',
+    tr_1: 'rgba(59, 48, 38, 0.08)',
+    tr_2: 'rgba(59, 48, 38, 0.14)',
+    tr_3: 'rgba(59, 48, 38, 0.2)',
+    black_tr_1: 'rgba(59, 48, 38, 0.08)',
+    black_tr_2: 'rgba(59, 48, 38, 0.14)',
+    menuAccentColor: 'rgba(160, 120, 82, 0.55)',
+    account: 'rgba(255, 255, 255, 0.4)',
+    subAccount: 'rgba(59, 48, 38, 0.05)',
   },
   fw: {
     home_acc_text: 500,
