@@ -92,7 +92,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         style={{ width: windowWidth }}
       >
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07, paddingBottom: windowWidth * 0.04 }, activeFieldOpacityAnimatedStyle]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'center', alignItems: 'center', paddingHorizontal: windowWidth * 0.07 }, activeFieldOpacityAnimatedStyle]}>
             <View
               style={[
                 {
