@@ -13,7 +13,7 @@ SplashScreen.preventAutoHideAsync();
 // vivir dentro de los providers porque useDesign lee el tema del usuario.
 function AppContent() {
   const design = useDesign();
-  const { pages, MainMenu, GradientBackground, pageAnimations } = design;
+  const { pages, MainMenu, GradientBackground, pageAnimations, PageSlider } = design;
 
   const [showMenu, setShowMenu] = useState(true);
   const [page, setPage] = useState('home');
@@ -26,19 +26,26 @@ function AppContent() {
     }, 20);
   };
 
-  const nAnimations = pageAnimations(direction);
+  // Con PageSlider el desplazamiento lo maneja el contenedor, así que las
+  // páginas no traen animación propia.
+  const nAnimations = PageSlider ? {} : pageAnimations(direction);
+  const pageProps = { setShowMenu, navigate, nAnimations };
 
   return (
     <GradientBackground>
-      {/* Cada página ocupa su propio lugar en el árbol, no un slot compartido
-          con key: si entra y sale en la misma posición, React desmonta y monta
-          en el mismo commit y reanimated no alcanza a animar la salida. */}
-      {Object.keys(pages).map((name) => {
-        if (name !== page) return null;
-        const Page = pages[name];
+      {PageSlider ? (
+        <PageSlider key={design.name} pages={pages} page={page} direction={direction} pageProps={pageProps} />
+      ) : (
+        // Cada página ocupa su propio lugar en el árbol, no un slot compartido
+        // con key: si entra y sale en la misma posición, React desmonta y monta
+        // en el mismo commit y reanimated no alcanza a animar la salida.
+        Object.keys(pages).map((name) => {
+          if (name !== page) return null;
+          const Page = pages[name];
 
-        return <Page key={`${design.name}_${name}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />;
-      })}
+          return <Page key={`${design.name}_${name}`} {...pageProps} />;
+        })
+      )}
       {showMenu && <MainMenu page={page} navigate={navigate} />}
     </GradientBackground>
   );
