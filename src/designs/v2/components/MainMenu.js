@@ -22,6 +22,11 @@ export default function MainMenu({ page, navigate }) {
     { name: 'aylin_accounts', label: 'Aylin' },
   ];
 
+  // La página entra desde el lado hacia el que te moviste en el riel. Si la
+  // actual no está en la lista (Suscripciones, por ejemplo), cuenta como
+  // anterior a todas y el destino siempre queda "más abajo".
+  const currentIndex = buttons.findIndex((btn) => btn.name === page);
+
   return (
     <View
       style={{
@@ -36,7 +41,7 @@ export default function MainMenu({ page, navigate }) {
         gap: 22,
       }}
     >
-      {buttons.map((btn) => {
+      {buttons.map((btn, index) => {
         const active = page === btn.name;
         const length = Math.ceil(btn.label.length * CHAR_WIDTH) + LABEL_PADDING;
 
@@ -47,7 +52,7 @@ export default function MainMenu({ page, navigate }) {
           // lo que se ve.
           <View key={btn.name} style={{ width: NAV_WIDTH, height: length }}>
             <Pressable
-              onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)}
+              onPress={() => navigate(btn.name, index > currentIndex ? 1 : 0)}
               style={{
                 position: 'absolute',
                 width: length,

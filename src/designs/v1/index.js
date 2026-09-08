@@ -6,6 +6,7 @@ import Matias_accounts from './pages/Matias_accounts.js';
 import Aylin_accounts from './pages/Aylin_accounts.js';
 import MainMenu from './components/MainMenu.js';
 import GradientBackground from './components/GradientBackground.js';
+import { SlideInLeft, SlideInRight, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';
 
 export default {
   name: 'v1',
@@ -19,4 +20,9 @@ export default {
   },
   MainMenu,
   GradientBackground,
+  // horizontal: el menú es un botón flotante, no hay noción de arriba o abajo
+  pageAnimations: (direction) => ({
+    en: direction === 1 ? SlideInRight : SlideInLeft,
+    ex: direction === 1 ? SlideOutLeft : SlideOutRight,
+  }),
 };

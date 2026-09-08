@@ -6,6 +6,7 @@ import Matias_accounts from './pages/Matias_accounts.js';
 import Aylin_accounts from './pages/Aylin_accounts.js';
 import MainMenu from './components/MainMenu.js';
 import GradientBackground from './components/GradientBackground.js';
+import { SlideInDown, SlideInUp, SlideOutDown, SlideOutUp } from 'react-native-reanimated';
 
 export default {
   name: 'v2',
@@ -19,4 +20,10 @@ export default {
   },
   MainMenu,
   GradientBackground,
+  // El menú es una barra vertical, así que la página acompaña el movimiento:
+  // direction 1 = el destino está más abajo en el riel, entra desde abajo.
+  pageAnimations: (direction) => ({
+    en: direction === 1 ? SlideInDown : SlideInUp,
+    ex: direction === 1 ? SlideOutUp : SlideOutDown,
+  }),
 };
