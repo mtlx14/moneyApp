@@ -18,8 +18,11 @@ export default function FadingScroll({ children, style }) {
   const moreAbove = offset > 2;
   const moreBelow = hidden > 2 && offset < hidden - 2;
 
+  // Alto natural del contenido, pero con flexShrink para que ceda cuando el
+  // conjunto no entra. Así la lista no se roba el espacio sobrante: el bloque
+  // se sigue centrando como antes, y solo scrollea si de verdad hace falta.
   return (
-    <View style={[{ position: 'relative' }, style]}>
+    <View style={[{ position: 'relative', flexShrink: 1, height: content > 0 ? content : undefined }, style]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
