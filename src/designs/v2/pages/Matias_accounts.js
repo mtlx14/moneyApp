@@ -39,7 +39,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
       setLocalInfo((prev) => ({
         ...prev,
         activeField: account,
-        activeFieldAmount: account.balance,
+        activeFieldAmount: balances.byAccount[account.id] || 0,
       }));
     } else if (account.hasSubAccount) {
       setLocalInfo((prev) => ({
@@ -51,7 +51,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
       setLocalInfo((prev) => ({
         ...prev,
         activeField: account,
-        activeFieldAmount: account.balance,
+        activeFieldAmount: balances.byAccount[account.id] || 0,
       }));
     }
   };
@@ -136,7 +136,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                                             color: theme.text._3,
                                           }}
                                         >
-                                          <AnimatedSwapTextS value={subAccount.balance} />
+                                          <AnimatedSwapTextS value={balances.byAccount[subAccount.id] || 0} />
                                         </Text>
                                       </View>
                                     </Pressable>
@@ -185,7 +185,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
 
                   updateSubAccount({ account: newSubAccountId, balance: AmountToTransfer, isActive: true });
                 } else {
-                  updateAccountBalance({ account: selected.id, balance: selected.balance + AmountToTransfer });
+                  updateAccountBalance({ account: selected.id, balance: (balances.byAccount[selected.id] || 0) + AmountToTransfer });
                 }
 
                 setLocalInfo((prev) => ({

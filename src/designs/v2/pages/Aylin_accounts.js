@@ -40,7 +40,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   // "por pagar" no se escribe con el teclado: se elige entre el sueldo o cero
   const POR_PAGAR_ID = 'account_aylin_por_pagar';
   const [porPagarOpen, setPorPagarOpen] = useState(false);
-  const aylinSalary = accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0;
+  const aylinSalary = balances.byAccount['account_aylin_salary'] || 0;
 
   const handleOnPressPorPagarOption = (amount) => {
     updateAccountBalance({ account: POR_PAGAR_ID, balance: amount });
@@ -55,7 +55,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
       setLocalInfo((prev) => ({
         ...prev,
         activeField: account,
-        activeFieldAmount: account.balance,
+        activeFieldAmount: balances.byAccount[account.id] || 0,
       }));
     } else if (account.hasSubAccount) {
       setLocalInfo((prev) => ({
@@ -67,7 +67,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
       setLocalInfo((prev) => ({
         ...prev,
         activeField: account,
-        activeFieldAmount: account.balance,
+        activeFieldAmount: balances.byAccount[account.id] || 0,
       }));
     }
   };
@@ -175,7 +175,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
                                             color: theme.text._3,
                                           }}
                                         >
-                                          <AnimatedSwapTextS value={subAccount.balance} />
+                                          <AnimatedSwapTextS value={balances.byAccount[subAccount.id] || 0} />
                                         </Text>
                                       </View>
                                     </Pressable>
@@ -224,7 +224,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
 
                   updateSubAccount({ account: newSubAccountId, balance: AmountToTransfer, isActive: true });
                 } else {
-                  updateAccountBalance({ account: selected.id, balance: selected.balance + AmountToTransfer });
+                  updateAccountBalance({ account: selected.id, balance: (balances.byAccount[selected.id] || 0) + AmountToTransfer });
                 }
 
                 setLocalInfo((prev) => ({

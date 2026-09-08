@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { monthKeyOf } from './src/helpers';
 
 const STORAGE_KEY = 'app_storage';
 
@@ -12,8 +13,6 @@ const defaultState = {
   monthOffset: 0,
   monthOffsetActivatedAt: null,
 };
-
-const monthKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
 const AppStorageContext = createContext(null);
 
@@ -28,7 +27,7 @@ export const AppStorageProvider = ({ children }) => {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
           const parsed = { ...defaultState, ...JSON.parse(stored) };
-          if (parsed.monthOffset === 1 && parsed.monthOffsetActivatedAt && parsed.monthOffsetActivatedAt !== monthKey()) {
+          if (parsed.monthOffset === 1 && parsed.monthOffsetActivatedAt && parsed.monthOffsetActivatedAt !== monthKeyOf()) {
             parsed.monthOffset = 0;
             parsed.monthOffsetActivatedAt = null;
           }
@@ -110,7 +109,7 @@ export const AppStorageProvider = ({ children }) => {
       return {
         ...prev,
         monthOffset: next,
-        monthOffsetActivatedAt: next === 1 ? monthKey() : null,
+        monthOffsetActivatedAt: next === 1 ? monthKeyOf() : null,
       };
     });
   };

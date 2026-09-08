@@ -38,3 +38,18 @@ export const themes = {
   ...legacyThemes,
   ...newThemes,
 };
+
+// Categorías de transacciones. Viven en código por ahora; las transacciones
+// guardan solo la clave, así que mudarlas a Firestore es cambiar de dónde sale
+// este objeto y nada más.
+export const categories = {
+  cat_saldo_inicial: { label: 'Saldo inicial', emoji: '🏁', kind: 'both' },
+  cat_sueldo: { label: 'Sueldo', emoji: '💼', kind: 'income' },
+  cat_transferencia: { label: 'Transferencia', emoji: '🔁', kind: 'both' },
+  cat_ajuste: { label: 'Ajuste', emoji: '🩹', kind: 'both' },
+  cat_comida: { label: 'Comida', emoji: '🍽️', kind: 'expense' },
+  cat_bencina: { label: 'Bencina', emoji: '⛽', kind: 'expense' },
+  cat_super: { label: 'Supermercado', emoji: '🛒', kind: 'expense' },
+  cat_salidas: { label: 'Salidas', emoji: '🍻', kind: 'expense' },
+  cat_otros: { label: 'Otros', emoji: '📦', kind: 'both' },
+};

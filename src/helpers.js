@@ -61,3 +61,13 @@ export function getYearOfNextMonth(monthOffset = 0) {
   const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return nextMonthDate.getFullYear().toString();
 }
+
+// clave de mes de una fecha, para agrupar y filtrar transacciones sin rangos
+export function monthKeyOf(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// saldo que aportan un conjunto de transacciones: los ingresos suman, los gastos restan
+export function sumTransactions(transactions) {
+  return transactions.reduce((total, tx) => total + (tx.type === 'income' ? tx.amount : -tx.amount), 0);
+}
