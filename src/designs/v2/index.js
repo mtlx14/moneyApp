@@ -11,12 +11,9 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 // Los presets son los únicos que animan acá: las funciones custom, aunque
 // lleven la directiva 'worklet', reanimated las ignora sin avisar.
 //
-// El recorrido de entrada se sube con withInitialValues; el de salida tiene sus
-// 25px escritos como destino en el preset y no se puede mover.
-const TRAVEL_IN = 80;
-const DURATION_OUT = 160;
-// Sin espera: las dos corren juntas. Encadenarlas se siente como un frenazo.
-const DELAY_IN = 0;
+// Entrada y salida usan la misma configuración. El recorrido queda en los 25px
+// del preset: se le puede subir a la entrada con withInitialValues, pero la
+// salida tiene su destino escrito adentro, así que subirlo las descalza.
 const SPRING = { damping: 22, stiffness: 190, mass: 0.6 };
 
 export default {
@@ -34,7 +31,7 @@ export default {
   // El menú es una barra vertical, así que la página acompaña el movimiento:
   // direction 1 = el destino está más abajo en el riel, entra desde abajo.
   pageAnimations: (direction) => ({
-    en: (direction === 1 ? FadeInDown : FadeInUp).springify().damping(SPRING.damping).stiffness(SPRING.stiffness).mass(SPRING.mass).delay(DELAY_IN).withInitialValues({ transform: [{ translateY: direction === 1 ? TRAVEL_IN : -TRAVEL_IN }] }),
-    ex: (direction === 1 ? FadeOutUp : FadeOutDown).duration(DURATION_OUT),
+    en: (direction === 1 ? FadeInDown : FadeInUp).springify().damping(SPRING.damping).stiffness(SPRING.stiffness).mass(SPRING.mass),
+    ex: (direction === 1 ? FadeOutUp : FadeOutDown).springify().damping(SPRING.damping).stiffness(SPRING.stiffness).mass(SPRING.mass),
   }),
 };
