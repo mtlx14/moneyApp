@@ -5,11 +5,8 @@ import { DEBUG_HIT_AREAS, NAV_WIDTH } from '../layout.js';
 
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
-// El Text se dibuja en una caja ancha y fija: como después se rota y se centra,
-// el sobrante queda vacío y no se ve, pero garantiza que nunca haya que cortar.
-const LABEL_BOX = 240;
-// Esta estimación ya no decide si el texto entra, solo cuánto alto ocupa cada
-// item en el riel, o sea la separación entre ellos.
+// Alto que ocupa cada item en el riel, que rotado es el largo disponible para
+// su texto. Va holgado: si sobra no se ve, si falta el texto se desborda.
 const CHAR_WIDTH = FONT_SIZE * 0.9 + LETTER_SPACING;
 const LABEL_PADDING = 24;
 
@@ -45,36 +42,41 @@ export default function MainMenu({ page, navigate }) {
         const length = Math.ceil(btn.label.length * CHAR_WIDTH) + LABEL_PADDING;
 
         return (
-          <Pressable
-            key={btn.name}
-            onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)}
-            style={{
-              width: NAV_WIDTH,
-              height: length,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: DEBUG_HIT_AREAS ? 'rgba(255, 0, 0, 0.25)' : undefined,
-              borderWidth: DEBUG_HIT_AREAS ? 1 : 0,
-              borderColor: 'rgba(255, 0, 0, 0.8)',
-            }}
-          >
-            <Text
+          // El hueco reserva el espacio vertical; el botón adentro es una caja
+          // horizontal común, del tamaño del texto, que se rota entera sobre
+          // ese hueco. Nada se desborda, así que el área tocable coincide con
+          // lo que se ve.
+          <View key={btn.name} style={{ width: NAV_WIDTH, height: length, backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 255, 0, 0.25)' : undefined }}>
+            <Pressable
+              onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)}
               style={{
-                width: LABEL_BOX,
-                backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 255, 0, 0.25)' : undefined,
-                textAlign: 'center',
+                position: 'absolute',
+                width: length,
+                height: NAV_WIDTH,
+                left: (NAV_WIDTH - length) / 2,
+                top: (length - NAV_WIDTH) / 2,
                 transform: [{ rotate: '-90deg' }],
-                fontSize: FONT_SIZE,
-                fontWeight: '500',
-                letterSpacing: LETTER_SPACING,
-                textTransform: 'uppercase',
-                color: active ? theme.bg.menuAccentColor : theme.text._1,
-                opacity: active ? 1 : 0.3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: DEBUG_HIT_AREAS ? 'rgba(255, 0, 0, 0.25)' : undefined,
+                borderWidth: DEBUG_HIT_AREAS ? 1 : 0,
+                borderColor: 'rgba(255, 0, 0, 0.8)',
               }}
             >
-              {btn.label}
-            </Text>
-          </Pressable>
+              <Text
+                style={{
+                  fontSize: FONT_SIZE,
+                  fontWeight: '500',
+                  letterSpacing: LETTER_SPACING,
+                  textTransform: 'uppercase',
+                  color: active ? theme.bg.menuAccentColor : theme.text._1,
+                  opacity: active ? 1 : 0.3,
+                }}
+              >
+                {btn.label}
+              </Text>
+            </Pressable>
+          </View>
         );
       })}
     </View>
