@@ -260,7 +260,7 @@ export const beigeTheme = createTheme({
     check: 'rgb(77, 189, 107)',
     // pareja del bg.check: mismo peso, sólido, para que los dos estados del
     // botón se lean como del mismo juego
-    yellow: 'rgb(226, 173, 64)',
+    yellow: 'rgb(255, 209, 41)',
     keyboard: 'rgba(57, 53, 48, 0.06)',
     keyboard_key: 'rgba(255, 255, 255, 0.5)',
     tr_05: 'rgba(57, 53, 48, 0.04)',
