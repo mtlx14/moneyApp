@@ -13,7 +13,7 @@ SplashScreen.preventAutoHideAsync();
 // vivir dentro de los providers porque useDesign lee el tema del usuario.
 function AppContent() {
   const design = useDesign();
-  const { pages, MainMenu, GradientBackground, pageAnimations, PageScroller, pageOrder } = design;
+  const { pages, MainMenu, GradientBackground, pageAnimations, PageSlider } = design;
 
   const [showMenu, setShowMenu] = useState(true);
   const [page, setPage] = useState('home');
@@ -26,15 +26,15 @@ function AppContent() {
     }, 20);
   };
 
-  // Con PageScroller el desplazamiento lo hace el contenedor, así que las
+  // Con PageSlider el desplazamiento lo maneja el contenedor, así que las
   // páginas no traen animación propia.
-  const nAnimations = PageScroller ? {} : pageAnimations(direction);
+  const nAnimations = PageSlider ? {} : pageAnimations(direction);
   const pageProps = { setShowMenu, navigate, nAnimations };
 
   return (
     <GradientBackground>
-      {PageScroller ? (
-        <PageScroller key={design.name} pages={pages} order={pageOrder} page={page} pageProps={pageProps} />
+      {PageSlider ? (
+        <PageSlider key={design.name} pages={pages} page={page} direction={direction} pageProps={pageProps} />
       ) : (
         // Cada página ocupa su propio lugar en el árbol, no un slot compartido
         // con key: si entra y sale en la misma posición, React desmonta y monta
