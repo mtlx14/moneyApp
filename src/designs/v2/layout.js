@@ -10,6 +10,3 @@ export const CONTENT_LEFT = 37;
 
 // Inicio va un poco más adentro que el resto.
 export const CONTENT_LEFT_HOME = 47;
-
-// Pinta el área tocable de cada botón de la barra. Solo para depurar.
-export const DEBUG_HIT_AREAS = true;

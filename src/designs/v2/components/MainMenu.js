@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../../../theme/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DEBUG_HIT_AREAS, NAV_WIDTH } from '../layout.js';
+import { NAV_WIDTH } from '../layout.js';
 
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
@@ -30,7 +30,6 @@ export default function MainMenu({ page, navigate }) {
         bottom: 0,
         left: 0,
         width: NAV_WIDTH,
-        backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 0, 255, 0.12)' : undefined,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: insets.bottom + 16,
@@ -46,7 +45,7 @@ export default function MainMenu({ page, navigate }) {
           // horizontal común, del tamaño del texto, que se rota entera sobre
           // ese hueco. Nada se desborda, así que el área tocable coincide con
           // lo que se ve.
-          <View key={btn.name} style={{ width: NAV_WIDTH, height: length, backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 255, 0, 0.25)' : undefined }}>
+          <View key={btn.name} style={{ width: NAV_WIDTH, height: length }}>
             <Pressable
               onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)}
               style={{
@@ -58,9 +57,6 @@ export default function MainMenu({ page, navigate }) {
                 transform: [{ rotate: '-90deg' }],
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: DEBUG_HIT_AREAS ? 'rgba(255, 0, 0, 0.25)' : undefined,
-                borderWidth: DEBUG_HIT_AREAS ? 1 : 0,
-                borderColor: 'rgba(255, 0, 0, 0.8)',
               }}
             >
               <Text
