@@ -1,6 +1,5 @@
 import { Dimensions, Pressable, Text, View } from 'react-native';
 import { useTheme } from '../../../theme/useTheme.js';
-import { BlurView } from 'expo-blur';
 import { useEffect, useState } from 'react';
 import Animated, { FadeOutRight, LinearTransition, SlideInLeft, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';
 import React from 'react';
@@ -81,13 +80,15 @@ export default function UserTag({}) {
             left: 19,
           }}
         >
-          <BlurView
-            intensity={40}
+          <View
             style={{
               width: windowWidth * 0.5,
               height: buttons.length * windowWidth * 0.12,
               borderRadius: 12,
               overflow: 'hidden',
+              backgroundColor: theme.bg.card,
+              borderWidth: 1,
+              borderColor: theme.bg.divider,
             }}
           >
             {buttons.map((btn, index) => {
@@ -105,7 +106,7 @@ export default function UserTag({}) {
                 </React.Fragment>
               );
             })}
-          </BlurView>
+          </View>
         </Animated.View>
       )}
       {themesOpen && (
@@ -118,14 +119,16 @@ export default function UserTag({}) {
             left: 19,
           }}
         >
-          <BlurView
-            intensity={20}
+          <View
             style={{
               borderRadius: 20,
               overflow: 'hidden',
+              backgroundColor: theme.bg.card,
+              borderWidth: 1,
+              borderColor: theme.bg.divider,
             }}
           >
-            <View style={{ backgroundColor: theme.bg.tr_3, width: windowWidth * 0.6 }}>
+            <View style={{ width: windowWidth * 0.6 }}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -152,7 +155,7 @@ export default function UserTag({}) {
                 ))}
               </View>
             </View>
-          </BlurView>
+          </View>
         </Animated.View>
       )}
       <View style={{ position: 'absolute', top: 20, left: 20, height: windowWidth * 0.07 }}>
