@@ -258,7 +258,9 @@ export const beigeTheme = createTheme({
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',
     check: 'rgb(77, 189, 107)',
-    yellow: 'rgba(206, 158, 74, 0.6)',
+    // pareja del bg.check: mismo peso, sólido, para que los dos estados del
+    // botón se lean como del mismo juego
+    yellow: 'rgb(226, 173, 64)',
     keyboard: 'rgba(57, 53, 48, 0.06)',
     keyboard_key: 'rgba(255, 255, 255, 0.5)',
     tr_05: 'rgba(57, 53, 48, 0.04)',
