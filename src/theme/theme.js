@@ -40,6 +40,9 @@ export const baseTheme = {
   bg: {
     primary: 'rgb(35, 35, 35)',
     primary_2: 'rgb(20, 20, 20)',
+    // mismo color que primary pero transparente: los degradados necesitan los
+    // dos extremos del mismo tono, si no el fade tira a negro
+    primary_0: 'rgba(35, 35, 35, 0)',
     blue: 'rgba(40, 153, 205, 0.7)',
     red: 'rgba(208, 36, 73, 0.5)',
     green: 'rgba(73, 172, 70, .6)',
@@ -243,6 +246,7 @@ export const beigeTheme = createTheme({
   bg: {
     primary: '#F3EFE6',
     primary_2: '#EBE4D6',
+    primary_0: 'rgba(243, 239, 230, 0)',
     // líneas de la cuadrícula del fondo
     grid: 'rgba(57, 53, 48, 0.015)',
     blue: 'rgba(74, 127, 193, 0.7)',
