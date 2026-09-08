@@ -28,11 +28,17 @@ function AppContent() {
 
   const nAnimations = pageAnimations(direction);
 
-  const Page = pages[page] || pages.home;
-
   return (
     <GradientBackground>
-      <Page key={`${design.name}_${page}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />
+      {/* Cada página ocupa su propio lugar en el árbol, no un slot compartido
+          con key: si entra y sale en la misma posición, React desmonta y monta
+          en el mismo commit y reanimated no alcanza a animar la salida. */}
+      {Object.keys(pages).map((name) => {
+        if (name !== page) return null;
+        const Page = pages[name];
+
+        return <Page key={`${design.name}_${name}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />;
+      })}
       {showMenu && <MainMenu page={page} navigate={navigate} />}
     </GradientBackground>
   );
