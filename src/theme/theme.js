@@ -231,7 +231,8 @@ export const beigeTheme = createTheme({
   name: 'beige',
   design: 'v2',
   text: {
-    // prueba: _1 y _2 iguales, para dejar la pantalla en dos tonos
+    // _1 y _2 comparten tono a propósito: la jerarquía es de dos niveles,
+    // el cuerpo y los totales. El monto grande se distingue por tamaño.
     _1: '#6B6358',
     _2: '#6B6358',
     _3: '#9A9183',
