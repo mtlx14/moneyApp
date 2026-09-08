@@ -9,6 +9,7 @@ import { Keyboard } from '../components/Keyboard.js';
 import AnimatedSwapTextS from '../components/AnimatedSwapTextS.js';
 import { updateAccountBalance, updateChanges, updateSubAccount } from '../../../services.js';
 import ModalTransferAccount from '../components/ModalTransferAccount.js';
+import AccountHistory from '../components/AccountHistory.js';
 import { fS } from '../../../theme/theme.js';
 import GoBackScroll from '../components/GoBackScroll.js';
 import CollapsibleRow from '../components/CollapsibleRow.js';
@@ -71,6 +72,18 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
       }));
     }
   };
+
+  // las cuentas migradas al ledger muestran sus movimientos en vez del teclado:
+  // ahí el saldo ya no se escribe a mano, sale de las transacciones
+  const showHistory = !!localInfo.activeField?.isLedger;
+
+  const closeField = () =>
+    setLocalInfo((prev) => ({
+      ...prev,
+      activeField: null,
+      activeFieldAmount: null,
+      subAccountToSave: null,
+    }));
 
   return (
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate}>
@@ -204,6 +217,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} />}
+          {showHistory && !localInfo.showModalTransferAccount && <AccountHistory account={localInfo.activeField} onClose={closeField} />}
           {localInfo.showModalTransferAccount && (
             <ModalTransferAccount
               accounts={aylinAccounts.filter((a) => a.id !== localInfo.activeField.forAccount && !a.isNegative)}
@@ -240,7 +254,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
 
           {/* teclado ------------------------------------ */}
 
-          {localInfo.activeField && (
+          {localInfo.activeField && !showHistory && (
             <Keyboard
               showCancel={localInfo.activeField.hasSubAccount ? (localInfo.subAccountToSave && localInfo.activeFieldAmount > 0 ? false : true) : false}
               showDelete={localInfo.activeField.type === 'sub_account'}
