@@ -253,9 +253,9 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 los saldos de arriba y el total de abajo quedan fijos. */}
             <FadingScroll>
               <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
 
-                <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
+                <AnimatedSwapTextS type={'debt'} color={theme.text.strong} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
               </Pressable>
               {/* se montan todos los planeados y cada fila se abre o cierra según si entra en el mes siguiente */}
               {bills

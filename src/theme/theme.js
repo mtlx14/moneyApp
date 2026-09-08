@@ -36,6 +36,7 @@ export const baseTheme = {
     _4: 'rgba(255, 255, 255, 0.2)',
     green: 'rgb(70, 228, 70)',
     red: 'rgb(245, 89, 89)',
+    strong: 'rgba(255, 255, 255, 1)',
   },
   bg: {
     primary: 'rgb(35, 35, 35)',
@@ -242,6 +243,7 @@ export const beigeTheme = createTheme({
     _4: 'rgba(57, 53, 48, 0.22)',
     green: 'rgb(74, 122, 84)',
     red: 'rgb(176, 82, 72)',
+    strong: '#393530',
   },
   bg: {
     primary: '#F3EFE6',
