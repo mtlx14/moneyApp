@@ -6,8 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const NAV_WIDTH = 34;
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
-// Ancho reservado para el texto rotado. Va holgado a propósito: el Text tiene
-// ancho fijo, así que quedarse corto lo corta con elipsis. Sobrar no se ve.
+// El Text se dibuja en una caja ancha y fija: como después se rota y se centra,
+// el sobrante queda vacío y no se ve, pero garantiza que nunca haya que cortar.
+const LABEL_BOX = 240;
+// Esta estimación ya no decide si el texto entra, solo cuánto alto ocupa cada
+// item en el riel, o sea la separación entre ellos.
 const CHAR_WIDTH = FONT_SIZE * 0.9 + LETTER_SPACING;
 const LABEL_PADDING = 24;
 
@@ -44,9 +47,8 @@ export default function MainMenu({ page, navigate }) {
         return (
           <Pressable key={btn.name} onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)} style={{ width: NAV_WIDTH, height: length, alignItems: 'center', justifyContent: 'center' }}>
             <Text
-              numberOfLines={1}
               style={{
-                width: length,
+                width: LABEL_BOX,
                 textAlign: 'center',
                 transform: [{ rotate: '-90deg' }],
                 fontSize: FONT_SIZE,
