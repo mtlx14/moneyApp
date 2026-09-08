@@ -73,9 +73,9 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   };
 
   return (
-    <>
+    <Animated.View style={{ flex: 1 }} entering={nAnimations.en} exiting={nAnimations.ex}>
       <GoBackScroll navigate={navigate}>
-        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
+        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {!localInfo.activeField && (
             <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
@@ -296,6 +296,6 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
           )}
         </Animated.View>
       </GoBackScroll>
-    </>
+    </Animated.View>
   );
 }
