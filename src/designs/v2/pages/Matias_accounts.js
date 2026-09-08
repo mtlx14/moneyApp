@@ -12,12 +12,10 @@ import ModalTransferAccount from '../components/ModalTransferAccount.js';
 import { fS } from '../../../theme/theme.js';
 import GoBackScroll from '../components/GoBackScroll.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
-import { NAV_WIDTH } from '../layout.js';
+import { CONTENT_LEFT } from '../layout.js';
 
 const windowHeight = Dimensions.get('window').height;
-const fullWindowWidth = Dimensions.get('window').width;
-// ancho útil: lo que queda a la derecha de la barra
-const windowWidth = fullWindowWidth - NAV_WIDTH;
+const windowWidth = Dimensions.get('window').width;
 
 export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
@@ -61,7 +59,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
   return (
     <>
       <GoBackScroll navigate={navigate}>
-        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth, marginLeft: NAV_WIDTH }]} entering={nAnimations.en} exiting={nAnimations.ex}>
+        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {!localInfo.activeField && (
             <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
@@ -72,6 +70,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                   style={{
                     width: windowWidth,
                     paddingHorizontal: windowWidth * 0.05,
+                    paddingLeft: CONTENT_LEFT,
                     gap: 5,
                     marginTop: windowHeight * 0.03,
                     paddingBottom: windowHeight * 0.015,

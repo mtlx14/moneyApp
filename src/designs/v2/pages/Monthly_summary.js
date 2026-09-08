@@ -12,12 +12,10 @@ import { currentInstallment } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
 import { Image } from 'expo-image';
 import GoBackScroll from '../components/GoBackScroll.js';
-import { NAV_WIDTH } from '../layout.js';
+import { CONTENT_LEFT } from '../layout.js';
 
 const windowHeight = Dimensions.get('window').height;
-const fullWindowWidth = Dimensions.get('window').width;
-// ancho útil: lo que queda a la derecha de la barra
-const windowWidth = fullWindowWidth - NAV_WIDTH;
+const windowWidth = Dimensions.get('window').width;
 
 export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
@@ -35,7 +33,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   return (
     <>
       <GoBackScroll navigate={navigate}>
-        <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth, marginLeft: NAV_WIDTH }]} entering={nAnimations.en} exiting={nAnimations.ex}>
+        <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {activeField ? (
             <ModalEditAccount bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
           ) : (
@@ -51,6 +49,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                   style={{
                     width: windowWidth,
                     paddingHorizontal: windowWidth * 0.05,
+                    paddingLeft: CONTENT_LEFT,
                     gap: 5,
                     marginTop: windowHeight * 0.03,
                     paddingBottom: windowHeight * 0.015,

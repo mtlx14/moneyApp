@@ -17,14 +17,12 @@ import { fS } from '../../../theme/theme.js';
 import { amountForMonth, monthName } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
-import { NAV_WIDTH } from '../layout.js';
+import { CONTENT_LEFT } from '../layout.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
   const windowHeight = Dimensions.get('window').height - insets.top;
-  const fullWindowWidth = Dimensions.get('window').width;
-// ancho útil: lo que queda a la derecha de la barra
-const windowWidth = fullWindowWidth - NAV_WIDTH;
+  const windowWidth = Dimensions.get('window').width;
   const theme = useTheme();
   const { accounts, balances, appMeta, bills } = useData();
   const { currentUser } = useAppStorage();
@@ -81,7 +79,7 @@ const windowWidth = fullWindowWidth - NAV_WIDTH;
   if (!isReady) return null;
 
   return (
-    <Animated.View style={{ height: windowHeight, width: windowWidth, marginLeft: NAV_WIDTH }} entering={nAnimations.en} exiting={nAnimations.ex}>
+    <Animated.View style={{ height: windowHeight, width: windowWidth }} entering={nAnimations.en} exiting={nAnimations.ex}>
       <ScrollView
         horizontal
         pagingEnabled={true}
@@ -95,14 +93,12 @@ const windowWidth = fullWindowWidth - NAV_WIDTH;
         style={{ width: windowWidth }}
       >
         <View>
-          {/* el monto grande queda centrado contra la pantalla completa, no contra
-              el ancho útil: es el único elemento que no se corre por la barra */}
-          <Animated.View style={[{ width: fullWindowWidth, marginLeft: -NAV_WIDTH, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
           </Animated.View>
 
-          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <Pressable onPress={() => navigate('aylin_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('aylin') && (
@@ -209,13 +205,11 @@ const windowWidth = fullWindowWidth - NAV_WIDTH;
         </View>
         {/* NEXT MONTH */}
         <View>
-          {/* el monto grande queda centrado contra la pantalla completa, no contra
-              el ancho útil: es el único elemento que no se corre por la barra */}
-          <Animated.View style={[{ width: fullWindowWidth, marginLeft: -NAV_WIDTH, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
-          <View style={{ width: windowWidth, height: windowHeight * 0.65, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.65, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
