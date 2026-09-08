@@ -209,7 +209,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
-          <View style={{ width: windowWidth, height: windowHeight * 0.7, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center', backgroundColor: DEBUG_LAYOUT ? 'rgba(0, 0, 255, 0.12)' : undefined }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.75, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center', backgroundColor: DEBUG_LAYOUT ? 'rgba(0, 0, 255, 0.12)' : undefined }}>
             <View style={{ backgroundColor: DEBUG_LAYOUT ? 'rgba(255, 0, 0, 0.2)' : undefined }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
