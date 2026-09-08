@@ -16,7 +16,7 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 // salida tiene su destino escrito adentro, así que subirlo las descalza.
 const TRAVEL_IN = 100;
 const DURATION = 100;
-const DELAY_IN = 100;
+const DELAY_IN = 200;
 
 export default {
   name: 'v2',
