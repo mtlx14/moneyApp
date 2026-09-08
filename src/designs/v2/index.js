@@ -10,12 +10,18 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 
 // Los presets son los únicos que animan acá: las funciones custom, aunque
 // lleven la directiva 'worklet', reanimated las ignora sin avisar.
-// Del recorrido solo se puede tocar el de entrada, con withInitialValues; el
-// de salida tiene su -25 escrito en la animación del preset.
-const TRAVEL_IN = 100;
-const DURATION_OUT = 100;
-// cuánto espera la entrada desde que arranca la salida
-const DELAY_IN = 200;
+//
+// La referencia es el scroll horizontal de Inicio: arranca rápido, frena solo y
+// se asienta sin golpe. Eso es un resorte apenas por debajo del amortiguamiento
+// crítico, no una curva con tiempo fijo.
+//
+// El recorrido de entrada se sube con withInitialValues; el de salida tiene sus
+// 25px escritos como destino en el preset y no se puede mover.
+const TRAVEL_IN = 80;
+const DURATION_OUT = 110;
+// La entrada pisa el final de la salida: sin solape queda un frame vacío.
+const DELAY_IN = 60;
+const SPRING = { damping: 20, stiffness: 260, mass: 0.5 };
 
 export default {
   name: 'v2',
@@ -32,7 +38,7 @@ export default {
   // El menú es una barra vertical, así que la página acompaña el movimiento:
   // direction 1 = el destino está más abajo en el riel, entra desde abajo.
   pageAnimations: (direction) => ({
-    en: (direction === 1 ? FadeInDown : FadeInUp).springify().damping(12).stiffness(180).mass(0.5).delay(DELAY_IN).withInitialValues({ transform: [{ translateY: direction === 1 ? TRAVEL_IN : -TRAVEL_IN }] }),
+    en: (direction === 1 ? FadeInDown : FadeInUp).springify().damping(SPRING.damping).stiffness(SPRING.stiffness).mass(SPRING.mass).delay(DELAY_IN).withInitialValues({ transform: [{ translateY: direction === 1 ? TRAVEL_IN : -TRAVEL_IN }] }),
     ex: (direction === 1 ? FadeOutUp : FadeOutDown).duration(DURATION_OUT),
   }),
 };
