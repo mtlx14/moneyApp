@@ -12,9 +12,9 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 // lleven la directiva 'worklet', reanimated las ignora sin avisar.
 // Del recorrido solo se puede tocar el de entrada, con withInitialValues; el
 // de salida tiene su -25 escrito en la animación del preset.
-const TRAVEL_IN = 70;
-const DURATION_OUT = 140;
-const DURATION_IN = 200;
+const TRAVEL_IN = 100;
+const DURATION_OUT = 150;
+const DURATION_IN = 150;
 
 export default {
   name: 'v2',
