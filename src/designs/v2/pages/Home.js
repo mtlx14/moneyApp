@@ -180,7 +180,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
 
                 <AnimatedSwapTextS type={'debt'} value={`${balances.billsBalances.toPay || 0}`} />
               </Pressable>
@@ -198,7 +198,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
             </View>
           </View>
@@ -212,7 +212,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
           <View style={{ width: windowWidth, height: windowHeight * 0.75, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText }}>{'💷' + '  ' + 'Saldo actual'}</Text>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
 
                 <AnimatedSwapTextS value={balances.totalAfterPayments || 0} />
               </View>
@@ -220,14 +220,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
               <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0} />
               </Pressable>
               <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0} />
               </Pressable>
@@ -244,14 +244,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
+              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo Total'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
             </View>
             {/* Lo único que crece es esta lista, así que es lo único que scrollea:
                 los saldos de arriba y el total de abajo quedan fijos. */}
             <FadingScroll>
               <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
-                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
 
                 <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
               </Pressable>
@@ -274,7 +274,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
             </View>
           </View>
