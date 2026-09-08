@@ -234,10 +234,10 @@ export const beigeTheme = createTheme({
   name: 'beige',
   design: 'v2',
   text: {
-    // La jerarquía la marca el rol, no el tamaño: los montos van en tinta
-    // (_1) y las etiquetas de las filas en el tono claro (_2 y _3).
-    _1: '#393530',
-    _2: '#9A9183',
+    // _1 y _2 comparten tono a propósito: la jerarquía es de dos niveles,
+    // el cuerpo y los totales. El monto grande se distingue por tamaño.
+    _1: '#6B6358',
+    _2: '#6B6358',
     _3: '#9A9183',
     _4: 'rgba(57, 53, 48, 0.22)',
     green: 'rgb(74, 122, 84)',
