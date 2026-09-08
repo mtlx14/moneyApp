@@ -31,8 +31,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   };
 
   return (
-    <Animated.View style={{ width: windowWidth, height: '100%' }} entering={nAnimations.en} exiting={nAnimations.ex}>
-      <GoBackScroll navigate={navigate}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]}>
           {activeField ? (
             <ModalEditAccount bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
@@ -154,7 +153,6 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
             </Animated.View>
           )}
         </Animated.View>
-      </GoBackScroll>
-    </Animated.View>
+    </GoBackScroll>
   );
 }

@@ -57,8 +57,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
   };
 
   return (
-    <Animated.View style={{ width: windowWidth, height: '100%' }} entering={nAnimations.en} exiting={nAnimations.ex}>
-      <GoBackScroll navigate={navigate}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {!localInfo.activeField && (
             <View>
@@ -256,7 +255,6 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
             />
           )}
         </Animated.View>
-      </GoBackScroll>
-    </Animated.View>
+    </GoBackScroll>
   );
 }

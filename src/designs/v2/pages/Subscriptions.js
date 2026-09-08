@@ -30,8 +30,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
   const [activeField, setActiveField] = useState(null);
 
   return (
-    <Animated.View style={{ width: windowWidth, height: '100%' }} entering={nAnimations.en} exiting={nAnimations.ex}>
-      <GoBackScroll page='monthly_summary' navigate={navigate}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} page='monthly_summary' navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]}>
           {activeField ? (
             <ModalEditSub bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
@@ -109,7 +108,6 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
             </View>
           )}
         </Animated.View>
-      </GoBackScroll>
-    </Animated.View>
+    </GoBackScroll>
   );
 }

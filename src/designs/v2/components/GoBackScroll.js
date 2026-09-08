@@ -2,7 +2,10 @@ import { useRef } from 'react';
 import { Dimensions, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue, withTiming } from 'react-native-reanimated';
 
-export default function GoBackScroll({ page = 'home', children, navigate }) {
+// Recibe la animación de página y la aplica sobre su propio ScrollView: así el
+// nodo animado es el más externo de la página, como en Inicio. Envuelto en otra
+// vista, la entrada no recorría.
+export default function GoBackScroll({ page = 'home', children, navigate, entering, exiting }) {
   const windowWidth = Dimensions.get('window').width;
 
   const scrollRef = useRef(null);
@@ -36,7 +39,7 @@ export default function GoBackScroll({ page = 'home', children, navigate }) {
     }
   });
   return (
-    <Animated.ScrollView ref={scrollRef} horizontal scrollEventThrottle={16} pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleGoBackScroll} contentOffset={{ x: windowWidth * 0.5 }} onContentSizeChange={handleContentSizeChange} decelerationRate={'fast'}>
+    <Animated.ScrollView entering={entering} exiting={exiting} ref={scrollRef} horizontal scrollEventThrottle={16} pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleGoBackScroll} contentOffset={{ x: windowWidth * 0.5 }} onContentSizeChange={handleContentSizeChange} decelerationRate={'fast'}>
       <View style={{ width: windowWidth * 0.5 }} />
       <Animated.View style={{ opacity: goBackOpacity }}>{children}</Animated.View>
     </Animated.ScrollView>
