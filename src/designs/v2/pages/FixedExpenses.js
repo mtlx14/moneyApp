@@ -3,9 +3,12 @@ import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
 import { useEffect, useRef, useState } from 'react';
 import Animated, { SlideInRight, SlideOutRight, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { NAV_WIDTH } from '../layout.js';
 
 const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
+const fullWindowWidth = Dimensions.get('window').width;
+// ancho útil: lo que queda a la derecha de la barra
+const windowWidth = fullWindowWidth - NAV_WIDTH;
 export default function FixedExpenses({ setShowMenu }) {
   const theme = useTheme();
   const { accounts, bills } = useData();
@@ -28,7 +31,7 @@ export default function FixedExpenses({ setShowMenu }) {
 
   return (
     <>
-      <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }, modalOpenOpacityAnimatedStyle]} entering={SlideInRight} exiting={SlideOutRight}>
+      <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth, marginLeft: NAV_WIDTH }, modalOpenOpacityAnimatedStyle]} entering={SlideInRight} exiting={SlideOutRight}>
         <View style={{ width: windowWidth, height: windowHeight * 0.2, justifyContent: 'flex-end', alignItems: 'center' }}>
           <Text style={{ color: theme.text._1, fontSize: 18, fontWeight: 400 }}>Gastos fijos</Text>
         </View>

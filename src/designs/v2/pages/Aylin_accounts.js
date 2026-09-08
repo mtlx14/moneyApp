@@ -13,9 +13,12 @@ import { fS } from '../../../theme/theme.js';
 import GoBackScroll from '../components/GoBackScroll.js';
 import CollapsibleRow from '../components/CollapsibleRow.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
+import { NAV_WIDTH } from '../layout.js';
 
 const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
+const fullWindowWidth = Dimensions.get('window').width;
+// ancho útil: lo que queda a la derecha de la barra
+const windowWidth = fullWindowWidth - NAV_WIDTH;
 
 export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
@@ -74,7 +77,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   return (
     <>
       <GoBackScroll navigate={navigate}>
-        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
+        <Animated.View style={[{ height: windowHeight * 1, width: windowWidth, marginLeft: NAV_WIDTH }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {!localInfo.activeField && (
             <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>

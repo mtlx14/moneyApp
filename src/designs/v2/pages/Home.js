@@ -17,11 +17,14 @@ import { fS } from '../../../theme/theme.js';
 import { amountForMonth, monthName } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
+import { NAV_WIDTH } from '../layout.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
   const windowHeight = Dimensions.get('window').height - insets.top;
-  const windowWidth = Dimensions.get('window').width;
+  const fullWindowWidth = Dimensions.get('window').width;
+// ancho útil: lo que queda a la derecha de la barra
+const windowWidth = fullWindowWidth - NAV_WIDTH;
   const theme = useTheme();
   const { accounts, balances, appMeta, bills } = useData();
   const { currentUser } = useAppStorage();
@@ -78,7 +81,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
   if (!isReady) return null;
 
   return (
-    <Animated.View style={{ height: windowHeight, width: windowWidth }} entering={nAnimations.en} exiting={nAnimations.ex}>
+    <Animated.View style={{ height: windowHeight, width: windowWidth, marginLeft: NAV_WIDTH }} entering={nAnimations.en} exiting={nAnimations.ex}>
       <ScrollView
         horizontal
         pagingEnabled={true}
@@ -92,7 +95,9 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         style={{ width: windowWidth }}
       >
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          {/* el monto grande queda centrado contra la pantalla completa, no contra
+              el ancho útil: es el único elemento que no se corre por la barra */}
+          <Animated.View style={[{ width: fullWindowWidth, marginLeft: -NAV_WIDTH, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
           </Animated.View>
@@ -204,7 +209,9 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         </View>
         {/* NEXT MONTH */}
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          {/* el monto grande queda centrado contra la pantalla completa, no contra
+              el ancho útil: es el único elemento que no se corre por la barra */}
+          <Animated.View style={[{ width: fullWindowWidth, marginLeft: -NAV_WIDTH, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>

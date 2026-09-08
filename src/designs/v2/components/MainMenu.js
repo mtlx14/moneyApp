@@ -1,9 +1,8 @@
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../../../theme/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NAV_WIDTH } from '../layout.js';
 
-
-const NAV_WIDTH = 34;
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
 // El Text se dibuja en una caja ancha y fija: como después se rota y se centra,

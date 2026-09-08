@@ -10,9 +10,12 @@ import { Image } from 'expo-image';
 import ModalEditAccount from '../components/ModalEditAccount.js';
 import ModalEditSub from '../components/ModalEditSub.js';
 import GoBackScroll from '../components/GoBackScroll.js';
+import { NAV_WIDTH } from '../layout.js';
 
 const windowHeight = Dimensions.get('window').height;
-const windowWidth = Dimensions.get('window').width;
+const fullWindowWidth = Dimensions.get('window').width;
+// ancho útil: lo que queda a la derecha de la barra
+const windowWidth = fullWindowWidth - NAV_WIDTH;
 
 function currentInstallment(firstMonth) {
   const now = new Date();
@@ -31,7 +34,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
   return (
     <>
       <GoBackScroll page='monthly_summary' navigate={navigate}>
-        <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]} entering={nAnimations.en} exiting={nAnimations.ex}>
+        <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth, marginLeft: NAV_WIDTH }]} entering={nAnimations.en} exiting={nAnimations.ex}>
           {activeField ? (
             <ModalEditSub bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
           ) : (
