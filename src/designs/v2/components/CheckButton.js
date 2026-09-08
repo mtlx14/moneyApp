@@ -49,7 +49,7 @@ export default function CheckButton({ bill }) {
     setChecked((prev) => !prev);
   };
   return (
-    <Pressable onPress={() => handleOnPress()} style={{ height: windowWidth * 0.1 - 10, aspectRatio: 1 / 1, backgroundColor: checked ? (yellow ? theme.bg.yellow : theme.text.green) : theme.bg.tr_1, opacity: checked && !yellow ? 0.9 : 1, borderRadius: 5, justifyContent: 'center', alignItems: 'center' }}>
+    <Pressable onPress={() => handleOnPress()} style={{ height: windowWidth * 0.1 - 10, aspectRatio: 1 / 1, backgroundColor: checked ? (yellow ? theme.bg.yellow : theme.text.green) : theme.bg.tr_1, opacity: checked && !yellow ? 0.8 : 1, borderRadius: 5, justifyContent: 'center', alignItems: 'center' }}>
       {checked && (
         <Animated.View entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(200)} style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
           <Image source={require('../../../../assets/icons/check.png')} style={{ width: '60%', aspectRatio: 1 / 1 }}></Image>
