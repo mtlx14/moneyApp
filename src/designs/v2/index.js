@@ -14,7 +14,7 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 // Entrada y salida usan la misma configuración. El recorrido queda en los 25px
 // del preset: se le puede subir a la entrada con withInitialValues, pero la
 // salida tiene su destino escrito adentro, así que subirlo las descalza.
-const TRAVEL_IN = 100;
+const TRAVEL_IN = 200;
 const DURATION = 100;
 const DELAY_IN = 200;
 
