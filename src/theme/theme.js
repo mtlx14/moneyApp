@@ -263,7 +263,7 @@ export const beigeTheme = createTheme({
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',
     check: 'rgb(77, 189, 107)',
-    danger: 'rgb(203, 62, 62)',
+    danger: 'rgb(201, 80, 80)',
     // pareja del bg.check: mismo peso, sólido, para que los dos estados del
     // botón se lean como del mismo juego
     yellow: 'rgb(238, 185, 39)',
