@@ -5,6 +5,7 @@ import { useTheme } from '../../../theme/useTheme';
 import Animated, { useSharedValue, withDelay, withTiming, Easing, useAnimatedStyle, FadeInDown, LinearTransition, FadeInRight, FadeOutRight, SlideInRight, SlideOutRight, FadeOut, FadeIn } from 'react-native-reanimated';
 import { useEffect, useRef, useState } from 'react';
 import { fS } from '../../../theme/theme';
+import Caret from './Caret.js';
 import { useData } from '../../../../context';
 import { deleteBill, updateBill } from '../../../services';
 import { Image } from 'expo-image';
@@ -201,8 +202,9 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                       </Pressable>
                     ) : field === 'amount' ? (
                       <>
-                        <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={() => openKeyboard('amount')}>
+                        <Pressable style={{ flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center' }} onPress={() => openKeyboard('amount')}>
                           <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{rField}</Text>
+                          {amountKeyboard === 'amount' && <Caret height={fS.modalTransfer * 1.2} />}
                         </Pressable>
                         {canHaveNextAmount && !hasNextAmount && (
                           <Pressable
@@ -283,8 +285,9 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                         <View style={{ backgroundColor: theme.bg.tr_05, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
                           <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>Mes 2:</Text>
                         </View>
-                        <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={() => openKeyboard('nextAmount')}>
+                        <Pressable style={{ flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center' }} onPress={() => openKeyboard('nextAmount')}>
                           <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{currentBill.nextAmount ? String(currentBill.nextAmount) : ''}</Text>
+                          {amountKeyboard === 'nextAmount' && <Caret height={fS.modalTransfer * 1.2} />}
                         </Pressable>
                         <Pressable
                           onPress={() => removeNextAmount()}

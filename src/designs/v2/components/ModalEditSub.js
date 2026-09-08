@@ -5,6 +5,7 @@ import { useTheme } from '../../../theme/useTheme';
 import Animated, { useSharedValue, withDelay, withTiming, Easing, useAnimatedStyle, FadeInDown, LinearTransition, FadeInRight, FadeOutRight, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { useEffect, useRef, useState } from 'react';
 import { fS } from '../../../theme/theme';
+import Caret from './Caret.js';
 import { useData } from '../../../../context';
 import { deleteBill, updateBill } from '../../../services';
 import { Image } from 'expo-image';
@@ -122,10 +123,11 @@ export default function ModalEditSub({ bill = {}, onCancel, setShowMenu }) {
 
                     {field === 'amount' ? (
                       <Pressable
-                        style={{ flex: 1, height: '100%', justifyContent: 'center' }}
+                        style={{ flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center' }}
                         onPress={() => openKeyboard()}
                       >
                         <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{rField}</Text>
+                        {amountKeyboard && <Caret height={fS.modalTransfer * 1.2} />}
                       </Pressable>
                     ) : (
                       <TextInput
