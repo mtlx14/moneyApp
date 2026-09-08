@@ -257,7 +257,7 @@ export const beigeTheme = createTheme({
     red: 'rgba(176, 82, 72, 0.5)',
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',
-    check: 'rgb(13, 176, 56)',
+    check: 'rgb(20, 169, 60)',
     yellow: 'rgba(206, 158, 74, 0.6)',
     keyboard: 'rgba(57, 53, 48, 0.06)',
     keyboard_key: 'rgba(255, 255, 255, 0.5)',
