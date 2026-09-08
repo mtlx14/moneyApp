@@ -98,7 +98,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
                       );
                     })}
                 </View>
-                <View style={{ flexDirection: 'row', marginLeft: windowWidth * 0.05, gap: 8 }}>
+                <View style={{ flexDirection: 'row', marginLeft: CONTENT_LEFT, gap: 8 }}>
                   <UnmarkButton billToUpdate={'subs'} />
                   <Pressable onPress={() => setActiveField({})} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 100, height: windowWidth * 0.09, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
                     <Image style={{ height: windowWidth * 0.045, aspectRatio: 1 / 1, opacity: 0.9, transform: [{ rotate: '45deg' }] }} source={require('../../../../assets/icons/x.png')}></Image>
