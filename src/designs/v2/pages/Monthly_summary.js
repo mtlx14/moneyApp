@@ -147,7 +147,8 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                     <Image style={{ height: windowWidth * 0.045, aspectRatio: 1 / 1, opacity: 0.9, transform: [{ rotate: '45deg' }] }} source={require('../../../../assets/icons/x.png')}></Image>
                   </Pressable>
                 </View>
-                <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
+                {/* aire al final del scroll; era 0.3 para esquivar el botón flotante del menú viejo */}
+                <View style={{ width: 100, height: windowHeight * 0.05 }}></View>
                 </ScrollView>
               </Animated.View>
             </Animated.View>
