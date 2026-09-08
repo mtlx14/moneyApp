@@ -148,6 +148,10 @@ hay más para ver, así que su presencia es la señal. Toma el alto de su
 contenido con `flexShrink: 1`: solo cede cuando el conjunto no entra, para no
 robarse el espacio sobrante.
 
+**`components/Caret.js`** — cursor parpadeante para los campos de monto de los
+modales. Esos campos son un `Pressable` con un `Text`, no un input, porque el
+monto se edita con el teclado propio, así que no traen cursor.
+
 **Tarjetas de cuenta** — la imagen no está en la base de datos, se elige en
 código:
 
@@ -161,15 +165,68 @@ código:
 
 ---
 
+## Transiciones entre páginas
+
+Cada diseño define la suya: `pageAnimations(direction)` en su `index.js`, y
+`App.js` se la pide en vez de tenerlas escritas. El riel pasa `direction` según
+la posición del destino: 1 si está más abajo en la lista, 0 si está más arriba.
+
+Estado actual en v2: **solo entrada**, `FadeInDown`/`FadeInUp` de 100ms, sin
+delay y con el recorrido por defecto del preset.
+
+Esto costó muchas vueltas. Lo que quedó aprendido, para no repetirlo:
+
+- **Solo funcionan los presets.** Las animaciones custom —tanto una función
+  devuelta por una fábrica como worklets sueltos a nivel de módulo, con la
+  directiva puesta— reanimated las descarta **sin ningún error**: no anima y no
+  avisa. Probado en las dos formas. (Reanimated 4.1.6 + react-native-worklets
+  0.5.1; el plugin de babel es correcto, `react-native-reanimated/plugin` es un
+  re-export de `react-native-worklets/plugin`.)
+- **No hay un recorrido intermedio.** `Slide*` recorre `windowHeight` entera,
+  `Fade*` tiene 25px escritos. Nada en el medio. `withInitialValues` mueve el
+  punto de partida de la entrada, pero no el destino de la salida, así que
+  usarlo descalza las dos.
+- **`withInitialValues` no surtió efecto en las páginas con `GoBackScroll`**,
+  solo en Inicio. Nunca se llegó a la causa.
+- **Cada página necesita su propio lugar en el árbol de `App.js`.** Con un slot
+  compartido y `key`, React desmonta y monta en el mismo commit y reanimated se
+  saltea la salida.
+- **El nodo animado tiene que ser el más externo de la página.** Por eso
+  `GoBackScroll` recibe `entering`/`exiting` y los aplica sobre su propio
+  `ScrollView`: envuelto en otra vista, no animaba.
+- **Los hijos no animan su salida si un ancestro se desmonta.** Juega en los dos
+  sentidos: es lo que rompía la salida de las páginas internas, y es lo que hoy
+  evita el parpadeo.
+- **Las páginas no tienen fondo propio** —el papel lo pinta
+  `GradientBackground`—, así que cualquier transición que las superponga muestra
+  los dos contenidos encimados. Es la razón de fondo por la que ningún
+  cruce entrada/salida se veía bien.
+- **No hay animación de salida, a propósito.** Con ella, la página que se va
+  queda montada y sus hijos con animación propia (los puntos verdes de Inicio,
+  `OkToChanges`, las filas plegables) corren la suya y quedan parpadeando encima
+  de la nueva.
+
+Si algún día se quiere la salida animada, el camino es darle fondo opaco a las
+páginas para que la que entra tape a la que sale — con el costo de perder la
+cuadrícula, que está detrás.
+
+---
+
 ## Estado
 
 Hecho: fondo, riel, padding de todas las páginas, paleta, Inicio (páginas 1 y
 2, con el scroll de la lista del mes siguiente), Gastos, cuentas de Matías y
 Aylin, teclado y modales de edición, popovers del usuario, banner de cambios.
 
+Se prueba en **el navegador del teléfono**, no en un build nativo. Importa: el
+`scrollTo` animado y las animaciones de reanimated no se comportan igual ahí que
+en nativo.
+
 Pendiente / conocido:
 
 - **Sin cambio de mes en v2** — el botón salió del menú.
+- **La entrada de las páginas internas no recorre**, solo funde; la de Inicio sí
+  se desplaza. Ver la sección de transiciones.
 - **Subcuentas anidadas sin contraste** — `bg.subAccount` (.05) quedó casi
   igual que `bg.account` (.04); antes contrastaban porque la cuenta era blanca.
 - **La cuadrícula casi no se ve** — alpha `.015`, copiado tal cual de
