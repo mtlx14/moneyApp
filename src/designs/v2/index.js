@@ -15,6 +15,8 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 const TRAVEL_IN = 100;
 const DURATION_OUT = 100;
 const DURATION_IN = 100;
+// cuánto espera la entrada desde que arranca la salida
+const DELAY_IN = 50;
 
 export default {
   name: 'v2',
@@ -31,7 +33,7 @@ export default {
   // El menú es una barra vertical, así que la página acompaña el movimiento:
   // direction 1 = el destino está más abajo en el riel, entra desde abajo.
   pageAnimations: (direction) => ({
-    en: (direction === 1 ? FadeInDown : FadeInUp).duration(DURATION_IN).delay(DURATION_OUT * 0.4).withInitialValues({ transform: [{ translateY: direction === 1 ? TRAVEL_IN : -TRAVEL_IN }] }),
+    en: (direction === 1 ? FadeInDown : FadeInUp).duration(DURATION_IN).delay(DELAY_IN).withInitialValues({ transform: [{ translateY: direction === 1 ? TRAVEL_IN : -TRAVEL_IN }] }),
     ex: (direction === 1 ? FadeOutUp : FadeOutDown).duration(DURATION_OUT),
   }),
 };
