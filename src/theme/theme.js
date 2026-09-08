@@ -231,7 +231,8 @@ export const beigeTheme = createTheme({
   name: 'beige',
   design: 'v2',
   text: {
-    _1: '#393530',
+    // prueba: _1 y _2 iguales, para dejar la pantalla en dos tonos
+    _1: '#6B6358',
     _2: '#6B6358',
     _3: '#9A9183',
     _4: 'rgba(57, 53, 48, 0.22)',
