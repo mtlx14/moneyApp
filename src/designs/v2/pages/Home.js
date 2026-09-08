@@ -246,7 +246,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
+              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
             </View>
             {/* Lo único que crece es esta lista, así que es lo único que scrollea:
@@ -277,7 +277,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
             </View>
           </View>
