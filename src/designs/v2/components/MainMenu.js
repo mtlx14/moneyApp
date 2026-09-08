@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../../../theme/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NAV_WIDTH } from '../layout.js';
+import { DEBUG_HIT_AREAS, NAV_WIDTH } from '../layout.js';
 
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
@@ -33,6 +33,7 @@ export default function MainMenu({ page, navigate }) {
         bottom: 0,
         left: 0,
         width: NAV_WIDTH,
+        backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 0, 255, 0.12)' : undefined,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: insets.bottom + 16,
@@ -44,10 +45,23 @@ export default function MainMenu({ page, navigate }) {
         const length = Math.ceil(btn.label.length * CHAR_WIDTH) + LABEL_PADDING;
 
         return (
-          <Pressable key={btn.name} onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)} style={{ width: NAV_WIDTH, height: length, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable
+            key={btn.name}
+            onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)}
+            style={{
+              width: NAV_WIDTH,
+              height: length,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: DEBUG_HIT_AREAS ? 'rgba(255, 0, 0, 0.25)' : undefined,
+              borderWidth: DEBUG_HIT_AREAS ? 1 : 0,
+              borderColor: 'rgba(255, 0, 0, 0.8)',
+            }}
+          >
             <Text
               style={{
                 width: LABEL_BOX,
+                backgroundColor: DEBUG_HIT_AREAS ? 'rgba(0, 255, 0, 0.25)' : undefined,
                 textAlign: 'center',
                 transform: [{ rotate: '-90deg' }],
                 fontSize: FONT_SIZE,
