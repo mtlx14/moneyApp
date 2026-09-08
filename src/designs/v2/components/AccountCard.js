@@ -106,7 +106,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
           >
             <Text
               style={{
-                color: theme.text._2,
+                color: theme.text.onCard,
                 fontWeight: 400,
                 fontSize: fS.accountCardText,
                 textAlign: 'center',
@@ -124,7 +124,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
                 height: windowHeight * 0.06,
                 borderRadius: 100,
                 textAlign: 'center',
-                color: theme.text._2,
+                color: theme.text.onCard,
                 fontSize: fS.accountCardNumber,
               }}
             ></TextInput>

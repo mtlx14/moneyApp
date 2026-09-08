@@ -39,6 +39,8 @@ export const baseTheme = {
     strong: 'rgba(255, 255, 255, 1)',
     // texto sobre un fondo sólido de color
     onFill: 'rgb(255, 255, 255)',
+    // texto encima de la imagen de la tarjeta
+    onCard: 'rgba(255, 255, 255, 0.92)',
   },
   bg: {
     primary: 'rgb(35, 35, 35)',
@@ -251,6 +253,7 @@ export const beigeTheme = createTheme({
     red: 'rgb(208, 66, 66)',
     strong: '#393530',
     onFill: 'rgb(255, 255, 255)',
+    onCard: 'rgba(255, 255, 255, 0.92)',
   },
   bg: {
     primary: '#F3EFE6',
