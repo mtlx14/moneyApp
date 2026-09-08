@@ -6,8 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const NAV_WIDTH = 34;
 const FONT_SIZE = 11;
 const LETTER_SPACING = 2;
-// ancho aproximado de cada carácter, para reservar el alto del texto rotado
-const CHAR_WIDTH = FONT_SIZE * 0.62 + LETTER_SPACING;
+// Ancho reservado para el texto rotado. Va holgado a propósito: el Text tiene
+// ancho fijo, así que quedarse corto lo corta con elipsis. Sobrar no se ve.
+const CHAR_WIDTH = FONT_SIZE * 0.9 + LETTER_SPACING;
+const LABEL_PADDING = 24;
 
 // v2: barra vertical fija a la izquierda, con el texto girado de abajo hacia
 // arriba. Etiquetas cortas: rotadas, una larga se come la pantalla.
@@ -37,7 +39,7 @@ export default function MainMenu({ page, navigate }) {
     >
       {buttons.map((btn) => {
         const active = page === btn.name;
-        const length = Math.ceil(btn.label.length * CHAR_WIDTH) + 8;
+        const length = Math.ceil(btn.label.length * CHAR_WIDTH) + LABEL_PADDING;
 
         return (
           <Pressable key={btn.name} onPress={() => navigate(btn.name, btn.name === 'home' ? 0 : 1)} style={{ width: NAV_WIDTH, height: length, alignItems: 'center', justifyContent: 'center' }}>
