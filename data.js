@@ -4,14 +4,14 @@ import { beigeTheme, blueGreenTheme, blueTheme, darkTheme, graphiteBluePurpleThe
 // Firestore: si no coincide, no pasa nada y se usa la tarjeta por defecto.
 export const accountCardByName = {
   m_account: {
-    Bencina: require('./assets/images/card_black-blue.png'),
+    Bencina: require('./assets/images/card_blue.png'),
     Efectivo: require('./assets/images/card_green.png'),
     'Cuenta corriente': require('./assets/images/card_purple-green.png'),
   },
 };
 
 export const subAccountCard = {
-  Bencina: require('./assets/images/card_black-blue.png'),
+  Bencina: require('./assets/images/card_blue.png'),
   Cabify: require('./assets/images/card_purple-green.png'),
   Didi: require('./assets/images/card_orange.png'),
   Uber: require('./assets/images/card_black.png'),
