@@ -67,8 +67,8 @@ export default function UnmarkButton({ billToUpdate }) {
   };
 
   return (
-    <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.red, borderRadius: 50, alignSelf: 'flex-start', paddingHorizontal: windowWidth * 0.04, height: windowWidth * 0.09, justifyContent: 'center' }}>
-      <Text style={{ color: theme.text._2, fontWeight: 500, fontSize: fS.unmarkBtn }}>Desmarcar todo</Text>
+    <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.danger, borderRadius: 50, alignSelf: 'flex-start', paddingHorizontal: windowWidth * 0.04, height: windowWidth * 0.09, justifyContent: 'center' }}>
+      <Text style={{ color: theme.text.onFill, fontWeight: 500, fontSize: fS.unmarkBtn }}>Desmarcar todo</Text>
     </Pressable>
   );
 }

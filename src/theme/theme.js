@@ -37,6 +37,8 @@ export const baseTheme = {
     green: 'rgb(70, 228, 70)',
     red: 'rgb(245, 89, 89)',
     strong: 'rgba(255, 255, 255, 1)',
+    // texto sobre un fondo sólido de color
+    onFill: 'rgb(255, 255, 255)',
   },
   bg: {
     primary: 'rgb(35, 35, 35)',
@@ -50,6 +52,8 @@ export const baseTheme = {
     green_03: 'rgba(73, 172, 70, .3)',
     // verde del botón marcado: el del texto no funciona como fondo
     check: 'rgba(73, 172, 70, .6)',
+    // rojo sólido para botones destructivos, con texto encima
+    danger: 'rgba(208, 36, 73, 0.5)',
     yellow: 'rgba(247, 185, 70, .6)',
     keyboard: 'rgba(255, 255, 255, 0.1)',
     keyboard_key: 'rgba(1,1,1,0.1)',
@@ -246,6 +250,7 @@ export const beigeTheme = createTheme({
     green: 'rgb(14, 184, 59)',
     red: 'rgb(208, 66, 66)',
     strong: '#393530',
+    onFill: 'rgb(255, 255, 255)',
   },
   bg: {
     primary: '#F3EFE6',
@@ -258,6 +263,7 @@ export const beigeTheme = createTheme({
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',
     check: 'rgb(77, 189, 107)',
+    danger: 'rgb(203, 62, 62)',
     // pareja del bg.check: mismo peso, sólido, para que los dos estados del
     // botón se lean como del mismo juego
     yellow: 'rgb(238, 185, 39)',
