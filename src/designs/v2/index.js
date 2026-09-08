@@ -6,7 +6,7 @@ import Matias_accounts from './pages/Matias_accounts.js';
 import Aylin_accounts from './pages/Aylin_accounts.js';
 import MainMenu from './components/MainMenu.js';
 import GradientBackground from './components/GradientBackground.js';
-import PageSlider from './components/PageSlider.js';
+import PageScroller from './components/PageScroller.js';
 
 export default {
   name: 'v2',
@@ -20,8 +20,9 @@ export default {
   },
   MainMenu,
   GradientBackground,
-  // El riel es vertical, así que las páginas se desplazan como una tira: en vez
-  // de una animación de entrada y otra de salida, PageSlider mueve las dos con
-  // un mismo valor.
-  PageSlider,
+  // El riel es vertical, así que las páginas se apilan y navegar es scrollear.
+  // El orden define la posición de cada una: las cuatro del riel primero, en el
+  // mismo orden en que aparecen ahí.
+  PageScroller,
+  pageOrder: ['home', 'monthly_summary', 'matias_accounts', 'aylin_accounts', 'subscriptions', 'fixed_expenses'],
 };
