@@ -6,7 +6,7 @@ import Matias_accounts from './pages/Matias_accounts.js';
 import Aylin_accounts from './pages/Aylin_accounts.js';
 import MainMenu from './components/MainMenu.js';
 import GradientBackground from './components/GradientBackground.js';
-import { enterFrom, exitTo } from './pageAnimations.js';
+import { enterFromAbove, enterFromBelow, exitDown, exitUp } from './pageAnimations.js';
 
 export default {
   name: 'v2',
@@ -23,7 +23,7 @@ export default {
   // El menú es una barra vertical, así que la página acompaña el movimiento:
   // direction 1 = el destino está más abajo en el riel, entra desde abajo.
   pageAnimations: (direction) => ({
-    en: enterFrom(direction === 1 ? 1 : -1),
-    ex: exitTo(direction === 1 ? -1 : 1),
+    en: direction === 1 ? enterFromBelow : enterFromAbove,
+    ex: direction === 1 ? exitUp : exitDown,
   }),
 };
