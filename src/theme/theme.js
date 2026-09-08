@@ -241,7 +241,7 @@ export const beigeTheme = createTheme({
     _2: '#6B6358',
     _3: '#9A9183',
     _4: 'rgba(57, 53, 48, 0.22)',
-    green: 'rgb(101, 156, 109)',
+    green: 'rgb(45, 216, 129)',
     red: 'rgb(176, 82, 72)',
     strong: '#393530',
   },
