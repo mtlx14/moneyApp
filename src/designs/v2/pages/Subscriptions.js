@@ -30,7 +30,7 @@ export default function Subscriptions({ setShowMenu, navigate, nAnimations }) {
   const [activeField, setActiveField] = useState(null);
 
   return (
-    <Animated.View style={{ flex: 1 }} entering={nAnimations.en} exiting={nAnimations.ex}>
+    <Animated.View style={{ width: windowWidth, height: '100%' }} entering={nAnimations.en} exiting={nAnimations.ex}>
       <GoBackScroll page='monthly_summary' navigate={navigate}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]}>
           {activeField ? (
