@@ -183,8 +183,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                   exiting={FadeOut.duration(300)}
                 >
                   {index > 0 && <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>}
-                  <View style={{ justifyContent: 'center', alignItems: 'center', height: windowWidth * 0.12, backgroundColor: theme.bg.tr_1, justifyContent: 'flex-start', flexDirection: 'row' }}>
-                    <View style={{ backgroundColor: theme.bg.tr_1, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
+                  <View style={{ justifyContent: 'center', alignItems: 'center', height: windowWidth * 0.12, backgroundColor: theme.bg.tr_05, justifyContent: 'flex-start', flexDirection: 'row' }}>
+                    <View style={{ backgroundColor: theme.bg.tr_05, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
                       <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>{`${fields.label[index]}:`}</Text>
                     </View>
                     {field === 'type' ? (
@@ -279,8 +279,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                   {field === 'amount' && canHaveNextAmount && (
                     <Animated.View pointerEvents={hasNextAmount ? 'auto' : 'none'} style={nextAmountRowStyle}>
                       <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>
-                      <Animated.View style={[{ alignItems: 'center', height: windowWidth * 0.12, backgroundColor: theme.bg.tr_1, justifyContent: 'flex-start', flexDirection: 'row' }, nextAmountContentStyle]}>
-                        <View style={{ backgroundColor: theme.bg.tr_1, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
+                      <Animated.View style={[{ alignItems: 'center', height: windowWidth * 0.12, backgroundColor: theme.bg.tr_05, justifyContent: 'flex-start', flexDirection: 'row' }, nextAmountContentStyle]}>
+                        <View style={{ backgroundColor: theme.bg.tr_05, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
                           <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>Mes 2:</Text>
                         </View>
                         <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={() => openKeyboard('nextAmount')}>
