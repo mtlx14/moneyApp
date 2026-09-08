@@ -7,9 +7,9 @@ import { useData } from '../../../../context';
 import { subAccountCard } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
 
-// La tarjeta de las cuentas con subcuentas es blanca: sobre el papel del tema
-// claro necesita texto oscuro, no el casi blanco de las tarjetas oscuras.
-const LIGHT_CARD = require('../../../../assets/images/card_transparent.png');
+// Versión gris de la tarjeta sin marca, para que se despegue del papel: la
+// blanca original desaparecía sobre el fondo claro. Lleva texto oscuro.
+const LIGHT_CARD = require('../../../../assets/images/card_light.png');
 
 export default function AccountCard({ amountValue, account, setLocalInfoMAccount = null }) {
   const theme = useTheme();
@@ -95,7 +95,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
     <>
       <Animated.View intensity={8} style={[{ position: 'absolute', width: windowWidth, height: windowHeight * 0.6, top: 0, left: 0, justifyContent: 'center', alignItems: 'center' }, animatedStyle]}>
         <View style={{ width: windowWidth * 0.9, aspectRatio: 1 / 1 }}>
-          <Image source={localInfo.imageToRender} style={{ width: windowWidth * 0.9, aspectRatio: 1 / 1 }} transition={400}></Image>
+          <Image source={localInfo.imageToRender} contentFit='contain' style={{ width: windowWidth * 0.9, aspectRatio: 1 / 1 }} transition={400}></Image>
           <Animated.View
             style={[
               {
