@@ -99,7 +99,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
           </Animated.View>
 
-          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingLeft: CONTENT_LEFT_HOME, paddingRight: windowWidth * 0.2 - CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <Pressable onPress={() => navigate('aylin_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('aylin') && (
@@ -210,7 +210,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
-          <View style={{ width: windowWidth, height: windowHeight * 0.75, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.75, position: 'relative', paddingLeft: CONTENT_LEFT_HOME, paddingRight: windowWidth * 0.2 - CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
