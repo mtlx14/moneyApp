@@ -16,7 +16,7 @@ const TRAVEL_IN = 100;
 const DURATION_OUT = 100;
 const DURATION_IN = 100;
 // cuánto espera la entrada desde que arranca la salida
-const DELAY_IN = 100;
+const DELAY_IN = 150;
 
 export default {
   name: 'v2',
