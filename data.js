@@ -1,5 +1,14 @@
 import { beigeTheme, blueGreenTheme, blueTheme, darkTheme, graphiteBluePurpleTheme, pinkBlueTheme, purple2Theme, purple3Theme, purpleTheme, redTheme } from './src/theme/theme';
 
+// Tarjeta por nombre de cuenta. Las claves son el `name` que tiene la cuenta en
+// Firestore: si no coincide, no pasa nada y se usa la tarjeta por defecto.
+export const accountCardByName = {
+  m_account: {
+    Efectivo: require('./assets/images/card_green.png'),
+    'Cuenta corriente': require('./assets/images/card_purple-green.png'),
+  },
+};
+
 export const subAccountCard = {
   Cabify: require('./assets/images/card_purple-green.png'),
   Didi: require('./assets/images/card_orange.png'),

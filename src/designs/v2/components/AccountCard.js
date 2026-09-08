@@ -4,7 +4,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, withSeq
 import { Image } from 'expo-image';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
-import { subAccountCard } from '../../../../data.js';
+import { accountCardByName, subAccountCard } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
 
 // Versión gris de la tarjeta sin marca, para que se despegue del papel: la
@@ -22,7 +22,9 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
   const [localInfo, setLocalInfo] = useState({
     accountNameToRender: account.id === 'account_aylin' ? 'Saldo de Aylin' : account.id === 'account_matias' ? 'Saldo de Matías' : account.type === 'sub_account' ? `${accounts.find((a) => a.id === account.forAccount).name} - ${account.name}` : account.hasSubAccount ? 'Agregar cuenta' : account.name,
     imageToRender:
-      account.id === 'account_aylin'
+      accountCardByName[account.type]?.[account.name]
+        ? accountCardByName[account.type][account.name]
+        : account.id === 'account_aylin'
         ? require('../../../../assets/images/card_pink-purple.png')
         : account.id === 'account_matias'
           ? require('../../../../assets/images/card_black-blue.png')
