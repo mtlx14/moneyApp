@@ -11,11 +11,19 @@ import { fS } from '../../../theme/theme.js';
 // blanca original desaparecía sobre el fondo claro. Lleva texto oscuro.
 const LIGHT_CARD = require('../../../../assets/images/card_light.png');
 
-export default function AccountCard({ amountValue, account, setLocalInfoMAccount = null }) {
+// Con la lista de movimientos debajo, la tarjeta se achica y sube: el texto y el
+// monto escalan con ella para que la proporción contra el ancho de la tarjeta
+// sea la misma en los dos tamaños.
+const FULL_CARD_RATIO = 0.9;
+const COMPACT_CARD_RATIO = 0.62;
+
+export default function AccountCard({ amountValue, account, setLocalInfoMAccount = null, compact = false }) {
   const theme = useTheme();
   const { accounts } = useData();
   const windowHeight = Dimensions.get('window').height;
   const windowWidth = Dimensions.get('window').width;
+  const cardWidth = windowWidth * (compact ? COMPACT_CARD_RATIO : FULL_CARD_RATIO);
+  const textScale = cardWidth / (windowWidth * FULL_CARD_RATIO);
   const rotation = useSharedValue(100);
   const textOpacity = useSharedValue(0);
 
@@ -95,17 +103,17 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
 
   return (
     <>
-      <Animated.View intensity={8} style={[{ position: 'absolute', width: windowWidth, height: windowHeight * 0.6, top: 0, left: 0, justifyContent: 'center', alignItems: 'center' }, animatedStyle]}>
-        <View style={{ width: windowWidth * 0.9, aspectRatio: 1 / 1 }}>
-          <Image source={localInfo.imageToRender} contentFit='contain' style={{ width: windowWidth * 0.9, aspectRatio: 1 / 1 }} transition={400}></Image>
+      <Animated.View intensity={8} style={[{ position: 'absolute', width: windowWidth, height: windowHeight * (compact ? 0.42 : 0.6), top: 0, left: 0, justifyContent: 'center', alignItems: 'center' }, animatedStyle]}>
+        <View style={{ width: cardWidth, aspectRatio: 1 / 1 }}>
+          <Image source={localInfo.imageToRender} contentFit='contain' style={{ width: cardWidth, aspectRatio: 1 / 1 }} transition={400}></Image>
           <Animated.View
             style={[
               {
                 position: 'absolute',
                 // top: windowHeight * 0.205,
                 // left: -windowWidth * 0.05,
-                width: windowWidth * 0.9,
-                height: windowWidth * 0.9,
+                width: cardWidth,
+                height: cardWidth,
                 justifyContent: 'center',
                 alignItems: 'center',
               },
@@ -116,7 +124,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
               style={{
                 color: cardTextColor,
                 fontWeight: 400,
-                fontSize: fS.accountCardText,
+                fontSize: fS.accountCardText * textScale,
                 textAlign: 'center',
               }}
             >
@@ -129,11 +137,11 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
               value={`${account?.isNegative ? '-' : ''}$${Number(amountValue).toLocaleString('es-CL')}`}
               style={{
                 pointerEvents: 'none',
-                height: windowHeight * 0.06,
+                height: windowHeight * 0.06 * textScale,
                 borderRadius: 100,
                 textAlign: 'center',
                 color: cardTextColor,
-                fontSize: fS.accountCardNumber,
+                fontSize: fS.accountCardNumber * textScale,
               }}
             ></TextInput>
           </Animated.View>

@@ -177,7 +177,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
             </View>
           )}
           {/* modals ------------------------------------ */}
-          {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} />}
+          {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} compact={showHistory} />}
           {showHistory && !localInfo.showModalTransferAccount && <AccountHistory account={localInfo.activeField} onClose={closeField} />}
           {localInfo.showModalTransferAccount && (
             <ModalTransferAccount

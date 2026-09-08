@@ -28,7 +28,7 @@ export default function AccountHistory({ account, onClose }) {
   const rows = useMemo(() => [...transactions.filter((t) => t.accountId === account.id)].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0)), [transactions, account.id]);
 
   return (
-    <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: 'absolute', left: 0, top: windowHeight * 0.55, width: windowWidth, height: windowHeight * 0.45, paddingHorizontal: windowWidth * 0.05 }}>
+    <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: 'absolute', left: 0, top: windowHeight * 0.4, width: windowWidth, height: windowHeight * 0.6, paddingHorizontal: windowWidth * 0.05 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
         <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle }}>Movimientos</Text>
         <Pressable onPress={onClose} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 15, height: windowWidth * 0.09, paddingHorizontal: 20, justifyContent: 'center', alignItems: 'center' }}>
