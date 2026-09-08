@@ -10,3 +10,6 @@ export const CONTENT_LEFT = 37;
 
 // Inicio va un poco más adentro que el resto.
 export const CONTENT_LEFT_HOME = 47;
+
+// Pinta los contenedores de la lista del mes siguiente. Solo para depurar.
+export const DEBUG_LAYOUT = true;
