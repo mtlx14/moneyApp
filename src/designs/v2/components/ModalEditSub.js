@@ -151,7 +151,7 @@ export default function ModalEditSub({ bill = {}, onCancel, setShowMenu }) {
               toque, se lo lleva el escudo de atrás y solo cierra el teclado */}
           <Animated.View layout={LinearTransition} pointerEvents={keyboardOpen ? 'none' : 'auto'} style={{ marginRight: windowWidth * 0.2, marginTop: 10, flexDirection: 'row', justifyContent: 'flex-end', width: '100%', gap: 8 }}>
             <Animated.View layout={LinearTransition}>
-              <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.red, borderRadius: 100, height: windowWidth * 0.08, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
+              <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.danger, borderRadius: 100, height: windowWidth * 0.08, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
                 <Image style={{ height: windowWidth * 0.055, aspectRatio: 1 / 1, opacity: 0.9 }} source={require('../../../../assets/icons/trash.png')}></Image>
               </Pressable>
             </Animated.View>
@@ -162,7 +162,7 @@ export default function ModalEditSub({ bill = {}, onCancel, setShowMenu }) {
             </Animated.View>
             {JSON.stringify(currentBill) !== JSON.stringify(bills.find((b) => b.id === currentBill.id)) && fields.every((field) => field in currentBill) && (
               <Animated.View layout={LinearTransition} entering={SlideInRight} exiting={SlideOutRight}>
-                <Pressable onPress={() => (updateBill({ bill: { ...currentBill, type: 'sub' } }), onCancel())} style={{ backgroundColor: theme.bg.green, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}>
+                <Pressable onPress={() => (updateBill({ bill: { ...currentBill, type: 'sub' } }), onCancel())} style={{ backgroundColor: theme.bg.check, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingHorizontal: 20 }}>Guardar</Text>
                 </Pressable>
               </Animated.View>

@@ -100,7 +100,7 @@ export function Keyboard({ initialValue = '0', onChange, onConfirm, onCancel = n
           width: windowWidth * 0.25,
           top: -windowWidth * 0.09 - 5,
           right: 5,
-          backgroundColor: showCancel ? theme.bg.red : theme.bg.blue,
+          backgroundColor: showCancel ? theme.bg.danger : theme.bg.blue,
           height: windowWidth * 0.09,
           borderRadius: 15,
           justifyContent: 'center',
@@ -109,11 +109,11 @@ export function Keyboard({ initialValue = '0', onChange, onConfirm, onCancel = n
         }}
       >
         {showCancel ? (
-          <Animated.Text key={'cancel'} entering={FadeInDown.duration(100)} exiting={FadeOutUp.duration(100)} style={{ color: theme.text._1, fontWeight: 400, fontSize: fS.keyboardBtn }}>
+          <Animated.Text key={'cancel'} entering={FadeInDown.duration(100)} exiting={FadeOutUp.duration(100)} style={{ color: theme.text.onFill, fontWeight: 400, fontSize: fS.keyboardBtn }}>
             Cancelar
           </Animated.Text>
         ) : (
-          <Animated.Text key={'confirm'} entering={FadeInDown.duration(100)} exiting={FadeOutUp.duration(100)} style={{ color: theme.text._1, fontWeight: 400, fontSize: fS.keyboardBtn }}>
+          <Animated.Text key={'confirm'} entering={FadeInDown.duration(100)} exiting={FadeOutUp.duration(100)} style={{ color: theme.text.onFill, fontWeight: 400, fontSize: fS.keyboardBtn }}>
             Confirmar
           </Animated.Text>
         )}
@@ -128,7 +128,7 @@ export function Keyboard({ initialValue = '0', onChange, onConfirm, onCancel = n
               width: windowWidth * 0.12,
               top: -windowWidth * 0.09 - 5,
               right: 10 + windowWidth * 0.25,
-              backgroundColor: theme.bg.red,
+              backgroundColor: theme.bg.danger,
               height: windowWidth * 0.09,
               borderRadius: 15,
               justifyContent: 'center',

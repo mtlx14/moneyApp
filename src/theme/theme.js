@@ -261,7 +261,7 @@ export const beigeTheme = createTheme({
     primary_0: 'rgba(243, 239, 230, 0)',
     // líneas de la cuadrícula del fondo
     grid: 'rgba(57, 53, 48, 0.015)',
-    blue: 'rgba(74, 127, 193, 0.7)',
+    blue: 'rgb(74, 127, 193)',
     red: 'rgba(176, 82, 72, 0.5)',
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',

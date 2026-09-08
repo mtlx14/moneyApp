@@ -315,7 +315,7 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
           <Animated.View layout={LinearTransition} pointerEvents={keyboardOpen ? 'none' : 'auto'} style={{ marginRight: windowWidth * 0.2, marginTop: 10, flexDirection: 'row', justifyContent: 'flex-end', width: '100%', gap: 8 }}>
             {/* botón eliminar -------------------------- */}
             <Animated.View layout={LinearTransition}>
-              <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.red, borderRadius: 100, height: windowWidth * 0.08, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
+              <Pressable onPress={() => confirmationAction()} style={{ backgroundColor: theme.bg.danger, borderRadius: 100, height: windowWidth * 0.08, width: windowWidth * 0.1, justifyContent: 'center', alignItems: 'center' }}>
                 <Image style={{ height: windowWidth * 0.055, aspectRatio: 1 / 1, opacity: 0.9 }} source={require('../../../../assets/icons/trash.png')}></Image>
               </Pressable>
             </Animated.View>
@@ -377,7 +377,7 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                       }),
                       onCancel()
                     )}
-                    style={{ backgroundColor: theme.bg.green, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}
+                    style={{ backgroundColor: theme.bg.check, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}
                   >
                     <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingHorizontal: 20 }}>Guardar</Text>
                   </Pressable>
