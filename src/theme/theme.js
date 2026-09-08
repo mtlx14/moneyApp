@@ -48,6 +48,8 @@ export const baseTheme = {
     red: 'rgba(208, 36, 73, 0.5)',
     green: 'rgba(73, 172, 70, .6)',
     green_03: 'rgba(73, 172, 70, .3)',
+    // verde del botón marcado: el del texto no funciona como fondo
+    check: 'rgba(73, 172, 70, .6)',
     yellow: 'rgba(247, 185, 70, .6)',
     keyboard: 'rgba(255, 255, 255, 0.1)',
     keyboard_key: 'rgba(1,1,1,0.1)',
@@ -255,6 +257,7 @@ export const beigeTheme = createTheme({
     red: 'rgba(176, 82, 72, 0.5)',
     green: 'rgba(74, 122, 84, 0.55)',
     green_03: 'rgba(74, 122, 84, 0.25)',
+    check: 'rgb(12, 160, 52)',
     yellow: 'rgba(206, 158, 74, 0.6)',
     keyboard: 'rgba(57, 53, 48, 0.06)',
     keyboard_key: 'rgba(255, 255, 255, 0.5)',
