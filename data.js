@@ -10,6 +10,7 @@ export const accountCardByName = {
 };
 
 export const subAccountCard = {
+  Bencina: require('./assets/images/card_black-blue.png'),
   Cabify: require('./assets/images/card_purple-green.png'),
   Didi: require('./assets/images/card_orange.png'),
   Uber: require('./assets/images/card_black.png'),
