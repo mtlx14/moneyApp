@@ -41,13 +41,13 @@ export default function AnimatedSwapTextS({ value, type = 'normal' }) {
     <>
       {!showNew ? (
         <Animated.View key={'one'} entering={swapIn} exiting={swapOut} style={{ flexDirection: 'row', gap: 1, alignItems: 'baseline' }}>
-          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Suf }}>{type === 'debt' ? '- $' : type === 'income' ? '+ $' : '$'}</Text>
-          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Number }}>{Number(valuesRef.current.one).toLocaleString('es-CL')}</Text>
+          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._1, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Suf }}>{type === 'debt' ? '- $' : type === 'income' ? '+ $' : '$'}</Text>
+          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._1, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Number }}>{Number(valuesRef.current.one).toLocaleString('es-CL')}</Text>
         </Animated.View>
       ) : (
         <Animated.View key={'two'} entering={swapIn} exiting={swapOut} style={{ flexDirection: 'row', gap: 1, alignItems: 'baseline' }}>
-          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Suf }}>{type === 'debt' ? '- $' : type === 'income' ? '+ $' : '$'}</Text>
-          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Number }}>{Number(valuesRef.current.two).toLocaleString('es-CL')}</Text>
+          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._1, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Suf }}>{type === 'debt' ? '- $' : type === 'income' ? '+ $' : '$'}</Text>
+          <Text style={{ color: type === 'debt' ? theme.text.red : type === 'green' ? theme.text.green : type === 'income' ? theme.text.green : theme.text._1, fontWeight: theme.fw.home_acc_text, fontSize: fS.animatedSwapTextS_Number }}>{Number(valuesRef.current.two).toLocaleString('es-CL')}</Text>
         </Animated.View>
       )}
     </>
