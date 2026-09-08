@@ -7,6 +7,10 @@ import { useData } from '../../../../context';
 import { subAccountCard } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
 
+// La tarjeta de las cuentas con subcuentas es blanca: sobre el papel del tema
+// claro necesita texto oscuro, no el casi blanco de las tarjetas oscuras.
+const LIGHT_CARD = require('../../../../assets/images/card_transparent.png');
+
 export default function AccountCard({ amountValue, account, setLocalInfoMAccount = null }) {
   const theme = useTheme();
   const { accounts } = useData();
@@ -25,7 +29,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
           : account.id === 'account_aylin_salary' || account.type === 'a_account'
             ? require('../../../../assets/images/card_pink-purple.png')
             : account.hasSubAccount
-              ? require('../../../../assets/images/card_transparent.png')
+              ? LIGHT_CARD
               : require('../../../../assets/images/card_black-blue.png'),
   });
 
@@ -43,6 +47,8 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
       }),
     );
   }, []);
+
+  const cardTextColor = localInfo.imageToRender === LIGHT_CARD ? theme.text.strong : theme.text.onCard;
 
   const opacityAnimatedStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
@@ -106,7 +112,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
           >
             <Text
               style={{
-                color: theme.text.onCard,
+                color: cardTextColor,
                 fontWeight: 400,
                 fontSize: fS.accountCardText,
                 textAlign: 'center',
@@ -124,7 +130,7 @@ export default function AccountCard({ amountValue, account, setLocalInfoMAccount
                 height: windowHeight * 0.06,
                 borderRadius: 100,
                 textAlign: 'center',
-                color: theme.text.onCard,
+                color: cardTextColor,
                 fontSize: fS.accountCardNumber,
               }}
             ></TextInput>
