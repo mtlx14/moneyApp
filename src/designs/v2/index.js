@@ -17,11 +17,12 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 //
 // El recorrido de entrada se sube con withInitialValues; el de salida tiene sus
 // 25px escritos como destino en el preset y no se puede mover.
-const TRAVEL_IN = 80;
-const DURATION_OUT = 110;
-// La entrada pisa el final de la salida: sin solape queda un frame vacío.
-const DELAY_IN = 60;
-const SPRING = { damping: 20, stiffness: 260, mass: 0.5 };
+const TRAVEL_IN = 60;
+const DURATION_OUT = 90;
+// Sin espera: las dos corren juntas. Encadenarlas es lo que se siente como un
+// frenazo en el medio.
+const DELAY_IN = 0;
+const SPRING = { damping: 18, stiffness: 400, mass: 0.35 };
 
 export default {
   name: 'v2',
