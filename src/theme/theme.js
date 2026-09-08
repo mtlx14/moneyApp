@@ -36,7 +36,6 @@ export const baseTheme = {
     _4: 'rgba(255, 255, 255, 0.2)',
     green: 'rgb(70, 228, 70)',
     red: 'rgb(245, 89, 89)',
-    onCard: 'rgba(255, 255, 255, 1)',
   },
   bg: {
     primary: 'rgb(35, 35, 35)',
@@ -60,6 +59,7 @@ export const baseTheme = {
     subAccount: 'rgba(1, 1, 1, 0.05)',
     card: 'rgba(255, 255, 255, 0.05)',
     divider: 'rgba(255, 255, 255, 0.2)',
+    grid: 'transparent',
   },
   fw: {
     home_acc_text: 300,
@@ -225,53 +225,45 @@ export const blueTheme = createTheme({
 // ---------------------------------------------------------------------------
 // Rediseño (v2)
 // ---------------------------------------------------------------------------
+// Paleta tomada de songListApp: papel cálido + tinta gris carbón (nunca negro
+// puro) + un solo acento azul.
 export const beigeTheme = createTheme({
   name: 'beige',
   design: 'v2',
   text: {
-    _1: '#A09A95',
-    _2: '#A09A95',
-    _3: '#A09A95',
-    _4: '#A09A95',
-    green: 'rgb(70, 130, 74)',
-    red: 'rgb(184, 74, 66)',
-    onCard: '#685E5E',
+    _1: '#393530',
+    _2: '#6B6358',
+    _3: '#9A9183',
+    _4: 'rgba(57, 53, 48, 0.22)',
+    green: 'rgb(74, 122, 84)',
+    red: 'rgb(176, 82, 72)',
   },
   bg: {
-    // fondo plano: primary y primary_2 iguales, sin gradiente
-    primary: '#F5F3ED',
-    primary_2: '#F5F3ED',
-    blue: 'rgba(110, 142, 168, 0.7)',
-    red: 'rgba(184, 74, 66, 0.5)',
-    green: 'rgba(70, 130, 74, 0.55)',
-    green_03: 'rgba(70, 130, 74, 0.25)',
-    yellow: 'rgba(212, 163, 74, 0.6)',
-    keyboard: 'rgba(59, 48, 38, 0.06)',
-    keyboard_key: 'rgba(255, 255, 255, 0.45)',
-    tr_05: 'rgba(59, 48, 38, 0.04)',
-    tr_1: 'rgba(59, 48, 38, 0.08)',
-    tr_2: 'rgba(59, 48, 38, 0.14)',
-    tr_3: 'rgba(59, 48, 38, 0.2)',
-    black_tr_1: 'rgba(59, 48, 38, 0.08)',
-    black_tr_2: 'rgba(59, 48, 38, 0.14)',
-    menuAccentColor: 'rgba(160, 120, 82, 0.55)',
-    account: 'rgba(255, 255, 255, 0.4)',
-    subAccount: 'rgba(59, 48, 38, 0.05)',
-    card: '#FFFEFC',
-    // el mismo tono de los textos, pero suave: en sólido la línea pesa demasiado
-    divider: 'rgba(160, 154, 149, 0.4)',
+    primary: '#F3EFE6',
+    primary_2: '#EBE4D6',
+    // líneas de la cuadrícula del fondo
+    grid: 'rgba(57, 53, 48, 0.015)',
+    blue: 'rgba(74, 127, 193, 0.7)',
+    red: 'rgba(176, 82, 72, 0.5)',
+    green: 'rgba(74, 122, 84, 0.55)',
+    green_03: 'rgba(74, 122, 84, 0.25)',
+    yellow: 'rgba(206, 158, 74, 0.6)',
+    keyboard: 'rgba(57, 53, 48, 0.06)',
+    keyboard_key: 'rgba(255, 255, 255, 0.5)',
+    tr_05: 'rgba(57, 53, 48, 0.04)',
+    tr_1: 'rgba(57, 53, 48, 0.08)',
+    tr_2: 'rgba(57, 53, 48, 0.14)',
+    tr_3: 'rgba(57, 53, 48, 0.2)',
+    black_tr_1: 'rgba(57, 53, 48, 0.08)',
+    black_tr_2: 'rgba(57, 53, 48, 0.14)',
+    menuAccentColor: '#4A7FC1',
+    account: 'rgba(255, 255, 255, 0.5)',
+    subAccount: 'rgba(57, 53, 48, 0.05)',
+    card: '#FAF7F0',
+    divider: 'rgba(57, 53, 48, 0.1)',
   },
   fw: {
     home_acc_text: 500,
     home_acc_text_2: 400,
-  },
-  shadow: {
-    card: {
-      shadowColor: 'rgb(59, 48, 38)',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 14,
-      elevation: 2,
-    },
   },
 });

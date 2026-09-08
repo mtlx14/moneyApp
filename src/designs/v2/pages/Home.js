@@ -17,8 +17,6 @@ import { fS } from '../../../theme/theme.js';
 import { amountForMonth, monthName } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
-import Rocket from '../components/icons/Rocket.js';
-import Flower from '../components/icons/Flower.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
   const insets = useSafeAreaInsets();
@@ -94,14 +92,12 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         style={{ width: windowWidth }}
       >
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07, marginTop: 56, marginBottom: 56 }, activeFieldOpacityAnimatedStyle]}>
-            <View style={[{ width: '100%', alignItems: 'center', backgroundColor: theme.bg.card, borderRadius: 18, paddingVertical: 44, paddingHorizontal: 24 }, theme.shadow.card]}>
-              <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} color={theme.text.onCard} />
-              <Text style={{ color: theme.text.onCard, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
-            </View>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+            <AnimatedSwapTextL value={balances.matiasTotal + balances.aylinTotal} />
+            <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo total</Text>
           </Animated.View>
 
-          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'flex-start' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.6, position: 'relative', paddingHorizontal: windowWidth * 0.1, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <Pressable onPress={() => navigate('aylin_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('aylin') && (
@@ -135,14 +131,11 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Flower size={fS.homeSubText} color={theme.text._2} />
-                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Aylin</Text>
-                </View>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Aylin'}</Text>
 
                 <AnimatedSwapTextS value={balances.aylinTotal} />
               </Pressable>
-              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.86, height: 1, marginLeft: -windowWidth * 0.03 }}></View>
+              <View style={{ backgroundColor: theme.text._4, width: windowWidth * 0.86, height: 1, marginLeft: -windowWidth * 0.03 }}></View>
 
               <Pressable onPress={() => navigate('matias_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('matias') && (
@@ -162,10 +155,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Rocket size={fS.homeSubText} color={theme.text._2} />
-                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Matías</Text>
-                </View>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Matías'}</Text>
 
                 <AnimatedSwapTextS value={balances.matiasTotal} />
               </Pressable>
@@ -188,7 +178,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                     ]}
                   ></Animated.View>
                 )}
-                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🧾' + '  ' + 'Cuentas por pagar'}</Text>
 
                 <AnimatedSwapTextS type={'debt'} value={`${balances.billsBalances.toPay || 0}`} />
               </Pressable>
@@ -207,14 +197,14 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
             </View>
           </View>
         </View>
         {/* NEXT MONTH */}
         <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: windowWidth * 0.07, marginTop: 56, marginBottom: 56 }, activeFieldOpacityAnimatedStyle]}>
+          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
@@ -226,23 +216,17 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 <AnimatedSwapTextS value={balances.totalAfterPayments || 0} />
               </View>
 
-              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
+              <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Flower size={fS.homeSubText} color={theme.text._2} />
-                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Sueldo Aylin</Text>
-                </View>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_aylin_salary')?.balance || 0} />
               </Pressable>
-              <View style={{ backgroundColor: theme.bg.divider, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
+              <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Rocket size={fS.homeSubText} color={theme.text._2} />
-                  <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>Sueldo Matías</Text>
-                </View>
+                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
 
                 <AnimatedSwapTextS type={'income'} value={accounts.find((a) => a.id === 'account_matias_salary')?.balance || 0} />
               </Pressable>
@@ -260,7 +244,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo Total'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
             </View>
             <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
@@ -287,7 +271,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.home_acc_text_2 }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
             </View>
           </View>
