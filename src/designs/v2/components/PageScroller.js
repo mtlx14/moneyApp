@@ -1,44 +1,42 @@
-import { Dimensions, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useEffect, useRef } from 'react';
+import { Dimensions, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const windowWidth = Dimensions.get('window').width;
 
-const DURATION = 380;
-// Curva de scroll: sale disparada y se va frenando hasta apoyar. Es la misma
-// forma que tiene el snap de una lista al soltarla.
-const EASING = Easing.bezier(0.22, 1, 0.36, 1);
-
-// Las páginas van apiladas dentro de una tira que se desplaza, como los dos
-// paneles del scroll horizontal de Inicio.
-//
-// Es importante que estén en el flujo, una debajo de otra, y no superpuestas:
-// las páginas no tienen fondo propio (el papel lo pinta GradientBackground), así
-// que si se solapan durante la transición se ven los dos contenidos encimados.
+// Todas las páginas montadas, una debajo de otra, y navegar es hacer scroll.
+// El desplazamiento lo hace el propio ScrollView, así que se siente igual que
+// el scroll horizontal de Inicio, que es de donde salió la idea.
 export default function PageScroller({ pages, order, page, pageProps }) {
   const insets = useSafeAreaInsets();
   const pageHeight = Dimensions.get('window').height - insets.top;
 
+  const scrollRef = useRef(null);
   const index = Math.max(0, order.indexOf(page));
 
-  const stripStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: withTiming(-index * pageHeight, { duration: DURATION, easing: EASING }) }],
-  }));
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: index * pageHeight, animated: true });
+  }, [index, pageHeight]);
 
   return (
-    <View style={{ width: windowWidth, height: pageHeight, overflow: 'hidden' }}>
-      <Animated.View style={[{ width: windowWidth }, stripStyle]}>
-        {order.map((name) => {
-          const Page = pages[name];
-          if (!Page) return null;
+    <ScrollView
+      ref={scrollRef}
+      // el gesto queda deshabilitado: adentro hay listas que scrollean vertical
+      // y dos scrolls verticales anidados se pelean. Se mueve solo por el riel.
+      scrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+      style={{ flex: 1 }}
+    >
+      {order.map((name) => {
+        const Page = pages[name];
+        if (!Page) return null;
 
-          return (
-            <View key={name} style={{ height: pageHeight, width: windowWidth, overflow: 'hidden' }}>
-              <Page {...pageProps} />
-            </View>
-          );
-        })}
-      </Animated.View>
-    </View>
+        return (
+          <View key={name} style={{ height: pageHeight, width: windowWidth, overflow: 'hidden' }}>
+            <Page {...pageProps} />
+          </View>
+        );
+      })}
+    </ScrollView>
   );
 }
