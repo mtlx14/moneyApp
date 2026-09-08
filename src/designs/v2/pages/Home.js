@@ -187,7 +187,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             </View>
             <View
               style={{
-                backgroundColor: theme.bg.tr_1,
+                backgroundColor: theme.bg.tr_05,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginTop: 0,
