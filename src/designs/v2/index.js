@@ -13,8 +13,8 @@ import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reani
 // Del recorrido solo se puede tocar el de entrada, con withInitialValues; el
 // de salida tiene su -25 escrito en la animación del preset.
 const TRAVEL_IN = 100;
-const DURATION_OUT = 150;
-const DURATION_IN = 150;
+const DURATION_OUT = 100;
+const DURATION_IN = 100;
 
 export default {
   name: 'v2',
