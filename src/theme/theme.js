@@ -276,7 +276,8 @@ export const beigeTheme = createTheme({
     black_tr_1: 'rgba(57, 53, 48, 0.08)',
     black_tr_2: 'rgba(57, 53, 48, 0.14)',
     menuAccentColor: '#4A7FC1',
-    account: 'rgba(255, 255, 255, 0.5)',
+    // mismo relleno que las filas de Gastos (tr_05)
+    account: 'rgba(57, 53, 48, 0.04)',
     subAccount: 'rgba(57, 53, 48, 0.05)',
     card: '#FAF7F0',
     divider: 'rgba(57, 53, 48, 0.1)',

@@ -88,7 +88,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
                     paddingHorizontal: windowWidth * 0.05,
                     paddingLeft: CONTENT_LEFT,
                     gap: 5,
-                    marginTop: windowHeight * 0.03,
+                    marginTop: windowHeight * 0.025,
                     paddingBottom: windowHeight * 0.015,
                   }}
                 >
