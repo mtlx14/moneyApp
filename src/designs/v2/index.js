@@ -32,6 +32,9 @@ export default {
   // direction 1 = el destino está más abajo en el riel, entra desde abajo.
   pageAnimations: (direction) => ({
     en: (direction === 1 ? FadeInDown : FadeInUp).duration(DURATION),
-    ex: (direction === 1 ? FadeOutUp : FadeOutDown).duration(DURATION),
+    // Sin animación de salida: mientras la página que se va sigue montada, sus
+    // hijos con animación propia corren la suya y quedan parpadeando encima de
+    // la nueva. Sin ella, el árbol entero se desmonta de una.
+    ex: undefined,
   }),
 };
