@@ -129,9 +129,11 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                               movimientos no aparece nada */}
                           {rideRows.length > 0 && (
                             <View style={{ backgroundColor: theme.bg.subAccount, borderRadius: 10, marginHorizontal: 10, marginBottom: 10 }}>
-                              {rideRows.map(({ id, category, total }, index) => {
+                              {rideRows.map(({ id, category, total, lastTx }, index) => {
                                 return (
-                                  <View key={id} style={{ height: windowWidth * 0.1, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15 }}>
+                                  // tocarla abre el movimiento más nuevo de esa app: cerrarlo
+                                  // deja la cuenta abierta con toda su lista
+                                  <Pressable onPress={() => setLocalInfo((prev) => ({ ...prev, activeField: account, activeFieldAmount: balances.byAccount[account.id] || 0, selectedTx: lastTx }))} key={id} style={{ height: windowWidth * 0.1, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15 }}>
                                     {index > 0 && <View style={{ width: '94%', marginLeft: '3%', height: 1, backgroundColor: theme.bg.tr_1 }}></View>}
                                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
                                       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -159,7 +161,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                                         <AnimatedSwapTextS value={total} />
                                       </Text>
                                     </View>
-                                  </View>
+                                  </Pressable>
                                 );
                               })}
                             </View>

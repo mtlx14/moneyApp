@@ -140,10 +140,16 @@ export function rideBreakdown({ account, transactions, categories }) {
   if (!isRideAccount(account)) return [];
 
   return rideCategories(categories)
-    .map(([id, category]) => ({
-      id,
-      category,
-      total: transactions.filter((tx) => tx.accountId === account.id && tx.category === id).reduce((sum, tx) => sum + signedAmountFor(tx, account.id), 0),
-    }))
+    .map(([id, category]) => {
+      const rows = transactions.filter((tx) => tx.accountId === account.id && tx.category === id);
+
+      return {
+        id,
+        category,
+        total: rows.reduce((sum, tx) => sum + signedAmountFor(tx, account.id), 0),
+        // el más nuevo, que es el que abre la fila al tocarla
+        lastTx: [...rows].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0))[0],
+      };
+    })
     .filter((row) => row.total !== 0);
 }

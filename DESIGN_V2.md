@@ -291,8 +291,9 @@ Qué cambia en esas cuentas:
 - **En el listado de cuentas se abren** mostrando cuánto puso cada app, en el
   lugar donde antes iban las sub-cuentas. Es la suma de los movimientos de esa
   categoría (`rideBreakdown`) y no se toca: los montos se anotan abriendo la
-  cuenta. Las categorías sin movimientos no salen, y una cuenta vacía no muestra
-  nada. La fila se ve como la vieja sub-cuenta: **emoji** y nombre, no la
+  cuenta, o tocando la fila: eso abre el movimiento más nuevo de esa app, y al
+  cerrarlo queda la cuenta abierta con toda su lista. Las categorías sin
+  movimientos no salen, y una cuenta vacía no muestra nada. La fila se ve como la vieja sub-cuenta: **emoji** y nombre, no la
   pastilla con el ícono. El emoji sale de `RIDE_CATEGORIES`, no del movimiento,
   así que cambiarle la cuenta a un movimiento no lo mueve. La pastilla con el
   ícono de la categoría sigue siendo lo que usa la lista de movimientos.
