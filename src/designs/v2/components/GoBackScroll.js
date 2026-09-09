@@ -1,11 +1,11 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Dimensions, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue, withTiming } from 'react-native-reanimated';
 
 // Recibe la animación de página y la aplica sobre su propio ScrollView: así el
 // nodo animado es el más externo de la página, como en Inicio. Envuelto en otra
 // vista, la entrada no recorría.
-export default function GoBackScroll({ page = 'home', children, navigate, entering, exiting, onBack }) {
+export default function GoBackScroll({ page = 'home', children, navigate, entering, exiting, onBack, innerStep = false }) {
   const windowWidth = Dimensions.get('window').width;
 
   const scrollRef = useRef(null);
@@ -16,6 +16,14 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
   onBackRef.current = onBack;
 
   const goBackOpacity = useSharedValue(1);
+  // Con algo abierto encima, el gesto no saca de la página sino que cierra eso,
+  // que ya tiene su propia animación: apagar además la página entera mientras se
+  // arrastra encimaba las dos cosas y se veía sucio. Va en un shared value
+  // porque el handler es un worklet y no vería el cambio de la prop
+  const hasInnerStep = useSharedValue(innerStep);
+  useEffect(() => {
+    hasInnerStep.value = innerStep;
+  }, [innerStep]);
   // el handler sigue corriendo después de cruzar el umbral: sin esto navigate se llama
   // en cada frame y el fade por frame le pisa el withTiming, que es lo que parpadea
   const hasNavigated = useSharedValue(false);
@@ -34,8 +42,7 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
     if (onBackRef.current?.()) {
       scrollRef.current?.scrollTo({ x: windowWidth * 0.5, animated: false });
       goBackOpacity.value = withTiming(1, { duration: 150 });
-      // recién cuando el scroll ya volvió a su lugar se vuelve a armar el gesto
-      setTimeout(() => (hasNavigated.value = false), 200);
+      // el gesto se rearma solo cuando el scroll vuelve a su lugar, en el handler
       return;
     }
 
@@ -46,10 +53,20 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
   };
 
   const handleGoBackScroll = useAnimatedScrollHandler((e) => {
-    if (hasNavigated.value) return;
-
     const { x } = e.contentOffset;
-    goBackOpacity.value = x / (windowWidth * 0.5);
+
+    if (hasNavigated.value) {
+      // Rearmado por posición y no por tiempo: arrastrando despacio, el dedo
+      // sigue abajo y el scroll sigue pasado del umbral, así que un rearme a los
+      // 200ms disparaba el gesto una segunda vez —y esa segunda, sin paso de
+      // adentro que deshacer, se iba al inicio
+      if (x > windowWidth * 0.45) hasNavigated.value = false;
+      return;
+    }
+
+    // la página se apaga mientras se arrastra solo si el gesto la va a dejar; con
+    // algo abierto encima la que anima es esa cosa al cerrarse
+    if (!hasInnerStep.value) goBackOpacity.value = x / (windowWidth * 0.5);
 
     if (x < windowWidth * 0.25) {
       hasNavigated.value = true;

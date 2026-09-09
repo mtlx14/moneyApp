@@ -136,7 +136,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
   };
 
   return (
-    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!localInfo.activeField}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {/* el listado vuelve recién cuando la cuenta terminó de irse: entrando
               encima, las dos cosas se veían juntas un momento y parecía un

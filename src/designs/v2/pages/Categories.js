@@ -56,7 +56,7 @@ export default function Categories({ setShowMenu, navigate, nAnimations }) {
   };
 
   return (
-    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!editing}>
       <Animated.View style={{ height: windowHeight, width: windowWidth }}>
         {editing ? (
           <ModalCategory
