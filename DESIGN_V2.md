@@ -277,8 +277,8 @@ cuentas, las dejó en cero, borró los seis documentos `sub_account` y creó las
 categorías que faltaban. Los saldos viejos no se migraron, se arrancó de cero.
 
 Las dos listas están en `data.js`: `RIDE_ACCOUNTS` (por **id**) y
-`RIDE_CATEGORIES` (por **etiqueta**, como el resto de los mapas de ese archivo, y
-en el orden en que se ven). Sobre eso trabajan tres helpers de `helpers.js`:
+`RIDE_CATEGORIES` (por **etiqueta**, como el resto de los mapas de ese archivo,
+en el orden en que se ven y con el emoji que tenía cada sub-cuenta). Sobre eso trabajan tres helpers de `helpers.js`:
 `isRideAccount`, `rideCategories` y `rideBreakdown`.
 
 Qué cambia en esas cuentas:
@@ -292,7 +292,10 @@ Qué cambia en esas cuentas:
   lugar donde antes iban las sub-cuentas. Es la suma de los movimientos de esa
   categoría (`rideBreakdown`) y no se toca: los montos se anotan abriendo la
   cuenta. Las categorías sin movimientos no salen, y una cuenta vacía no muestra
-  nada.
+  nada. La fila se ve como la vieja sub-cuenta: **emoji** y nombre, no la
+  pastilla con el ícono. El emoji sale de `RIDE_CATEGORIES`, no del movimiento,
+  así que cambiarle la cuenta a un movimiento no lo mueve. La pastilla con el
+  ícono de la categoría sigue siendo lo que usa la lista de movimientos.
 
 Con las sub-cuentas se fueron también, de `Matias_accounts` y de `AccountCard`,
 el traspaso entre sub-cuentas (`ModalTransferAccount`), las pastillas de la

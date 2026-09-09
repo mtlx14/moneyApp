@@ -71,8 +71,14 @@ export const RIDE_ACCOUNTS = ['m_account_to_be_paid', 'm_account_currently'];
 
 // Por **etiqueta** de la categoría, como el resto de los mapas de este archivo:
 // si la categoría no existe o se renombra, simplemente no aparece. El orden es
-// el que se ve dentro de la cuenta.
-export const RIDE_CATEGORIES = ['Uber', 'Didi', 'Cabify'];
+// el que se ve dentro de la cuenta. El emoji es el que tenían las sub-cuentas y
+// vive acá, no en el movimiento: así la fila se ve igual aunque el movimiento
+// cambie de cuenta.
+export const RIDE_CATEGORIES = [
+  { label: 'Uber', emoji: '🚗' },
+  { label: 'Didi', emoji: '🛻' },
+  { label: 'Cabify', emoji: '🚙' },
+];
 
 // Categorías de transacciones. Ya viven en Firestore (colección 'categories');
 // esto es solo la semilla: si la colección está vacía, el contexto la escribe

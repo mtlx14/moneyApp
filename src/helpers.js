@@ -122,9 +122,13 @@ export function isRideAccount(account) {
 }
 
 // las categorías de transporte que existen hoy en la base, en el orden de
-// RIDE_CATEGORIES. Devuelve [id, categoría]
+// RIDE_CATEGORIES. Devuelve [id, categoría], con el emoji de data.js sumado a la
+// categoría: es lo que muestra la fila del listado de cuentas
 export function rideCategories(categories) {
-  return RIDE_CATEGORIES.map((label) => Object.entries(categories).find(([, c]) => c.label === label)).filter(Boolean);
+  return RIDE_CATEGORIES.map(({ label, emoji }) => {
+    const found = Object.entries(categories).find(([, c]) => c.label === label);
+    return found && [found[0], { ...found[1], emoji }];
+  }).filter(Boolean);
 }
 
 // lo que puso cada app dentro de una cuenta de transporte: la suma de sus

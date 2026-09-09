@@ -15,7 +15,6 @@ import GoBackScroll from '../components/GoBackScroll.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { CONTENT_LEFT } from '../layout.js';
 import { rideBreakdown } from '../../../helpers.js';
-import Icon from '../components/Icon.js';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -135,10 +134,14 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
                                   <View key={id} style={{ height: windowWidth * 0.1, justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15 }}>
                                     {index > 0 && <View style={{ width: '94%', marginLeft: '3%', height: 1, backgroundColor: theme.bg.tr_1 }}></View>}
                                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%' }}>
-                                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                        <View style={{ width: windowWidth * 0.055, height: windowWidth * 0.055, borderRadius: 6, backgroundColor: category.color, justifyContent: 'center', alignItems: 'center' }}>
-                                          <Icon name={category.icon} size={windowWidth * 0.035} color={theme.text.onFill} />
-                                        </View>
+                                      <View style={{ flexDirection: 'row', gap: 10 }}>
+                                        <Text
+                                          style={{
+                                            fontSize: fS.subsText,
+                                          }}
+                                        >
+                                          {category.emoji}
+                                        </Text>
                                         <Text
                                           style={{
                                             color: theme.text._3,
