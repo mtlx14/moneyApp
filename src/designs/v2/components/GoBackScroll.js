@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Dimensions, View } from 'react-native';
+import { Dimensions, Platform, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 // Recibe la animación de página y la aplica sobre su propio ScrollView: así el
@@ -80,8 +80,16 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
       runOnJS(goBack)();
     }
   });
+  // El único lugar donde el scroll se queda es su posición de reposo. En nativo
+  // hay que decirlo: pagingEnabled ancla de a pantallas, así que soltando a
+  // medio camino el scroll se quedaba en 0 —abierto— y desde ahí el gesto
+  // volvía a cruzar el umbral solo, sin nada que cerrar, y salía al inicio.
+  // En web el único anclaje que existe es pagingEnabled, que ancla al principio
+  // de cada hijo: el separador y el contenido, que es justo lo que se quiere
+  const snapProps = Platform.OS === 'web' ? { pagingEnabled: true } : { snapToOffsets: [windowWidth * 0.5], snapToStart: false, snapToEnd: false, disableIntervalMomentum: true };
+
   return (
-    <Animated.ScrollView entering={entering} exiting={exiting} ref={scrollRef} horizontal scrollEventThrottle={16} pagingEnabled showsHorizontalScrollIndicator={false} onScroll={handleGoBackScroll} contentOffset={{ x: windowWidth * 0.5 }} onContentSizeChange={handleContentSizeChange} decelerationRate={'fast'}>
+    <Animated.ScrollView entering={entering} exiting={exiting} ref={scrollRef} horizontal scrollEventThrottle={16} {...snapProps} showsHorizontalScrollIndicator={false} onScroll={handleGoBackScroll} contentOffset={{ x: windowWidth * 0.5 }} onContentSizeChange={handleContentSizeChange} decelerationRate={'fast'}>
       <View style={{ width: windowWidth * 0.5 }} />
       <Animated.View style={{ opacity: goBackOpacity }}>{children}</Animated.View>
     </Animated.ScrollView>
