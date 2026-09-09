@@ -175,6 +175,16 @@ export function rideBreakdown({ account, transactions, categories }) {
     .filter((row) => row.total !== 0);
 }
 
+// Avisos entre los dos ---------------------------------------------------------
+
+// si el otro hizo cambios que este usuario todavía no aceptó: es lo que enciende
+// el aviso verde de Inicio. Se lee del documento, sin estado de por medio, así
+// que vale ya en el primer render
+export function hasPendingChanges(appMeta, userName) {
+  if (userName === 'matias') return !!(appMeta?.mOkDate && appMeta?.aChangesDate && appMeta.mOkDate < appMeta.aChangesDate);
+  return !!(appMeta?.aOkDate && appMeta?.mChangesDate && appMeta.aOkDate < appMeta.mChangesDate);
+}
+
 // Gastos del resumen del mes ---------------------------------------------------
 
 // la categoría con la que nace el movimiento de un gasto pagado, buscada por

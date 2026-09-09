@@ -1,5 +1,5 @@
 import { Dimensions, Pressable, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme.js';
 import { fS } from '../../../theme/theme.js';
 
@@ -16,7 +16,9 @@ export default function ModalConfirm({ message, confirmLabel = 'Sí', cancelLabe
     <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: 'absolute', top: 0, left: 0, width: windowWidth, height: windowHeight, justifyContent: 'center', alignItems: 'center' }}>
       <Pressable onPress={onCancel} disabled={!onCancel} style={{ position: 'absolute', top: 0, left: 0, width: windowWidth, height: windowHeight, backgroundColor: theme.bg.black_tr_2 }} />
 
-      <Animated.View entering={FadeInDown.duration(200)} style={{ width: windowWidth * 0.7, backgroundColor: theme.bg.primary, borderRadius: 20, overflow: 'hidden' }}>
+      {/* la caja no anima aparte: con dos animaciones encima, la de adentro
+          vuelve a correr mientras la de afuera se va y parpadea */}
+      <View style={{ width: windowWidth * 0.7, backgroundColor: theme.bg.primary, borderRadius: 20, overflow: 'hidden' }}>
         <View style={{ padding: 20, alignItems: 'center' }}>
           <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, textAlign: 'center' }}>{message}</Text>
         </View>
@@ -30,7 +32,7 @@ export default function ModalConfirm({ message, confirmLabel = 'Sí', cancelLabe
             <Text style={{ color: theme.text.onFill, fontSize: fS.modalTransfer }}>{confirmLabel}</Text>
           </Pressable>
         </View>
-      </Animated.View>
+      </View>
     </Animated.View>
   );
 }

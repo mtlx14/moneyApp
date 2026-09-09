@@ -14,7 +14,7 @@ import { okTransfers, updateAccountBalance, updateChanges } from '../../../servi
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../../../theme/theme.js';
-import { amountForMonth, monthAndYear } from '../../../helpers.js';
+import { amountForMonth, hasPendingChanges, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import ModalConfirm from '../components/ModalConfirm.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
@@ -45,12 +45,11 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
     opacity: changesOpacity.value,
   }));
 
+  const changesPending = hasPendingChanges(appMeta, currentUser.name);
+
   useEffect(() => {
-    if (currentUser.name === 'matias' && appMeta.mOkDate && appMeta.aChangesDate && appMeta.mOkDate < appMeta.aChangesDate) {
-      setShowChanges(appMeta.aChanges);
-      changesOpacity.value = withRepeat(withSequence(withTiming(0.4, { duration: 1000, easing: Easing.in(Easing.quad) }), withTiming(1, { duration: 1000, easing: Easing.out(Easing.quad) })), -1, false);
-    } else if (currentUser.name === 'aylin' && appMeta.aOkDate && appMeta.mChangesDate && appMeta.aOkDate < appMeta.mChangesDate) {
-      setShowChanges(appMeta.mChanges);
+    if (changesPending) {
+      setShowChanges(currentUser.name === 'matias' ? appMeta.aChanges : appMeta.mChanges);
       changesOpacity.value = withRepeat(withSequence(withTiming(0.4, { duration: 1000, easing: Easing.in(Easing.quad) }), withTiming(1, { duration: 1000, easing: Easing.out(Easing.quad) })), -1, false);
     } else {
       setShowChanges([]);
@@ -61,8 +60,16 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
   // también el aviso verde de cambios, así que primero se lee ese y el detalle
   // sale recién al darle Ok. Si el aviso ya se había aceptado antes, salen solas
   // en vez de quedarse esperando uno que no va a volver
+  //
+  // Se mira changesPending y no showChanges, que se llena en un efecto: con un
+  // render de atraso el modal alcanzaba a asomarse antes que el aviso verde
   const receivedTransfers = (currentUser.name === 'matias' ? appMeta?.mTransfers : appMeta?.aTransfers) || [];
-  const showTransfers = receivedTransfers.length > 0 && showChanges.length === 0 && !localInfo.activeField;
+  // al darle Ok se va de una, sin esperar a que vuelva el documento
+  const [transfersSeen, setTransfersSeen] = useState(false);
+  useEffect(() => {
+    if (receivedTransfers.length === 0) setTransfersSeen(false);
+  }, [receivedTransfers.length]);
+  const showTransfers = receivedTransfers.length > 0 && !changesPending && !transfersSeen && !localInfo.activeField;
 
   const activeFieldOpacity = useSharedValue(1);
   const activeFieldOpacityAnimatedStyle = useAnimatedStyle(() => ({
@@ -313,7 +320,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
         <ModalConfirm
           message={receivedTransfers.map((t) => `${t.from} te transfirió $${Number(t.amount).toLocaleString('es-CL')} a tu ${t.accountName}`).join('\n\n')}
           confirmLabel='Ok'
-          onConfirm={() => okTransfers({ user: currentUser })}
+          onConfirm={() => (setTransfersSeen(true), okTransfers({ user: currentUser }))}
         />
       )}
 
