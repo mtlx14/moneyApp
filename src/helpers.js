@@ -164,9 +164,12 @@ export function billCategoryId(bill, categories) {
   return Object.entries(categories).find(([, c]) => c.label === label)?.[0];
 }
 
-// la cuenta desde la que se paga: la cuenta corriente de quien está usando la
-// app. Es solo el valor con el que abre el modal, ahí se puede cambiar
+// La cuenta desde la que se paga: siempre una del usuario que está usando la
+// app —Matías nunca anota en las de Aylin ni al revés—, y de esas la cuenta
+// corriente. Si no la tuviera, cualquiera de sus cuentas de ledger que no sea de
+// transporte. Es solo el valor con el que abre el modal, ahí se puede cambiar
 export function defaultTxAccount(accounts, userName) {
   const type = userName === 'matias' ? 'm_account' : 'a_account';
-  return accounts.find((a) => a.type === type && a.isLedger && a.name === TRANSFER_PAIR[0]);
+  const mine = accounts.filter((a) => a.type === type && a.isLedger && !isRideAccount(a));
+  return mine.find((a) => a.name === TRANSFER_PAIR[0]) || mine[0];
 }
