@@ -232,6 +232,15 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   const otherAccounts = accounts.filter((a) => a.type === otherOwner && a.isLedger && a.type !== 'sub_account' && TRANSFER_PAIR.includes(a.name));
   const toAccount = accounts.find((a) => a.id === draft.toAccountId);
 
+  // Al elegir el tipo, la transferencia al otro usuario ya viene escrita: de
+  // cuenta corriente a cuenta corriente y con la descripción puesta. Todo se
+  // puede cambiar después, y una descripción ya escrita no se pisa
+  const userTransferDefaults = (prev) => ({
+    accountId: accounts.find((a) => a.type === originOwner && a.isLedger && a.name === TRANSFER_PAIR[0])?.id || prev.accountId,
+    toAccountId: otherAccounts.find((a) => a.name === TRANSFER_PAIR[0])?.id,
+    label: prev.label.trim() ? prev.label : `Transferencia para ${otherUserLabel}`,
+  });
+
   // Por pagar y Currently son lo que dejó cada app de transporte: ahí todo es
   // ingreso, así que no se ofrece ningún otro tipo (ver RIDE_ACCOUNTS)
   const rideAccount = isRideAccount(account);
@@ -459,7 +468,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
           <Animated.View pointerEvents={picking && picking !== 'date' ? 'auto' : 'none'} style={[{ position: 'absolute', left: windowWidth * 0.8 + gap, top: panelTop, width: panelWidth }, panelStyle]}>
             {/* al cambiar el tipo, la categoría que hubiera se suelta: puede no
                 corresponder al tipo nuevo y quedaría escrita una mezcla */}
-            {panelField === 'type' && pickList(typeOptions, (key) => setDraft((prev) => ({ ...prev, type: key, category: undefined, toAccountId: key === 'transfer' ? prev.toAccountId : undefined })))}
+            {panelField === 'type' && pickList(typeOptions, (key) => setDraft((prev) => ({ ...prev, type: key, category: undefined, toAccountId: key === 'transfer' ? prev.toAccountId : undefined, ...(key === 'user_transfer' ? userTransferDefaults(prev) : {}) })))}
             {/* al cambiar la cuenta de origen el destino se suelta: podría ser la
                 misma cuenta, o una de otro dueño */}
             {panelField === 'account' && pickList(accountOptions, (key) => setDraft((prev) => ({ ...prev, accountId: key, toAccountId: undefined })))}
