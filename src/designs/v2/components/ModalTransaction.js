@@ -238,9 +238,9 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
 
   // sin par no hay a dónde transferir: el tipo ni se ofrece
   const canTransfer = !!account?.isLedger && account.type !== 'sub_account' && !!transferPartner;
-  // al otro usuario se transfiere desde cualquier cuenta propia de ledger, con
-  // que él tenga a dónde recibirlo
-  const canUserTransfer = !!account?.isLedger && account.type !== 'sub_account' && otherAccounts.length > 0;
+  // sale de la cuenta corriente o del efectivo propios y llega a los del otro:
+  // en las demás cuentas el tipo ni se ofrece
+  const canUserTransfer = !!account?.isLedger && account.type !== 'sub_account' && TRANSFER_PAIR.includes(account.name) && otherAccounts.length > 0;
   const typeOptions = Object.entries(txTypes)
     .filter(([key]) => key !== draft.type && !(key === 'initial' && hasInitial) && !(key === 'transfer' && !canTransfer) && !(key === 'user_transfer' && !canUserTransfer) && !(rideAccount && key !== 'income'))
     .map(([key, type]) => ({ key, label: txTypeLabel(key, otherUserLabel), icon: type }));
@@ -249,8 +249,9 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
 
   // las cuentas del mismo dueño, sin la que ya tiene el movimiento. Solo las de
   // ledger: Bencina y los sueldos llevan el saldo escrito a mano, un movimiento
-  // ahí no movería nada
-  const accountOptions = accounts.filter((a) => a.type === account?.type && a.isLedger && a.id !== draft.accountId).map((a) => ({ key: a.id, label: a.name }));
+  // ahí no movería nada. En la transferencia al otro usuario las dos puntas son
+  // cuenta corriente o efectivo, así que la de salida también se limita a esas
+  const accountOptions = accounts.filter((a) => a.type === account?.type && a.isLedger && a.id !== draft.accountId && (draft.type !== 'user_transfer' || TRANSFER_PAIR.includes(a.name))).map((a) => ({ key: a.id, label: a.name }));
 
   // una cuenta de transporte solo lleva ingresos: si el movimiento llega con
   // otro tipo (el swipe de gasto, o se cambió la cuenta) se corrige solo, y la
