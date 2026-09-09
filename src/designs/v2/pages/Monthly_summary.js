@@ -8,8 +8,10 @@ import Animated, { FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutR
 import CheckButton from '../components/CheckButton.js';
 import UnmarkButton from '../components/UnmarkButton.js';
 import { fS } from '../../../theme/theme.js';
-import { currentInstallment } from '../../../helpers.js';
+import { billCategoryId, currentInstallment, defaultTxAccount, getEffectiveDate } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
+import ModalTransaction from '../components/ModalTransaction.js';
+import ModalConfirm from '../components/ModalConfirm.js';
 import { Image } from 'expo-image';
 import GoBackScroll from '../components/GoBackScroll.js';
 import { CONTENT_LEFT } from '../layout.js';
@@ -19,15 +21,36 @@ const windowWidth = Dimensions.get('window').width;
 
 export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
-  const { balances, bills } = useData();
-  const { monthOffset } = useAppStorage();
+  const { accounts, balances, bills, categories } = useData();
+  const { monthOffset, currentUser } = useAppStorage();
   const [activeField, setActiveField] = useState(null);
+  // el gasto que se acaba de marcar y está esperando el sí o el no
+  const [billToAnnotate, setBillToAnnotate] = useState(null);
+  // el movimiento nuevo que abre el modal de transacción
+  const [newTx, setNewTx] = useState(null);
 
   // la lista solo anima al volver del modal, no al entrar a la página
   const cameFromModal = useRef(false);
   const openModal = (field) => {
     cameFromModal.current = true;
     setActiveField(field);
+  };
+
+  // el movimiento que deja el pago: el monto y la descripción del gasto, la
+  // categoría que le toca por tipo (las cuentas en los fijos, la tarjeta en los
+  // planeados) y la cuenta corriente de quien está usando la app. Todo se puede
+  // cambiar en el modal antes de guardar
+  const annotate = (bill) => {
+    setBillToAnnotate(null);
+    setNewTx({
+      label: bill.label,
+      amount: bill.amount,
+      type: 'expense',
+      category: billCategoryId(bill, categories),
+      accountId: defaultTxAccount(accounts, currentUser.name)?.id,
+      // mirando otro mes, el movimiento nace el día 1 de ese mes
+      date: monthOffset === 0 ? new Date() : getEffectiveDate(monthOffset),
+    });
   };
 
   return (
@@ -94,7 +117,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                             >
                               {`$${(bill.type === 'fixed' ? bill.amount : balances.billsBalances.subscriptions.toPay).toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} />
+                            <CheckButton bill={bill} onChecked={setBillToAnnotate} />
                           </View>
                         </Pressable>
                       );
@@ -134,7 +157,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                             >
                               {`$${bill.amount.toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} />
+                            <CheckButton bill={bill} onChecked={setBillToAnnotate} />
                           </View>
                         </Pressable>
                       );
@@ -152,6 +175,11 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
               </Animated.View>
             </Animated.View>
           )}
+
+          {/* al marcar un gasto se pregunta si además se anota el movimiento */}
+          {billToAnnotate && <ModalConfirm message={`¿Anotar el movimiento de ${billToAnnotate.label}?`} onConfirm={() => annotate(billToAnnotate)} onCancel={() => setBillToAnnotate(null)} />}
+
+          {newTx && <ModalTransaction tx={newTx} onCancel={() => setNewTx(null)} setShowMenu={setShowMenu} />}
         </Animated.View>
     </GoBackScroll>
   );

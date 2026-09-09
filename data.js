@@ -80,6 +80,15 @@ export const RIDE_CATEGORIES = [
   { label: 'Cabify', emoji: '🚙' },
 ];
 
+// Al marcar un gasto como pagado se ofrece anotar el movimiento, y nace con la
+// categoría que le toca por tipo: los fijos son las cuentas de la casa y los
+// planeados se pagan con la tarjeta. Va por **etiqueta**, como el resto de los
+// mapas de este archivo: si no existe, el modal abre sin categoría.
+export const BILL_CATEGORIES = {
+  fixed: 'Cuentas',
+  planned: 'Tarjeta de crédito',
+};
+
 // Categorías de transacciones. Ya viven en Firestore (colección 'categories');
 // esto es solo la semilla: si la colección está vacía, el contexto la escribe
 // con estas y de ahí en adelante manda la base. Se editan desde la página de

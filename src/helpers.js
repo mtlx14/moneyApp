@@ -1,6 +1,6 @@
 import { Alert, Platform } from 'react-native';
 import { Timestamp } from 'firebase/firestore';
-import { RIDE_ACCOUNTS, RIDE_CATEGORIES } from '../data.js';
+import { BILL_CATEGORIES, RIDE_ACCOUNTS, RIDE_CATEGORIES, TRANSFER_PAIR } from '../data.js';
 
 export function getEffectiveDate(monthOffset = 0) {
   const d = new Date();
@@ -152,4 +152,21 @@ export function rideBreakdown({ account, transactions, categories }) {
       };
     })
     .filter((row) => row.total !== 0);
+}
+
+// Gastos del resumen del mes ---------------------------------------------------
+
+// la categoría con la que nace el movimiento de un gasto pagado, buscada por
+// etiqueta en las que hay hoy en la base. Ver BILL_CATEGORIES en data.js
+export function billCategoryId(bill, categories) {
+  const label = BILL_CATEGORIES[bill?.type];
+  if (!label) return undefined;
+  return Object.entries(categories).find(([, c]) => c.label === label)?.[0];
+}
+
+// la cuenta desde la que se paga: la cuenta corriente de quien está usando la
+// app. Es solo el valor con el que abre el modal, ahí se puede cambiar
+export function defaultTxAccount(accounts, userName) {
+  const type = userName === 'matias' ? 'm_account' : 'a_account';
+  return accounts.find((a) => a.type === type && a.isLedger && a.name === TRANSFER_PAIR[0]);
 }

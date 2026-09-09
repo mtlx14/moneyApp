@@ -12,7 +12,7 @@ import { updateChanges } from '../../../services.js';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-export default function CheckButton({ bill }) {
+export default function CheckButton({ bill, onChecked }) {
   const theme = useTheme();
   const [checked, setChecked] = useState(false);
   const [yellow, setYellow] = useState(false);
@@ -47,6 +47,10 @@ export default function CheckButton({ bill }) {
     );
 
     setChecked((prev) => !prev);
+
+    // solo al marcar: el pago recién hecho es el que se puede anotar como
+    // movimiento. Desmarcar no pregunta nada
+    if (!checked) onChecked?.(bill);
   };
   return (
     <Pressable onPress={() => handleOnPress()} style={{ height: windowWidth * 0.1 - 10, aspectRatio: 1 / 1, backgroundColor: checked ? (yellow ? theme.bg.yellow : theme.bg.check) : theme.bg.tr_1, borderRadius: 5, justifyContent: 'center', alignItems: 'center' }}>
