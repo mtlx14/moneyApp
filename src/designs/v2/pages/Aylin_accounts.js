@@ -10,6 +10,7 @@ import AnimatedSwapTextS from '../components/AnimatedSwapTextS.js';
 import { updateAccountBalance, updateChanges, updateSubAccount } from '../../../services.js';
 import ModalTransferAccount from '../components/ModalTransferAccount.js';
 import AccountHistory from '../components/AccountHistory.js';
+import ModalTransaction from '../components/ModalTransaction.js';
 import { fS } from '../../../theme/theme.js';
 import GoBackScroll from '../components/GoBackScroll.js';
 import CollapsibleRow from '../components/CollapsibleRow.js';
@@ -29,6 +30,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
     activeFieldAmount: null,
     subAccountToSave: null,
     showModalTransferAccount: false,
+    selectedTx: null,
   });
 
   useEffect(() => {
@@ -74,7 +76,9 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   };
 
   // las cuentas migradas al ledger muestran sus movimientos en vez del teclado:
-  // ahí el saldo ya no se escribe a mano, sale de las transacciones
+  // ahí el saldo ya no se escribe a mano, sale de las transacciones. Por eso el
+  // monto de la tarjeta lo lee de balances y no del estado local, que se copia
+  // al abrir la cuenta y se quedaba viejo al anotar o borrar un movimiento
   const showHistory = !!localInfo.activeField?.isLedger;
 
   const closeField = () =>
@@ -83,10 +87,34 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
       activeField: null,
       activeFieldAmount: null,
       subAccountToSave: null,
+      selectedTx: null,
     }));
 
+  // el gesto de volver primero deshace el paso de adentro: el detalle de un
+  // movimiento vuelve a la lista, y la cuenta abierta vuelve al listado. Solo
+  // desde el listado se sale de la página
+  const handleGoBack = () => {
+    if (localInfo.selectedTx) {
+      setLocalInfo((prev) => ({ ...prev, selectedTx: null }));
+      return true;
+    }
+    if (localInfo.showModalTransferAccount) {
+      setLocalInfo((prev) => ({ ...prev, showModalTransferAccount: false }));
+      return true;
+    }
+    if (porPagarOpen) {
+      setPorPagarOpen(false);
+      return true;
+    }
+    if (localInfo.activeField) {
+      closeField();
+      return true;
+    }
+    return false;
+  };
+
   return (
-    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {!localInfo.activeField && (
             <View>
@@ -216,8 +244,9 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
             </View>
           )}
           {/* modals ------------------------------------ */}
-          {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} compact={showHistory} />}
-          {showHistory && !localInfo.showModalTransferAccount && <AccountHistory account={localInfo.activeField} onClose={closeField} />}
+          {localInfo.activeField && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} wide={showHistory} />}
+          {showHistory && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onClose={closeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
+          {localInfo.selectedTx && <ModalTransaction tx={localInfo.selectedTx} onCancel={() => setLocalInfo((prev) => ({ ...prev, selectedTx: null }))} />}
           {localInfo.showModalTransferAccount && (
             <ModalTransferAccount
               accounts={aylinAccounts.filter((a) => a.id !== localInfo.activeField.forAccount && !a.isNegative)}

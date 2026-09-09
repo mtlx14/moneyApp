@@ -4,6 +4,8 @@ const isIos = Platform.OS === 'ios';
 
 export const fS = {
   accountCardNumber: isIos ? 44 * 1.2 : 44,
+  // el monto sobre la tarjeta ancha del historial, que es más baja
+  accountCardNumberWide: isIos ? 37 * 1.2 : 37,
   accountCardText: isIos ? 14 * 1.2 : 14,
   animatedSwapTextL: isIos ? 50 * 1.2 : 50,
   animatedSwapTextS_Number: isIos ? 14 * 1.2 : 14,

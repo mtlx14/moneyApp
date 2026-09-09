@@ -47,6 +47,7 @@ function AppContent() {
 export default function App() {
   const [fontsLoaded] = useFonts({
     SansCode: require('./assets/fonts/SansCode.ttf'),
+    MaterialSymbols: require('./assets/fonts/MaterialSymbolsRounded.ttf'),
   });
 
   useEffect(() => {

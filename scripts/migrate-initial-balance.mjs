@@ -72,11 +72,11 @@ for (const id of LEDGER_ACCOUNTS) {
   if (balance !== 0) {
     batch.set(doc(collection(db, 'transactions')), {
       accountId: id,
-      type: 'income',
+      // tipo propio: suma como un ingreso pero no es uno, y no lleva categoría
+      type: 'initial',
       amount: balance,
       date: Timestamp.fromDate(now),
       monthKey: monthKeyOf(now),
-      category: 'cat_saldo_inicial',
       label: 'Saldo inicial',
       emoji: '🏁',
       user: 'matias',

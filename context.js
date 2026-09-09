@@ -2,7 +2,9 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, getEffectiveDate } from './src/helpers';
+import { amountForMonth, getEffectiveDate, signedAmount, signedAmountFor } from './src/helpers';
+import { defaultCategories } from './data.js';
+import { seedCategories } from './src/services.js';
 
 const DataContext = createContext(null);
 
@@ -29,6 +31,8 @@ export const DataProvider = ({ children }) => {
   const [bills, setBills] = useState([]);
   const [appMeta, setAppMeta] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  // mapa id -> categoría. Arranca con las de código y lo pisa la colección
+  const [categories, setCategories] = useState(defaultCategories);
 
   useEffect(() => {
     const unsubAccounts = onSnapshot(collection(db, 'accounts'), (snap) => {
@@ -49,11 +53,25 @@ export const DataProvider = ({ children }) => {
       setTransactions(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
 
+    // Las categorías vivían en código y ahora se editan desde la app. La primera
+    // vez que la colección aparece vacía se escribe la semilla de data.js: los
+    // ids son fijos, así que si los dos teléfonos lo hacen a la vez escriben lo
+    // mismo. Mientras tanto se sigue mostrando la semilla, no una lista vacía.
+    const unsubCategories = onSnapshot(collection(db, 'categories'), (snap) => {
+      if (snap.empty) {
+        setCategories(defaultCategories);
+        seedCategories(defaultCategories);
+        return;
+      }
+      setCategories(Object.fromEntries(snap.docs.map((d) => [d.id, { id: d.id, ...d.data() }])));
+    });
+
     return () => {
       unsubAccounts();
       unsubBills();
       unsubAppMeta();
       unsubTransactions();
+      unsubCategories();
     };
   }, []);
 
@@ -61,7 +79,10 @@ export const DataProvider = ({ children }) => {
   const txByAccount = useMemo(() => {
     const map = {};
     transactions.forEach((tx) => {
-      map[tx.accountId] = (map[tx.accountId] || 0) + (tx.type === 'income' ? tx.amount : -tx.amount);
+      map[tx.accountId] = (map[tx.accountId] || 0) + signedAmount(tx);
+      // la transferencia es un solo documento: le suma a la cuenta de destino
+      // lo que le restó a la de origen
+      if (tx.type === 'transfer' && tx.toAccountId) map[tx.toAccountId] = (map[tx.toAccountId] || 0) + tx.amount;
     });
     return map;
   }, [transactions]);
@@ -71,13 +92,15 @@ export const DataProvider = ({ children }) => {
   // contenedores, Bencina, los sueldos) siguen con el número escrito a mano
   const balanceOf = (account) => (account?.isLedger ? txByAccount[account.id] || 0 : account?.balance || 0);
 
-  // saldos por dueño: las cuentas propias más lo que sumen sus sub-cuentas,
-  // descontando las marcadas como isNegative (guardan en positivo lo que se debe)
+  // saldos por dueño. Ya no hay sub-cuentas: las de transporte pasaron a ser
+  // movimientos con categoría dentro de su cuenta, así que cada cuenta se lee
+  // sola. Las marcadas como isNegative guardan en positivo lo que se debe, por
+  // eso se descuentan dos veces del total
   const accountsByType = (type, excludeIds = []) => {
     const map = {};
 
     accounts
-      .filter((a) => a.type === type && !a.hasSubAccount && !excludeIds.includes(a.id))
+      .filter((a) => a.type === type && !excludeIds.includes(a.id))
       .forEach((a) => {
         map[a.id] = {
           id: a.id,
@@ -85,23 +108,8 @@ export const DataProvider = ({ children }) => {
           balance: balanceOf(a),
         };
       });
-    accounts
-      .filter((a) => a.type === 'sub_account')
-      .forEach((a) => {
-        const parent = accounts.find((account) => account.id === a.forAccount);
-        if (!parent || parent.type !== type) return;
 
-        if (!map[a.forAccount]) {
-          map[a.forAccount] = {
-            id: a.forAccount,
-            name: parent.name,
-            balance: 0,
-          };
-        }
-        map[a.forAccount].balance += balanceOf(a);
-      });
-
-    const total = Object.values(map).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.type === type && a.isNegative && !a.hasSubAccount && !excludeIds.includes(a.id)).reduce((sum, acc) => sum + balanceOf(acc), 0) * 2;
+    const total = Object.values(map).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.type === type && a.isNegative && !excludeIds.includes(a.id)).reduce((sum, acc) => sum + balanceOf(acc), 0) * 2;
 
     return { map, total };
   };
@@ -145,7 +153,7 @@ export const DataProvider = ({ children }) => {
 
     return { byAccount, m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
   }, [accounts, bills, appMeta, transactions, monthOffset]);
-  return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances }}>{children}</DataContext.Provider>;
+  return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances, categories }}>{children}</DataContext.Provider>;
 };
 
 export const useData = () => useContext(DataContext);

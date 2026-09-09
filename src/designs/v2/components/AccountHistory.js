@@ -1,11 +1,20 @@
 import { useMemo } from 'react';
+import Icon from './Icon.js';
+import SwipeToDelete from './SwipeToDelete.js';
 import { View, Text, Dimensions, Pressable } from 'react-native';
-import Animated, { FadeIn, FadeInDown, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown, FadeOutUp, SlideInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
-import { categories } from '../../../../data.js';
+import { deleteTransaction } from '../../../services.js';
+import { txTypes } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
 import FadingScroll from './FadingScroll.js';
+import NewTxSwipe from './NewTxSwipe.js';
+import { confirmDelete, isRideAccount, signedAmountFor } from '../../../helpers.js';
+import { CARD_RATIO, WIDE_CARD_ASPECT, WIDE_CARD_TOP } from './AccountCard.js';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -19,56 +28,91 @@ const shortDate = (value) => {
 
 // Lista de movimientos de una cuenta, para el espacio de abajo de la tarjeta.
 // Ocupa el mismo lugar que el teclado, así que los dos no conviven.
-export default function AccountHistory({ account, onClose }) {
+export default function AccountHistory({ account, onClose, onSelect, onNew }) {
   const theme = useTheme();
-  const { transactions } = useData();
+  const insets = useSafeAreaInsets();
+  const { transactions, categories } = useData();
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
+  // arranca justo debajo de la tarjeta, calculado con sus mismas medidas
+  const listTop = windowHeight * WIDE_CARD_TOP + (windowWidth * CARD_RATIO) / WIDE_CARD_ASPECT;
 
-  const rows = useMemo(() => [...transactions.filter((t) => t.accountId === account.id)].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0)), [transactions, account.id]);
+  // la barra de abajo es fija: la lista termina justo arriba de ella
+  const barHeight = windowWidth * 0.14;
+  const barBottom = insets.bottom + 10;
+  const barSpace = barHeight + barBottom + 10;
+
+  // las transferencias recibidas también son movimientos de esta cuenta, aunque
+  // el documento viva en la de origen
+  const rows = useMemo(() => [...transactions.filter((t) => t.accountId === account.id || t.toAccountId === account.id)].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0)), [transactions, account.id]);
 
   return (
-    <Animated.View entering={SlideInDown} exiting={SlideOutDown} style={{ position: 'absolute', left: 0, top: windowHeight * 0.47, width: windowWidth, height: windowHeight * 0.53, paddingHorizontal: windowWidth * 0.05 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
-        <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle }}>Movimientos</Text>
+    <>
+      {/* la franja sobre la tarjeta era margen vacío: ahí va el volver, y la
+        lista arranca pegada a la tarjeta */}
+      <Animated.View
+        entering={FadeIn}
+        exiting={FadeOutUp.duration(150)}
+        style={{ position: 'absolute', left: 0, top: 0, width: windowWidth, height: windowHeight * WIDE_CARD_TOP, paddingHorizontal: windowWidth * 0.05, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}
+      >
         <Pressable onPress={onClose} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 15, height: windowWidth * 0.09, paddingHorizontal: 20, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ color: theme.text._2, fontWeight: 500, fontSize: fS.keyboardBtn }}>Volver</Text>
         </Pressable>
-      </View>
+      </Animated.View>
 
-      {rows.length === 0 ? (
-        <Animated.Text entering={FadeIn} style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>
-          Sin movimientos todavía.
-        </Animated.Text>
-      ) : (
-        <FadingScroll>
-          <View style={{ gap: 5, paddingBottom: windowHeight * 0.02 }}>
-            {rows.map((tx, index) => {
-              const category = categories[tx.category];
-              const isIncome = tx.type === 'income';
+      <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
+        <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle, paddingTop: 10, paddingBottom: 8 }}>Movimientos</Text>
+        {rows.length === 0 ? (
+          <Animated.Text entering={FadeIn} style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>
+            Sin movimientos todavía.
+          </Animated.Text>
+        ) : (
+          <FadingScroll>
+            <View style={{ gap: 5, paddingBottom: windowHeight * 0.02 }}>
+              {rows.map((tx, index) => {
+                // sin categoría (los saldos iniciales) el movimiento se muestra con su tipo
+                const category = categories[tx.category] || txTypes[tx.type];
+                const isPositive = signedAmountFor(tx, account.id) > 0;
 
-              return (
-                <Animated.View
-                  key={tx.id}
-                  entering={FadeInDown.delay(index * 30)}
-                  style={{ backgroundColor: theme.bg.tr_05, borderRadius: 10, height: windowWidth * 0.13, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12 }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                    <Text style={{ fontSize: fS.subsText }}>{tx.emoji || category?.emoji || '📦'}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text numberOfLines={1} style={{ color: theme.text._2, fontSize: fS.subsText }}>
-                        {tx.label || category?.label || 'Movimiento'}
-                      </Text>
-                      <Text style={{ color: theme.text._3, fontSize: fS.keyboardBtn * 0.8 }}>{[shortDate(tx.date), category?.label].filter(Boolean).join(' · ')}</Text>
-                    </View>
-                  </View>
-                  <Text style={{ color: isIncome ? theme.text.green : theme.text.red, fontSize: fS.subsText }}>{`${isIncome ? '+' : '-'}$${Number(tx.amount).toLocaleString('es-CL')}`}</Text>
-                </Animated.View>
-              );
-            })}
-          </View>
-        </FadingScroll>
-      )}
-    </Animated.View>
+                return (
+                  <Animated.View key={tx.id} entering={FadeInDown.delay(index * 30)}>
+                    <SwipeToDelete
+                      width={windowWidth * 0.9}
+                      height={windowWidth * 0.13}
+                      onDelete={({ reset }) => confirmDelete({ title: 'Eliminar movimiento', message: `¿Estás seguro que quieres eliminar "${tx.label || 'este movimiento'}"?`, onConfirm: () => deleteTransaction({ tx }), onCancel: reset })}
+                    >
+                      <AnimatedPressable
+                        onPress={() => onSelect(tx)}
+                        style={{ backgroundColor: theme.bg.tr_05, borderRadius: 10, height: '100%', width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12 }}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                          <View style={{ width: windowWidth * 0.09, height: windowWidth * 0.09, borderRadius: 9, backgroundColor: category?.color || '#8A8378', justifyContent: 'center', alignItems: 'center' }}>
+                            <Icon name={category?.icon || 'inventory_2'} size={windowWidth * 0.05} color={theme.text.onFill} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text numberOfLines={1} style={{ color: theme.text._2, fontSize: fS.subsText }}>
+                              {tx.label || category?.label || 'Movimiento'}
+                            </Text>
+                            <Text style={{ color: theme.text._3, fontSize: fS.keyboardBtn * 0.8 }}>{[shortDate(tx.date), category?.label].filter(Boolean).join(' · ')}</Text>
+                          </View>
+                        </View>
+                        <Text style={{ color: isPositive ? theme.text.green : theme.text.red, fontSize: fS.subsText }}>{`${isPositive ? '+' : '-'}$${Number(tx.amount).toLocaleString('es-CL')}`}</Text>
+                      </AnimatedPressable>
+                    </SwipeToDelete>
+                  </Animated.View>
+                );
+              })}
+            </View>
+          </FadingScroll>
+        )}
+      </Animated.View>
+
+      {/* anotar un movimiento: se toca o se arrastra, fijo abajo */}
+      <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: windowWidth * 0.05, bottom: barBottom }}>
+        {/* en las cuentas de transporte todo es ingreso: el lado del gasto no
+          se ofrece */}
+        <NewTxSwipe height={barHeight} onNew={onNew} incomeOnly={isRideAccount(account)} />
+      </Animated.View>
+    </>
   );
 }

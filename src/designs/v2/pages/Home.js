@@ -14,10 +14,11 @@ import { updateAccountBalance, updateChanges } from '../../../services.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../../../theme/theme.js';
-import { amountForMonth, monthName } from '../../../helpers.js';
+import { amountForMonth, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
 import FadingScroll from '../components/FadingScroll.js';
+import HomeMenu from '../components/HomeMenu.js';
 import { CONTENT_LEFT_HOME } from '../layout.js';
 
 export default function Home({ setShowMenu, navigate, nAnimations }) {
@@ -137,7 +138,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
                 <AnimatedSwapTextS value={balances.aylinTotal} />
               </Pressable>
-              <View style={{ backgroundColor: theme.text._4, width: windowWidth * 0.86, height: 1, marginLeft: -windowWidth * 0.03 }}></View>
+              <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
 
               <Pressable onPress={() => navigate('matias_accounts')} style={{ flexDirection: 'row', justifyContent: 'space-between', height: windowWidth * 0.1, alignItems: 'center' }}>
                 {showChanges.includes('matias') && (
@@ -209,7 +210,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
             <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
           </Animated.View>
-          <View style={{ width: windowWidth, height: windowHeight * 0.75, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View style={{ width: windowWidth, height: windowHeight * 0.72, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
             <View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
                 <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
@@ -244,7 +245,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo Total'}</Text>
+              <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo Total'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
             </View>
             {/* Lo único que crece es esta lista, así que es lo único que scrollea:
@@ -274,7 +275,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 padding: windowWidth * 0.03,
               }}
             >
-              <Text style={{ color: theme.text.strong, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+              <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
             </View>
           </View>
@@ -285,11 +286,15 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
       {!localInfo.activeField && <UserTag />}
 
-      {/* mes de la página que se está viendo, en la fila del globo de usuario ------------------------------------ */}
+      {/* menú de los tres puntos, donde antes estaba el mes ------------------------------------ */}
+
+      {!localInfo.activeField && <HomeMenu navigate={navigate} />}
+
+      {/* mes de la página que se está viendo, al pie ------------------------------------ */}
 
       {!localInfo.activeField && (
-        <View style={{ position: 'absolute', top: 20, right: 20, height: windowWidth * 0.07, justifyContent: 'center' }}>
-          <Text style={{ color: theme.text._2, fontSize: fS.userTagName }}>{monthName(page + monthOffset)}</Text>
+        <View pointerEvents='none' style={{ position: 'absolute', bottom: insets.bottom + 12, left: 0, right: 0, alignItems: 'center' }}>
+          <Text style={{ color: theme.text._3, fontSize: fS.userTagName }}>{monthAndYear(page + monthOffset)}</Text>
         </View>
       )}
       {localInfo.activeField && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} />}

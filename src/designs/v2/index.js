@@ -4,6 +4,7 @@ import Monthly_summary from './pages/Monthly_summary.js';
 import Subscriptions from './pages/Subscriptions.js';
 import Matias_accounts from './pages/Matias_accounts.js';
 import Aylin_accounts from './pages/Aylin_accounts.js';
+import Categories from './pages/Categories.js';
 import MainMenu from './components/MainMenu.js';
 import GradientBackground from './components/GradientBackground.js';
 import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reanimated';
@@ -25,6 +26,7 @@ export default {
     subscriptions: Subscriptions,
     matias_accounts: Matias_accounts,
     aylin_accounts: Aylin_accounts,
+    categories: Categories,
   },
   MainMenu,
   GradientBackground,
