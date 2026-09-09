@@ -12,6 +12,7 @@ import Icon from './Icon.js';
 import Caret from './Caret.js';
 import { Keyboard as CustomKeyboard } from './Keyboard.js';
 import DatePicker from './DatePicker.js';
+import ModalConfirm from './ModalConfirm.js';
 
 const toDate = (value) => {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
@@ -38,6 +39,8 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   // se guarda aparte para que la caja conserve su tamaño mientras sale
   const [panelField, setPanelField] = useState(null);
   const [amountKeyboard, setAmountKeyboard] = useState(false);
+  // el aviso de estar metiendo mano en las cuentas del otro, una sola vez por modal
+  const [foreignWarning, setForeignWarning] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
 
   // las descripciones ya escritas, cada una con el tipo y la categoría que la
@@ -176,7 +179,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     const to = accounts.find((a) => a.id === draft.toAccountId);
     const toUser = userOfAccountType(to?.type)?.name;
     if (!toUser) return;
-    notifyUserTransfer({ toUser, from: userOfAccountType(myOwner)?.label || '', amount: Number(draft.amount), accountName: to.name });
+    notifyUserTransfer({ toUser, from: userOfAccountType(originOwner)?.label || '', amount: Number(draft.amount), accountName: to.name });
   };
 
   // el tipo que impone una categoría, si es exclusiva de uno; null si sirve para
@@ -224,13 +227,14 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   const partnerName = TRANSFER_PAIR.includes(account?.name) ? TRANSFER_PAIR.find((name) => name !== account.name) : null;
   const transferPartner = partnerName ? accounts.find((a) => a.name === partnerName && a.isLedger && a.type !== 'sub_account' && ownerOf(a) === originOwner) : null;
 
-  // El otro es el otro usuario de la app: en Matías la transferencia va a Aylin
-  // y en Aylin va a Matías. Sale de una cuenta propia y llega a una del otro, y
-  // en las dos puntas solo la cuenta corriente o el efectivo: las de transporte
-  // solo llevan ingresos y las que tienen el saldo escrito a mano no se mueven
-  // con un movimiento
+  // El otro es el otro dueño, el de la cuenta que no es la del movimiento: desde
+  // una cuenta de Matías se transfiere a Aylin y desde una de Aylin a Matías, se
+  // esté usando la app como quien sea. En las dos puntas solo la cuenta corriente
+  // o el efectivo: las de transporte solo llevan ingresos y las que tienen el
+  // saldo escrito a mano no se mueven con un movimiento
+  // de quién es la app en este teléfono, para avisar cuando la cuenta es del otro
   const myOwner = USER_ACCOUNT_TYPE[currentUser?.name];
-  const otherOwner = otherAccountType(myOwner);
+  const otherOwner = otherAccountType(originOwner);
   const otherUserLabel = userOfAccountType(otherOwner)?.label;
   const otherAccounts = accounts.filter((a) => a.type === otherOwner && a.isLedger && a.type !== 'sub_account' && TRANSFER_PAIR.includes(a.name));
   const toAccount = accounts.find((a) => a.id === draft.toAccountId);
@@ -239,7 +243,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   // cuenta corriente a cuenta corriente y con la descripción puesta. Todo se
   // puede cambiar después, y una descripción ya escrita no se pisa
   const userTransferDefaults = (prev) => ({
-    accountId: accounts.find((a) => a.type === myOwner && a.isLedger && a.name === TRANSFER_PAIR[0])?.id || prev.accountId,
+    accountId: accounts.find((a) => a.type === originOwner && a.isLedger && a.name === TRANSFER_PAIR[0])?.id || prev.accountId,
     toAccountId: otherAccounts.find((a) => a.name === TRANSFER_PAIR[0])?.id,
     label: prev.label.trim() ? prev.label : `Transferencia para ${otherUserLabel}`,
   });
@@ -252,8 +256,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   const canTransfer = !!account?.isLedger && account.type !== 'sub_account' && !!transferPartner;
   // sale de la cuenta corriente o del efectivo propios y llega a los del otro:
   // en las demás cuentas el tipo ni se ofrece
-  // solo desde una cuenta propia: en las del otro usuario el tipo ni se ofrece
-  const canUserTransfer = !!account?.isLedger && originOwner === myOwner && account.type !== 'sub_account' && TRANSFER_PAIR.includes(account.name) && otherAccounts.length > 0;
+  const canUserTransfer = !!account?.isLedger && account.type !== 'sub_account' && TRANSFER_PAIR.includes(account.name) && otherAccounts.length > 0;
   const typeOptions = Object.entries(txTypes)
     .filter(([key]) => key !== draft.type && !(key === 'initial' && hasInitial) && !(key === 'transfer' && !canTransfer) && !(key === 'user_transfer' && !canUserTransfer) && !(rideAccount && key !== 'income'))
     .map(([key, type]) => ({ key, label: txTypeLabel(key, otherUserLabel), icon: type }));
@@ -276,6 +279,14 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
       setDraft((prev) => ({ ...prev, type: 'income', category: allowed.includes(prev.category) ? prev.category : undefined, toAccountId: undefined }));
     }
   }, [rideAccount, draft.type, draft.category, categories]);
+
+  // Las dos apps ven las cuentas de los dos, así que se puede anotar o editar un
+  // movimiento en las del otro sin querer: al abrir el modal sobre una cuenta
+  // ajena se avisa de quién es. Es solo un aviso, no impide nada
+  useEffect(() => {
+    if (!account || !myOwner) return;
+    if (originOwner !== myOwner) setForeignWarning(true);
+  }, [account?.id, myOwner]);
 
   // el destino de la transferencia se pone solo, y se rehace si cambia la cuenta
   // de origen
@@ -532,6 +543,9 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
           }}
         />
       )}
+
+      {/* aviso de cuenta ajena, encima de todo ------------------------------------ */}
+      {foreignWarning && <ModalConfirm message={`Ojo: ${tx.id ? 'estás editando un movimiento' : 'estás anotando un movimiento'} en las cuentas de ${userOfAccountType(originOwner)?.label || 'el otro'}.`} confirmLabel='Ok' onConfirm={() => setForeignWarning(false)} />}
 
       {/* selector de fecha, en la misma caja de abajo que el teclado ------------- */}
       {picking === 'date' && (
