@@ -53,7 +53,11 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
   }, [params, accounts]);
 
 
+  // el listado no anima al entrar a la página, solo al volver de una cuenta
+  const cameFromAccount = useRef(false);
+
   const handleOnPressAccount = ({ account }) => {
+    cameFromAccount.current = true;
     setLocalInfo((prev) => ({
       ...prev,
       activeField: account,
@@ -94,7 +98,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {!localInfo.activeField && (
-            <View>
+            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(200) : undefined}>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Matías</Text>
@@ -201,11 +205,11 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </View>
+            </Animated.View>
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} wide={showHistory} />}
-          {showHistory && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onClose={closeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
+          {showHistory && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
           {localInfo.selectedTx && <ModalTransaction tx={localInfo.selectedTx} onCancel={() => setLocalInfo((prev) => ({ ...prev, selectedTx: null }))} />}
 
           {/* teclado ------------------------------------ */}

@@ -28,7 +28,7 @@ const shortDate = (value) => {
 
 // Lista de movimientos de una cuenta, para el espacio de abajo de la tarjeta.
 // Ocupa el mismo lugar que el teclado, así que los dos no conviven.
-export default function AccountHistory({ account, onClose, onSelect, onNew }) {
+export default function AccountHistory({ account, onSelect, onNew }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { transactions, categories } = useData();
@@ -48,18 +48,6 @@ export default function AccountHistory({ account, onClose, onSelect, onNew }) {
 
   return (
     <>
-      {/* la franja sobre la tarjeta era margen vacío: ahí va el volver, y la
-        lista arranca pegada a la tarjeta */}
-      <Animated.View
-        entering={FadeIn}
-        exiting={FadeOutUp.duration(150)}
-        style={{ position: 'absolute', left: 0, top: 0, width: windowWidth, height: windowHeight * WIDE_CARD_TOP, paddingHorizontal: windowWidth * 0.05, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}
-      >
-        <Pressable onPress={onClose} style={{ backgroundColor: theme.bg.tr_1, borderRadius: 15, height: windowWidth * 0.09, paddingHorizontal: 20, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: theme.text._2, fontWeight: 500, fontSize: fS.keyboardBtn }}>Volver</Text>
-        </Pressable>
-      </Animated.View>
-
       <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
         <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle, paddingTop: 10, paddingBottom: 8 }}>Movimientos</Text>
         {rows.length === 0 ? (

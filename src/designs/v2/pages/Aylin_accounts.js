@@ -2,7 +2,7 @@ import { View, Text, Dimensions, Platform, Pressable, ScrollView } from 'react-n
 import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
 import { useEffect, useRef, useState } from 'react';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import AccountCard from '../components/AccountCard.js';
 import { Keyboard } from '../components/Keyboard.js';
 
@@ -69,7 +69,11 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
     setPorPagarOpen(false);
   };
 
+  // el listado no anima al entrar a la página, solo al volver de una cuenta
+  const cameFromAccount = useRef(false);
+
   const handleOnPressAccount = ({ account }) => {
+    cameFromAccount.current = true;
     if (account.id === POR_PAGAR_ID) {
       setPorPagarOpen((prev) => !prev);
     } else if (account.type === 'sub_account') {
@@ -135,7 +139,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
           {!localInfo.activeField && (
-            <View>
+            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(200) : undefined}>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Aylin</Text>
@@ -259,11 +263,11 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </View>
+            </Animated.View>
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} wide={showHistory} />}
-          {showHistory && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onClose={closeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
+          {showHistory && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
           {localInfo.selectedTx && <ModalTransaction tx={localInfo.selectedTx} onCancel={() => setLocalInfo((prev) => ({ ...prev, selectedTx: null }))} />}
           {localInfo.showModalTransferAccount && (
             <ModalTransferAccount
