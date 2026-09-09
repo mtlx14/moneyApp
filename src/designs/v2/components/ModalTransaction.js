@@ -218,8 +218,10 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     .filter(([key]) => key !== draft.type && !(key === 'initial' && hasInitial) && !(key === 'transfer' && !canTransfer) && !(rideAccount && key !== 'income'))
     .map(([key, type]) => ({ key, label: type.label, icon: type }));
 
-  // las cuentas del mismo dueño, sin la que ya tiene el movimiento
-  const accountOptions = accounts.filter((a) => a.type === account?.type && a.id !== draft.accountId).map((a) => ({ key: a.id, label: a.name }));
+  // las cuentas del mismo dueño, sin la que ya tiene el movimiento. Solo las de
+  // ledger: Bencina y los sueldos llevan el saldo escrito a mano, un movimiento
+  // ahí no movería nada
+  const accountOptions = accounts.filter((a) => a.type === account?.type && a.isLedger && a.id !== draft.accountId).map((a) => ({ key: a.id, label: a.name }));
 
   // una cuenta de transporte solo lleva ingresos: si el movimiento llega con
   // otro tipo (el swipe de gasto, o se cambió la cuenta) se corrige solo, y la
