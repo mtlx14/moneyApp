@@ -41,8 +41,9 @@ export default function ModalCategory({ category, onCancel, onSave, onDelete, se
   // la caja recorta lo que sobre (overflow hidden), así que el alto de la lista
   // de íconos es lo que se ve y el resto scrollea adentro
   const iconsHeight = cell * 4 + gap * 3 + padding * 2;
-  // los colores son doce: dos filas justas, sin scroll
-  const colorsHeight = cell * 2 + gap + padding * 2;
+  // los colores son veinticuatro: las mismas cuatro filas que los íconos, y si
+  // algún día son más, scrollean igual que ellos
+  const colorsHeight = iconsHeight;
 
   // la lista se queda montada mientras se cierra, si no el contenido desaparece
   // de golpe y la caja se achica sobre el vacío
@@ -166,8 +167,7 @@ export default function ModalCategory({ category, onCancel, onSave, onDelete, se
                   })}
                 </Animated.ScrollView>
               ) : (
-                // los colores son doce: entran en dos filas, sin scroll
-                <Animated.View style={[{ height: colorsHeight, backgroundColor: theme.bg.tr_05, flexDirection: 'row', flexWrap: 'wrap', gap, padding }, panelContentStyle]}>
+                <Animated.ScrollView style={[{ height: colorsHeight, backgroundColor: theme.bg.tr_05 }, panelContentStyle]} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap, padding }}>
                   {CATEGORY_COLORS.map((color) => (
                     // el elegido se marca con un anillo alrededor, no con un
                     // borde encima: sobre doce colores distintos no se leería
@@ -179,7 +179,7 @@ export default function ModalCategory({ category, onCancel, onSave, onDelete, se
                       <View style={{ width: cell - 8, height: cell - 8, borderRadius: 100, backgroundColor: color }} />
                     </Pressable>
                   ))}
-                </Animated.View>
+                </Animated.ScrollView>
               )}
             </Animated.View>
           )}
