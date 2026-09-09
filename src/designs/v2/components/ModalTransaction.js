@@ -24,6 +24,8 @@ const toDate = (value) => {
 // sube acá, que vale para las dos plataformas
 const capitalize = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
 
+const isOtros = (label) => Number((label || '').trim().toLowerCase() === 'otros');
+
 const pad = (n) => String(n).padStart(2, '0');
 // la fecha se lee dd-mm-yyyy
 const shortDate = (date) => (date ? `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()}` : '—');
@@ -262,6 +264,20 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     label: prev.label.trim() ? prev.label : `Transferencia para ${otherUserLabel}`,
   });
 
+  // Elegir el tipo suelta la categoría que hubiera, que puede no corresponder al
+  // tipo nuevo, y deja escritas las transferencias: la de siempre con su
+  // descripción y la del otro usuario además con las dos cuentas. Lo que ya
+  // estaba escrito no se pisa
+  const pickType = (key) =>
+    setDraft((prev) => ({
+      ...prev,
+      type: key,
+      category: undefined,
+      toAccountId: key === 'transfer' ? prev.toAccountId : undefined,
+      ...(key === 'transfer' && !prev.label.trim() ? { label: 'Transferencia entre cuentas' } : {}),
+      ...(key === 'user_transfer' ? userTransferDefaults(prev) : {}),
+    }));
+
   // Por pagar y Currently son lo que dejó cada app de transporte: ahí todo es
   // ingreso, así que no se ofrece ningún otro tipo (ver RIDE_ACCOUNTS)
   const rideAccount = isRideAccount(account);
@@ -321,8 +337,10 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
         .map(([key, c]) => ({ key, label: c.label, icon: c }))
     : Object.entries(categories)
         .filter(([key, c]) => key !== draft.category && (!kindForType || c.kind === 'both' || c.kind === kindForType))
-        .map(([key, c]) => ({ key, label: c.label, icon: c, order: c.order ?? 0 }))
-        .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+        .map(([key, c]) => ({ key, label: c.label, icon: c }))
+        // alfabético, con Otros siempre al final: es el cajón de sastre, no una
+        // categoría más
+        .sort((a, b) => isOtros(a.label) - isOtros(b.label) || a.label.localeCompare(b.label, 'es'));
 
   const rows = [
     { field: 'label', label: 'Descripción' },
@@ -504,9 +522,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
           {/* caja chica al costado: entera, solo se funde. La opción actual no se
               repite, ya se lee en la fila */}
           <Animated.View pointerEvents={picking && picking !== 'date' ? 'auto' : 'none'} style={[{ position: 'absolute', left: windowWidth * 0.8 + gap, top: panelTop, width: panelWidth }, panelStyle]}>
-            {/* al cambiar el tipo, la categoría que hubiera se suelta: puede no
-                corresponder al tipo nuevo y quedaría escrita una mezcla */}
-            {panelField === 'type' && pickList(typeOptions, (key) => setDraft((prev) => ({ ...prev, type: key, category: undefined, toAccountId: key === 'transfer' ? prev.toAccountId : undefined, ...(key === 'user_transfer' ? userTransferDefaults(prev) : {}) })))}
+            {panelField === 'type' && pickList(typeOptions, pickType)}
             {/* al cambiar la cuenta de origen el destino se suelta: podría ser la
                 misma cuenta, o una de otro dueño */}
             {panelField === 'account' && pickList(accountOptions, (key) => setDraft((prev) => ({ ...prev, accountId: key, toAccountId: undefined })))}
