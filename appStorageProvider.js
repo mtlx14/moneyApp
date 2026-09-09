@@ -1,17 +1,21 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { monthKeyOf } from './src/helpers';
+import { DEFAULT_THEME } from './data';
 
 const STORAGE_KEY = 'app_storage';
 
 const defaultState = {
   users: {
-    matias: { name: 'matias', theme: 'graphite_blue_purple' },
-    aylin: { name: 'aylin', theme: 'pink_blue' },
+    matias: { name: 'matias', theme: DEFAULT_THEME },
+    aylin: { name: 'aylin', theme: DEFAULT_THEME },
   },
   currentUser: 'aylin',
   monthOffset: 0,
   monthOffsetActivatedAt: null,
+  // Marca de la migración al tema nuevo: quien traiga un tema guardado del
+  // diseño anterior arranca de nuevo en el por defecto, una sola vez.
+  themeMigrated: true,
 };
 
 const AppStorageContext = createContext(null);
@@ -26,10 +30,17 @@ export const AppStorageProvider = ({ children }) => {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
-          const parsed = { ...defaultState, ...JSON.parse(stored) };
+          const storedState = JSON.parse(stored);
+          const parsed = { ...defaultState, ...storedState };
           if (parsed.monthOffset === 1 && parsed.monthOffsetActivatedAt && parsed.monthOffsetActivatedAt !== monthKeyOf()) {
             parsed.monthOffset = 0;
             parsed.monthOffsetActivatedAt = null;
+          }
+          // Se mira el guardado, no `parsed`: el spread de arriba ya le puso
+          // la marca del estado por defecto.
+          if (!storedState.themeMigrated) {
+            parsed.users = Object.fromEntries(Object.entries(parsed.users).map(([name, user]) => [name, { ...user, theme: DEFAULT_THEME }]));
+            parsed.themeMigrated = true;
           }
           setAppStorage(parsed);
         }

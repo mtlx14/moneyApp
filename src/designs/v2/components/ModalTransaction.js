@@ -558,8 +558,8 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
           {isComplete && hasChanges && (
             <Animated.View layout={LinearTransition} entering={SlideInRight} exiting={SlideOutRight}>
               <Pressable onPress={() => (saveTransaction({ tx: { ...draft, id: tx.id } }), notifyReceiver(), onCancel())} style={{ backgroundColor: theme.bg.check, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}>
-                {/* onFill y no _1: el modal de gastos usa _1, que en v1 era blanco
-                    y en v2 quedó tinta sobre el verde */}
+                {/* onFill y no _1: sobre el verde sólido va texto blanco, y _1
+                    es tinta */}
                 <Text style={{ color: theme.text.onFill, fontSize: fS.modalTransfer, paddingHorizontal: 20 }}>Guardar</Text>
               </Pressable>
             </Animated.View>

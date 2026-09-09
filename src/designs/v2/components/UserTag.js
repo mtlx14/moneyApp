@@ -3,7 +3,7 @@ import { useTheme } from '../../../theme/useTheme.js';
 import { useEffect, useState } from 'react';
 import Animated, { FadeOutRight, LinearTransition, SlideInLeft, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';
 import React from 'react';
-import { legacyThemes, newThemes } from '../../../../data.js';
+import { themes } from '../../../../data.js';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { fS } from '../../../theme/theme.js';
@@ -137,20 +137,7 @@ export default function UserTag({}) {
                   flexWrap: 'wrap',
                 }}
               >
-                {Object.values(legacyThemes).map((t, index) => (
-                  <React.Fragment key={index}>{renderThemeItem(t)}</React.Fragment>
-                ))}
-              </View>
-              <View style={{ height: 1, marginHorizontal: 15, backgroundColor: theme.bg.tr_2 }}></View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  padding: 15,
-                  gap: 15,
-                  flexWrap: 'wrap',
-                }}
-              >
-                {Object.values(newThemes).map((t, index) => (
+                {Object.values(themes).map((t, index) => (
                   <React.Fragment key={index}>{renderThemeItem(t)}</React.Fragment>
                 ))}
               </View>

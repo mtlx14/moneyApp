@@ -4,8 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const GRID = 12;
 
-// v2: papel plano con cuadrícula, sin gradiente. Conserva el nombre para que el
-// registry de diseños lo resuelva igual que en v1.
+// Papel plano con cuadrícula, sin gradiente.
 export default function GradientBackground({ children }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();

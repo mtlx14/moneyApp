@@ -17,7 +17,10 @@ export const subAccountCard = {
   Uber: require('./assets/images/card_black.png'),
 };
 
-export const legacyThemes = {
+// Todos los temas son variantes de color del mismo diseño. El primero, beige,
+// es el que se usa por defecto; los demás vienen de la paleta anterior.
+export const themes = {
+  beige: beigeTheme,
   graphite_blue_purple: graphiteBluePurpleTheme,
   purple: purpleTheme,
   dark: darkTheme,
@@ -29,15 +32,7 @@ export const legacyThemes = {
   blue: blueTheme,
 };
 
-// Temas del rediseño
-export const newThemes = {
-  beige: beigeTheme,
-};
-
-export const themes = {
-  ...legacyThemes,
-  ...newThemes,
-};
+export const DEFAULT_THEME = 'beige';
 
 // Tipos de movimiento. La transacción guarda solo la clave.
 // El ícono y el color son fijos por tipo: no se eligen, solo identifican.

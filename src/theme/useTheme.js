@@ -1,10 +1,8 @@
-import { useColorScheme } from 'react-native';
-
 import { useAppStorage } from '../../appStorageProvider';
-import { themes } from '../../data';
+import { DEFAULT_THEME, themes } from '../../data';
 
 export const useTheme = () => {
   const { currentUser } = useAppStorage();
 
-  return themes[currentUser.theme] || themes.dark;
+  return themes[currentUser.theme] || themes[DEFAULT_THEME];
 };

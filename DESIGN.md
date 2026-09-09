@@ -1,37 +1,29 @@
-# Diseño v2 (tema beige / papel)
+# Diseño (tema beige / papel)
 
-Contexto para retomar el rediseño en otro chat. La app tiene **dos árboles de
-diseño** viviendo a la vez: `v1` es el diseño original y no se toca; `v2` es el
-rediseño. El tema activo decide cuál se renderiza.
+Contexto para retomar el diseño en otro chat. Hay **un solo árbol de diseño**,
+`src/designs/v2`: el original se eliminó. El tema solo define colores.
 
 Referencia visual: `~/Desktop/code/songListApp` — de ahí salen la paleta de
 papel, la cuadrícula del fondo y la barra vertical.
 
 ---
 
-## Cómo se eligen los diseños
+## Temas
 
-Cada tema declara su árbol:
+`src/theme/theme.js`:
 
-```js
-// src/theme/theme.js
-baseTheme  → design: 'v1'   // lo heredan todos los temas viejos
-beigeTheme → design: 'v2'
-```
+- `baseTheme` es la paleta del rediseño (papel + tinta) y `beigeTheme` la usa
+  tal cual: es el tema por defecto (`DEFAULT_THEME` en `data.js`).
+- Los demás son variantes de color heredadas del diseño anterior. Todas salen
+  de `createDarkTheme`, que apila `darkBase` (texto blanco, transparencias
+  claras, cuadrícula apagada) sobre la base; cada una cambia los dos tonos de
+  fondo y algún acento.
 
-`useDesign()` (`src/designs/index.js`) lee `theme.design` y devuelve el módulo
-del diseño. `App.js` resuelve contra ese registry: no importa páginas
-directamente.
+Para sumar un tema alcanza con crearlo ahí y agregarlo a `themes` en `data.js`:
+el selector del `UserTag` los lista todos en una sola grilla.
 
-```
-src/designs/index.js      useDesign() + registry
-src/designs/v1/index.js   páginas + MainMenu + GradientBackground
-src/designs/v2/index.js   ídem
-```
-
-Para agregar un tema nuevo al rediseño alcanza con `design: 'v2'` y sumarlo a
-`newThemes` en `data.js` (`legacyThemes` es el grupo de arriba del selector,
-`newThemes` el de abajo, separados por una barra).
+`useDesign()` (`src/designs/index.js`) devuelve el único diseño; `App.js`
+resuelve las páginas contra ese registry en vez de importarlas directo.
 
 ---
 
@@ -39,28 +31,22 @@ Para agregar un tema nuevo al rediseño alcanza con `design: 'v2'` y sumarlo a
 
 ```
 src/
-  theme/theme.js        TODOS los colores, de los dos diseños
+  theme/theme.js        TODOS los colores
   theme/useTheme.js
   helpers.js            compartido
   services.js           compartido
   designs/
     index.js
-    v1/{pages,components}    diseño original — NO TOCAR
     v2/
       layout.js              medidas del riel y del padding
       index.js
-      pages/       Home, Monthly_summary, Subscriptions,
+      pages/       Home, Monthly_summary, Subscriptions, Categories,
                    Matias_accounts, Aylin_accounts, FixedExpenses
-      components/  copias de v1, se editan libremente
+      components/
 ```
 
 `context.js`, `appStorageProvider.js`, `data.js` y `services.js` son únicos: la
 lógica de negocio no está duplicada.
-
-> **Ojo:** las páginas y componentes de v2 nacieron como copia de v1. Lo que
-> todavía no divergió sigue igual en los dos lados, así que **un arreglo de
-> lógica hay que hacerlo en los dos árboles**. Cuando algo se toca mucho,
-> conviene extraer la lógica a un hook compartido en `src/`.
 
 ---
 
@@ -125,10 +111,10 @@ los rellenos. No unificarlos.
 
 ---
 
-## Piezas propias de v2
+## Piezas propias del diseño
 
 **`components/GradientBackground.js`** — pese al nombre (se conserva para que el
-registry resuelva igual que v1), pinta papel **plano** más una cuadrícula de
+registry resuelva igual), pinta papel **plano** más una cuadrícula de
 12px. React Native no tiene `background-image` repetido, así que la retícula son
 ~100 `View` de 1px dibujadas una vez.
 
@@ -206,7 +192,7 @@ código:
   la tarjeta por defecto, o en ninguna.
 - `components/AccountCard.js` → consulta esos mapas y después una cadena por
   `id`/`type`/`hasSubAccount`.
-- `card_transparent.png` es blanca y desaparece sobre el papel: v2 usa
+- `card_transparent.png` es blanca y desaparece sobre el papel: se usa
   `card_light.png` (gris) para las cuentas con subcuentas, con texto oscuro.
 
 ---
@@ -312,7 +298,7 @@ Cada diseño define la suya: `pageAnimations(direction)` en su `index.js`, y
 `App.js` se la pide en vez de tenerlas escritas. El riel pasa `direction` según
 la posición del destino: 1 si está más abajo en la lista, 0 si está más arriba.
 
-Estado actual en v2: **solo entrada**, `FadeInDown`/`FadeInUp` de 100ms, sin
+Estado actual: **solo entrada**, `FadeInDown`/`FadeInUp` de 100ms, sin
 delay y con el recorrido por defecto del preset.
 
 Esto costó muchas vueltas. Lo que quedó aprendido, para no repetirlo:
@@ -379,5 +365,5 @@ Pendiente / conocido:
   menú viejo. En Gastos ya se bajó a `0.05`.
 - **Los iconos PNG de `assets/icons/` se dibujan sin `tintColor`.** Si son
   blancos, sobre el papel no se ven.
-- **`theme.home_acc_text_2`** (sin el `.fw`) aparece en varios lados de v1:
-  es `undefined` y renderiza el peso por defecto. En v2 ya está corregido.
+- **`theme.home_acc_text_2`** (sin el `.fw`) es `undefined` y renderiza el peso
+  por defecto. Va `theme.fw.home_acc_text_2`.
