@@ -57,9 +57,10 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
     }
   }, [appMeta, currentUser]);
 
-  // Las transferencias que le mandó el otro y todavía no vio. Salen después del
-  // aviso de cambios: primero se acepta ese, después se leen estas. Si no hubo
-  // cambios que aceptar, salen solas
+  // Las transferencias que le mandó el otro y todavía no vio. Anotarlas deja
+  // también el aviso verde de cambios, así que primero se lee ese y el detalle
+  // sale recién al darle Ok. Si el aviso ya se había aceptado antes, salen solas
+  // en vez de quedarse esperando uno que no va a volver
   const receivedTransfers = (currentUser.name === 'matias' ? appMeta?.mTransfers : appMeta?.aTransfers) || [];
   const showTransfers = receivedTransfers.length > 0 && showChanges.length === 0 && !localInfo.activeField;
 

@@ -7,7 +7,7 @@ import { useAppStorage } from '../../../../appStorageProvider';
 import { TRANSFER_PAIR, TRANSFER_TYPES, TYPES_WITHOUT_CATEGORY, USER_ACCOUNT_TYPE, txTypes } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
 import { addsToBalance, confirmDelete, isRideAccount, otherAccountType, rideCategories, txTypeLabel, userOfAccountType } from '../../../helpers.js';
-import { deleteTransaction, notifyUserTransfer, saveTransaction } from '../../../services.js';
+import { deleteTransaction, notifyUserTransfer, saveTransaction, updateChanges } from '../../../services.js';
 import Icon from './Icon.js';
 import Caret from './Caret.js';
 import { Keyboard as CustomKeyboard } from './Keyboard.js';
@@ -173,13 +173,18 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   };
 
   // Al que recibe una transferencia le queda el aviso anotado: no está mirando
-  // la app cuando se anota. Solo al crearla, editarla no vuelve a avisar
+  // la app cuando se anota. Solo al crearla, editarla no vuelve a avisar.
+  //
+  // Va con el aviso verde de cambios, que es el que se lee primero: el detalle
+  // de la transferencia sale recién al darle Ok a ese (ver Inicio)
   const notifyReceiver = () => {
     if (tx.id || draft.type !== 'user_transfer') return;
     const to = accounts.find((a) => a.id === draft.toAccountId);
     const toUser = userOfAccountType(to?.type)?.name;
-    if (!toUser) return;
-    notifyUserTransfer({ toUser, from: userOfAccountType(originOwner)?.label || '', amount: Number(draft.amount), accountName: to.name });
+    const fromUser = userOfAccountType(originOwner);
+    if (!toUser || !fromUser) return;
+    notifyUserTransfer({ toUser, from: fromUser.label, amount: Number(draft.amount), accountName: to.name });
+    updateChanges({ user: fromUser.name, change: 'transferencia' });
   };
 
   // el tipo que impone una categoría, si es exclusiva de uno; null si sirve para
