@@ -132,9 +132,13 @@ export function rideCategories(categories) {
 }
 
 // lo que puso cada app dentro de una cuenta de transporte: la suma de sus
-// movimientos por categoría. Las que no tienen ninguno quedan fuera, así que una
-// cuenta vacía no muestra nada
+// movimientos por categoría. Solo lo abren Por pagar y Currently —el resto de
+// las cuentas no muestra desglose ninguno, aunque tenga un movimiento de esas
+// categorías—, y las que no tienen ninguno quedan fuera, así que una cuenta
+// vacía tampoco muestra nada
 export function rideBreakdown({ account, transactions, categories }) {
+  if (!isRideAccount(account)) return [];
+
   return rideCategories(categories)
     .map(([id, category]) => ({
       id,
