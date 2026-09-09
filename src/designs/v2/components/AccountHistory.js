@@ -3,7 +3,7 @@ import Icon from './Icon.js';
 import SwipeToDelete from './SwipeToDelete.js';
 import { View, Text, Dimensions, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeOut, FadeOutUp, SlideInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
 import { deleteTransaction } from '../../../services.js';
@@ -13,8 +13,6 @@ import FadingScroll from './FadingScroll.js';
 import NewTxSwipe from './NewTxSwipe.js';
 import { confirmDelete, isRideAccount, signedAmountFor } from '../../../helpers.js';
 import { CARD_RATIO, WIDE_CARD_ASPECT, WIDE_CARD_TOP } from './AccountCard.js';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -48,12 +46,10 @@ export default function AccountHistory({ account, onSelect, onNew }) {
 
   return (
     <>
-      <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
+      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
         <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle, paddingTop: 10, paddingBottom: 8 }}>Movimientos</Text>
         {rows.length === 0 ? (
-          <Animated.Text entering={FadeIn} exiting={FadeOut.duration(150)} style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>
-            Sin movimientos todavía.
-          </Animated.Text>
+          <Text style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>Sin movimientos todavía.</Text>
         ) : (
           <FadingScroll>
             <View style={{ gap: 5, paddingBottom: windowHeight * 0.02 }}>
@@ -63,16 +59,17 @@ export default function AccountHistory({ account, onSelect, onNew }) {
                 const isPositive = signedAmountFor(tx, account.id) > 0;
 
                 return (
-                  // el exiting no es de adorno: sin él, al desmontarse la lista
-                  // reanimated saca las filas de una y solo se ve irse la caja
-                  // vacía, con el resto desaparecido de golpe
-                  <Animated.View key={tx.id} entering={FadeInDown.delay(index * 30)} exiting={FadeOut.duration(150)}>
+                  // Sin animación propia: la ponía cada fila por separado y se
+                  // veía reiniciarse la lista entera cada vez que se volvía de un
+                  // movimiento. Además, con hijos animados reanimated no puede
+                  // sacar el bloque de una sola pieza. Entran y salen con la caja
+                  <View key={tx.id}>
                     <SwipeToDelete
                       width={windowWidth * 0.9}
                       height={windowWidth * 0.13}
                       onDelete={({ reset }) => confirmDelete({ title: 'Eliminar movimiento', message: `¿Estás seguro que quieres eliminar "${tx.label || 'este movimiento'}"?`, onConfirm: () => deleteTransaction({ tx }), onCancel: reset })}
                     >
-                      <AnimatedPressable
+                      <Pressable
                         onPress={() => onSelect(tx)}
                         style={{ backgroundColor: theme.bg.tr_05, borderRadius: 10, height: '100%', width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12 }}
                       >
@@ -88,9 +85,9 @@ export default function AccountHistory({ account, onSelect, onNew }) {
                           </View>
                         </View>
                         <Text style={{ color: isPositive ? theme.text.green : theme.text.red, fontSize: fS.subsText }}>{`${isPositive ? '+' : '-'}$${Number(tx.amount).toLocaleString('es-CL')}`}</Text>
-                      </AnimatedPressable>
+                      </Pressable>
                     </SwipeToDelete>
-                  </Animated.View>
+                  </View>
                 );
               })}
             </View>
@@ -99,7 +96,7 @@ export default function AccountHistory({ account, onSelect, onNew }) {
       </Animated.View>
 
       {/* anotar un movimiento: se toca o se arrastra, fijo abajo */}
-      <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: windowWidth * 0.05, bottom: barBottom }}>
+      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: 'absolute', left: windowWidth * 0.05, bottom: barBottom }}>
         {/* en las cuentas de transporte todo es ingreso: el lado del gasto no
           se ofrece */}
         <NewTxSwipe height={barHeight} onNew={onNew} incomeOnly={isRideAccount(account)} />
