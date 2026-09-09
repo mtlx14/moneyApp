@@ -49,13 +49,31 @@ export const txTypes = {
   income: { label: 'Ingreso', icon: 'savings', color: '#4DBD6B' },
   expense: { label: 'Gasto', icon: 'receipt', color: '#D55858' },
   transfer: { label: 'Transferencia', icon: 'swap_horiz', color: '#6E9AA8' },
+  // Transferencia al otro usuario. Adentro es igual que la de arriba —sale de
+  // una cuenta y entra en otra, no es ingreso ni gasto—, lo único distinto es
+  // que la cuenta de destino es del otro. La etiqueta se arma con el nombre de
+  // quien recibe (ver txTypeLabel), esta es solo el respaldo
+  user_transfer: { label: 'Tr. a otro usuario', icon: 'swap_horiz', color: '#7A6FA8' },
   adjustment: { label: 'Ajuste', icon: 'healing', color: '#9A9183' },
 };
 
 // Saldo inicial, transferencia y ajuste NO son categorías: son tipos, y los
 // movimientos de esos tipos no llevan categoría ninguna. El ícono y el color se
 // los pone su entrada de txTypes.
-export const TYPES_WITHOUT_CATEGORY = ['initial', 'transfer', 'adjustment'];
+export const TYPES_WITHOUT_CATEGORY = ['initial', 'transfer', 'user_transfer', 'adjustment'];
+
+// Los dos tipos que mueven plata de una cuenta a otra: un solo documento que
+// resta en la de origen y suma en la de destino. Todo lo que mire toAccountId
+// tiene que mirar los dos
+export const TRANSFER_TYPES = ['transfer', 'user_transfer'];
+
+// Los dos usuarios y el tipo de cuenta que lleva cada uno. Las cuentas guardan
+// el tipo, así que de una cuenta se sabe de quién es y al revés
+export const USER_ACCOUNT_TYPE = { matias: 'm_account', aylin: 'a_account' };
+export const ACCOUNT_TYPE_USER = {
+  m_account: { name: 'matias', label: 'Matías' },
+  a_account: { name: 'aylin', label: 'Aylin' },
+};
 
 // Las transferencias van solo entre estas dos cuentas del mismo dueño, así que
 // elegido el origen el destino es la otra y no hay nada que elegir. Van por

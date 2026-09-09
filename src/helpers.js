@@ -1,6 +1,6 @@
 import { Alert, Platform } from 'react-native';
 import { Timestamp } from 'firebase/firestore';
-import { BILL_CATEGORIES, RIDE_ACCOUNTS, RIDE_CATEGORIES, TRANSFER_PAIR } from '../data.js';
+import { ACCOUNT_TYPE_USER, BILL_CATEGORIES, RIDE_ACCOUNTS, RIDE_CATEGORIES, TRANSFER_PAIR, TRANSFER_TYPES, USER_ACCOUNT_TYPE, txTypes } from '../data.js';
 
 export function getEffectiveDate(monthOffset = 0) {
   const d = new Date();
@@ -96,6 +96,27 @@ export function addsToBalance(tx) {
   return tx?.type === 'income' || tx?.type === 'initial';
 }
 
+// mueve plata de una cuenta a otra: la propia o, entre usuarios, la del otro
+export function isTransfer(tx) {
+  return TRANSFER_TYPES.includes(tx?.type);
+}
+
+// el nombre del tipo como se lee en el modal: la transferencia entre usuarios
+// dice a quién va, el resto usa la etiqueta de txTypes
+export function txTypeLabel(type, otherUserLabel) {
+  if (type === 'user_transfer' && otherUserLabel) return `Tr. a ${otherUserLabel}`;
+  return txTypes[type]?.label || type;
+}
+
+// el usuario dueño de un tipo de cuenta, y el otro
+export function userOfAccountType(accountType) {
+  return ACCOUNT_TYPE_USER[accountType];
+}
+
+export function otherAccountType(accountType) {
+  return accountType === 'm_account' ? 'a_account' : accountType === 'a_account' ? 'm_account' : null;
+}
+
 // el monto de una transacción con su signo
 export function signedAmount(tx) {
   return addsToBalance(tx) ? tx.amount : -tx.amount;
@@ -104,7 +125,7 @@ export function signedAmount(tx) {
 // lo que aporta una transacción a una cuenta en particular: una transferencia
 // resta en la de origen y suma en la de destino, el resto solo toca la suya
 export function signedAmountFor(tx, accountId) {
-  if (tx?.type === 'transfer' && tx.toAccountId === accountId) return tx.amount;
+  if (isTransfer(tx) && tx.toAccountId === accountId) return tx.amount;
   return signedAmount(tx);
 }
 
@@ -169,7 +190,7 @@ export function billCategoryId(bill, categories) {
 // corriente. Si no la tuviera, cualquiera de sus cuentas de ledger que no sea de
 // transporte. Es solo el valor con el que abre el modal, ahí se puede cambiar
 export function defaultTxAccount(accounts, userName) {
-  const type = userName === 'matias' ? 'm_account' : 'a_account';
+  const type = USER_ACCOUNT_TYPE[userName];
   const mine = accounts.filter((a) => a.type === type && a.isLedger && !isRideAccount(a));
   return mine.find((a) => a.name === TRANSFER_PAIR[0]) || mine[0];
 }

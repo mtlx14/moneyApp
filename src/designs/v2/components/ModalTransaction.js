@@ -3,10 +3,10 @@ import { Dimensions, Keyboard as RNKeyboard, Platform, Pressable, ScrollView, Te
 import Animated, { Easing, FadeInDown, LinearTransition, SlideInRight, SlideOutRight, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
-import { TRANSFER_PAIR, TYPES_WITHOUT_CATEGORY, txTypes } from '../../../../data.js';
+import { TRANSFER_PAIR, TRANSFER_TYPES, TYPES_WITHOUT_CATEGORY, txTypes } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
-import { addsToBalance, confirmDelete, isRideAccount, rideCategories } from '../../../helpers.js';
-import { deleteTransaction, saveTransaction } from '../../../services.js';
+import { addsToBalance, confirmDelete, isRideAccount, otherAccountType, rideCategories, txTypeLabel, userOfAccountType } from '../../../helpers.js';
+import { deleteTransaction, notifyUserTransfer, saveTransaction } from '../../../services.js';
 import Icon from './Icon.js';
 import Caret from './Caret.js';
 import { Keyboard as CustomKeyboard } from './Keyboard.js';
@@ -141,6 +141,10 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
 
   const isTransferAccountRow = (field) => draft.type === 'transfer' && (field === 'account' || field === 'toAccount');
 
+  // las filas que abren una caja chica: el destino solo cuando se elige, que es
+  // en la transferencia al otro usuario
+  const canPick = (field) => ['type', 'account', 'category', 'date'].includes(field) || (field === 'toAccount' && draft.type === 'user_transfer');
+
   const openPicker = (field) => {
     clearTimeout(openTimer.current);
     setAmountKeyboard(false);
@@ -163,6 +167,16 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     setInputFocused(false);
   };
 
+  // Al que recibe una transferencia le queda el aviso anotado: no está mirando
+  // la app cuando se anota. Solo al crearla, editarla no vuelve a avisar
+  const notifyReceiver = () => {
+    if (tx.id || draft.type !== 'user_transfer') return;
+    const to = accounts.find((a) => a.id === draft.toAccountId);
+    const toUser = userOfAccountType(to?.type)?.name;
+    if (!toUser) return;
+    notifyUserTransfer({ toUser, from: userOfAccountType(originOwner)?.label || '', amount: Number(draft.amount), accountName: to.name });
+  };
+
   // el tipo que impone una categoría, si es exclusiva de uno; null si sirve para
   // los dos y entonces el tipo elegido se respeta
   const typeForCategory = (key) => {
@@ -173,7 +187,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   // el botón de guardar aparece cuando el movimiento está entero y además
   // cambió, igual que en el modal de gastos. La categoría solo se pide en los
   // tipos que la llevan
-  const isComplete = !!draft.label.trim() && Number(draft.amount) > 0 && !!draft.type && !!draft.accountId && !!draft.date && (TYPES_WITHOUT_CATEGORY.includes(draft.type) || !!draft.category) && (draft.type !== 'transfer' || !!draft.toAccountId);
+  const isComplete = !!draft.label.trim() && Number(draft.amount) > 0 && !!draft.type && !!draft.accountId && !!draft.date && (TYPES_WITHOUT_CATEGORY.includes(draft.type) || !!draft.category) && (!TRANSFER_TYPES.includes(draft.type) || !!draft.toAccountId);
   const hasChanges =
     !tx.id ||
     draft.label.trim() !== (tx.label || '').trim() ||
@@ -208,15 +222,30 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   const partnerName = TRANSFER_PAIR.includes(account?.name) ? TRANSFER_PAIR.find((name) => name !== account.name) : null;
   const transferPartner = partnerName ? accounts.find((a) => a.name === partnerName && a.isLedger && a.type !== 'sub_account' && ownerOf(a) === originOwner) : null;
 
+  // La transferencia al otro usuario llega solo a su cuenta corriente o a su
+  // efectivo: las de transporte solo llevan ingresos y las que tienen el saldo
+  // escrito a mano no se mueven con un movimiento. El otro sale del dueño de la
+  // cuenta de origen, no de quién esté usando la app: cada uno transfiere desde
+  // sus cuentas
+  const otherOwner = otherAccountType(originOwner);
+  const otherUserLabel = userOfAccountType(otherOwner)?.label;
+  const otherAccounts = accounts.filter((a) => a.type === otherOwner && a.isLedger && a.type !== 'sub_account' && TRANSFER_PAIR.includes(a.name));
+  const toAccount = accounts.find((a) => a.id === draft.toAccountId);
+
   // Por pagar y Currently son lo que dejó cada app de transporte: ahí todo es
   // ingreso, así que no se ofrece ningún otro tipo (ver RIDE_ACCOUNTS)
   const rideAccount = isRideAccount(account);
 
   // sin par no hay a dónde transferir: el tipo ni se ofrece
   const canTransfer = !!account?.isLedger && account.type !== 'sub_account' && !!transferPartner;
+  // al otro usuario se transfiere desde cualquier cuenta propia de ledger, con
+  // que él tenga a dónde recibirlo
+  const canUserTransfer = !!account?.isLedger && account.type !== 'sub_account' && otherAccounts.length > 0;
   const typeOptions = Object.entries(txTypes)
-    .filter(([key]) => key !== draft.type && !(key === 'initial' && hasInitial) && !(key === 'transfer' && !canTransfer) && !(rideAccount && key !== 'income'))
-    .map(([key, type]) => ({ key, label: type.label, icon: type }));
+    .filter(([key]) => key !== draft.type && !(key === 'initial' && hasInitial) && !(key === 'transfer' && !canTransfer) && !(key === 'user_transfer' && !canUserTransfer) && !(rideAccount && key !== 'income'))
+    .map(([key, type]) => ({ key, label: txTypeLabel(key, otherUserLabel), icon: type }));
+
+  const otherAccountOptions = otherAccounts.map((a) => ({ key: a.id, label: a.name }));
 
   // las cuentas del mismo dueño, sin la que ya tiene el movimiento. Solo las de
   // ledger: Bencina y los sueldos llevan el saldo escrito a mano, un movimiento
@@ -259,12 +288,13 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   const rows = [
     { field: 'label', label: 'Descripción' },
     { field: 'amount', label: 'Monto' },
-    { field: 'type', label: 'Tipo', value: txTypes[draft.type]?.label || draft.type || '—', icon: txTypes[draft.type] },
+    { field: 'type', label: 'Tipo', value: draft.type ? txTypeLabel(draft.type, otherUserLabel) : '—', icon: txTypes[draft.type] },
     // saldos iniciales, transferencias y ajustes no llevan categoría: la fila no aparece
     ...(TYPES_WITHOUT_CATEGORY.includes(draft.type) ? [] : [{ field: 'category', label: 'Categoría', value: category?.label || draft.category || '—', icon: category }]),
     { field: 'account', label: 'Cuenta', value: account?.name || draft.accountId },
-    // la transferencia necesita saber a dónde va; los demás tipos no
-    ...(draft.type === 'transfer' ? [{ field: 'toAccount', label: 'A cuenta', value: transferPartner?.name || '—' }] : []),
+    // las dos transferencias necesitan saber a dónde van; los demás tipos no. La
+    // de siempre ya tiene su par puesto, la del otro usuario se elige
+    ...(TRANSFER_TYPES.includes(draft.type) ? [{ field: 'toAccount', label: 'A cuenta', value: (draft.type === 'transfer' ? transferPartner?.name : toAccount?.name) || '—' }] : []),
     { field: 'date', label: 'Fecha', value: shortDate(draft.date) },
   ];
 
@@ -279,7 +309,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
   // las cuentas y las categorías tienen nombres más largos que los tipos
   const panelWidth = panelField === 'type' ? windowWidth * 0.36 : windowWidth * 0.44;
 
-  const panelOptions = panelField === 'account' ? accountOptions : panelField === 'category' ? categoryOptions : panelField === 'type' ? typeOptions : [];
+  const panelOptions = panelField === 'account' ? accountOptions : panelField === 'toAccount' ? otherAccountOptions : panelField === 'category' ? categoryOptions : panelField === 'type' ? typeOptions : [];
   // las categorías pueden ser muchas: la caja chica nunca pasa de la grande y lo
   // que sobra scrollea adentro
   const panelHeight = Math.min(panelOptions.length * rowHeight + Math.max(0, panelOptions.length - 1), boxHeight);
@@ -378,7 +408,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
                     </Pressable>
                   ) : (
                     <Pressable
-                      disabled={!['type', 'account', 'category', 'date'].includes(row.field) && !isTransferAccountRow(row.field)}
+                      disabled={!canPick(row.field) && !isTransferAccountRow(row.field)}
                       onPress={() => (isTransferAccountRow(row.field) ? swapTransferAccounts() : openPicker(row.field))}
                       style={{ flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 10 }}
                     >
@@ -434,6 +464,8 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
             {panelField === 'account' && pickList(accountOptions, (key) => setDraft((prev) => ({ ...prev, accountId: key, toAccountId: undefined })))}
             {/* y al revés: una categoría que es solo de gasto o solo de ingreso
                 arrastra el tipo con ella. Las de kind 'both' lo dejan como está */}
+            {/* el destino de la transferencia al otro usuario: sus dos cuentas */}
+            {panelField === 'toAccount' && pickList(otherAccountOptions, (key) => setDraft((prev) => ({ ...prev, toAccountId: key })))}
             {panelField === 'category' && pickList(categoryOptions, (key) => setDraft((prev) => ({ ...prev, category: key, type: typeForCategory(key) || prev.type })))}
           </Animated.View>
         </Animated.View>
@@ -465,7 +497,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
           {/* guardar aparece solo cuando hay algo entero que guardar */}
           {isComplete && hasChanges && (
             <Animated.View layout={LinearTransition} entering={SlideInRight} exiting={SlideOutRight}>
-              <Pressable onPress={() => (saveTransaction({ tx: { ...draft, id: tx.id } }), onCancel())} style={{ backgroundColor: theme.bg.check, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}>
+              <Pressable onPress={() => (saveTransaction({ tx: { ...draft, id: tx.id } }), notifyReceiver(), onCancel())} style={{ backgroundColor: theme.bg.check, borderRadius: 100, height: windowWidth * 0.08, justifyContent: 'center', alignItems: 'center' }}>
                 {/* onFill y no _1: el modal de gastos usa _1, que en v1 era blanco
                     y en v2 quedó tinta sobre el verde */}
                 <Text style={{ color: theme.text.onFill, fontSize: fS.modalTransfer, paddingHorizontal: 20 }}>Guardar</Text>

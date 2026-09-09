@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, getEffectiveDate, signedAmount, signedAmountFor } from './src/helpers';
+import { amountForMonth, getEffectiveDate, isTransfer, signedAmount, signedAmountFor } from './src/helpers';
 import { defaultCategories } from './data.js';
 import { seedCategories } from './src/services.js';
 
@@ -82,7 +82,7 @@ export const DataProvider = ({ children }) => {
       map[tx.accountId] = (map[tx.accountId] || 0) + signedAmount(tx);
       // la transferencia es un solo documento: le suma a la cuenta de destino
       // lo que le restó a la de origen
-      if (tx.type === 'transfer' && tx.toAccountId) map[tx.toAccountId] = (map[tx.toAccountId] || 0) + tx.amount;
+      if (isTransfer(tx) && tx.toAccountId) map[tx.toAccountId] = (map[tx.toAccountId] || 0) + tx.amount;
     });
     return map;
   }, [transactions]);

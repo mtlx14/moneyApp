@@ -1,5 +1,6 @@
 import { setDoc, doc, deleteDoc, serverTimestamp, arrayUnion, deleteField, collection, Timestamp } from 'firebase/firestore';
 import db from '../conection.js';
+import { TRANSFER_TYPES } from '../data.js';
 
 export function updateAccountBalance({ account, balance }) {
   setDoc(
@@ -81,6 +82,29 @@ export function updateChanges({ user, change }) {
   );
 }
 
+// Aviso de una transferencia entre usuarios: el que recibe no está mirando, así
+// que le queda anotada y la lee al entrar a la app. Va en el mismo documento que
+// los cambios, que es el que las dos apps ya escuchan. La fecha va como
+// Timestamp y no serverTimestamp: adentro de un array no se puede.
+export function notifyUserTransfer({ toUser, from, amount, accountName }) {
+  const field = toUser === 'matias' ? 'mTransfers' : 'aTransfers';
+
+  setDoc(
+    doc(db, 'appMeta', 'changes'),
+    {
+      [field]: arrayUnion({ from, amount, accountName, date: Timestamp.now() }),
+    },
+    { merge: true },
+  );
+}
+
+// ya las vio: se vacían para que no vuelvan a salir
+export function okTransfers({ user }) {
+  const field = user.name === 'matias' ? 'mTransfers' : 'aTransfers';
+
+  setDoc(doc(db, 'appMeta', 'changes'), { [field]: [] }, { merge: true });
+}
+
 // Categorías ------------------------------------------------------------------
 
 // El id se arma con la etiqueta la primera vez y después no se toca: las
@@ -147,7 +171,7 @@ export function saveTransaction({ tx }) {
       // dejarla escrita de una edición anterior
       category: tx.category || deleteField(),
       // solo las transferencias tienen destino; en el resto se borra
-      toAccountId: tx.type === 'transfer' && tx.toAccountId ? tx.toAccountId : deleteField(),
+      toAccountId: TRANSFER_TYPES.includes(tx.type) && tx.toAccountId ? tx.toAccountId : deleteField(),
       date: Timestamp.fromDate(tx.date instanceof Date ? tx.date : new Date(tx.date)),
     },
     { merge: true },

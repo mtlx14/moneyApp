@@ -10,12 +10,13 @@ import { Keyboard } from '../components/Keyboard.js';
 import AccountCard from '../components/AccountCard.js';
 
 import UserTag from '../components/UserTag.js';
-import { updateAccountBalance, updateChanges } from '../../../services.js';
+import { okTransfers, updateAccountBalance, updateChanges } from '../../../services.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../../../theme/theme.js';
 import { amountForMonth, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
+import ModalConfirm from '../components/ModalConfirm.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
 import FadingScroll from '../components/FadingScroll.js';
 import HomeMenu from '../components/HomeMenu.js';
@@ -55,6 +56,12 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       setShowChanges([]);
     }
   }, [appMeta, currentUser]);
+
+  // Las transferencias que le mandó el otro y todavía no vio. Salen después del
+  // aviso de cambios: primero se acepta ese, después se leen estas. Si no hubo
+  // cambios que aceptar, salen solas
+  const receivedTransfers = (currentUser.name === 'matias' ? appMeta?.mTransfers : appMeta?.aTransfers) || [];
+  const showTransfers = receivedTransfers.length > 0 && showChanges.length === 0 && !localInfo.activeField;
 
   const activeFieldOpacity = useSharedValue(1);
   const activeFieldOpacityAnimatedStyle = useAnimatedStyle(() => ({
@@ -299,6 +306,15 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       )}
       {localInfo.activeField && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} />}
       {showChanges?.length > 0 && <OkToChanges user={currentUser} setShowChanges={setShowChanges} />}
+
+      {/* lo que le transfirió el otro: monto y cuenta, y un Ok que lo da por leído */}
+      {showTransfers && (
+        <ModalConfirm
+          message={receivedTransfers.map((t) => `${t.from} te transfirió $${Number(t.amount).toLocaleString('es-CL')} a tu ${t.accountName}`).join('\n\n')}
+          confirmLabel='Ok'
+          onConfirm={() => okTransfers({ user: currentUser })}
+        />
+      )}
 
       {/* teclado ------------------------------------ */}
 
