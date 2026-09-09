@@ -40,7 +40,11 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
   // movimiento), el gesto cierra eso y se queda; si no, sale de la página
   const goBack = () => {
     if (onBackRef.current?.()) {
-      scrollRef.current?.scrollTo({ x: windowWidth * 0.5, animated: false });
+      // Primero se cierra lo de adentro y recién en el frame siguiente vuelve el
+      // scroll a su lugar: haciéndolo de una, lo que se estaba yendo se veía
+      // deslizar de vuelta al centro antes de desaparecer. Así lo que se corre es
+      // el contenido nuevo, tapado por su propia entrada
+      requestAnimationFrame(() => scrollRef.current?.scrollTo({ x: windowWidth * 0.5, animated: false }));
       goBackOpacity.value = withTiming(1, { duration: 150 });
       // el gesto se rearma solo cuando el scroll vuelve a su lugar, en el handler
       return;

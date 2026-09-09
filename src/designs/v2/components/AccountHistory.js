@@ -3,7 +3,7 @@ import Icon from './Icon.js';
 import SwipeToDelete from './SwipeToDelete.js';
 import { View, Text, Dimensions, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
 import { deleteTransaction } from '../../../services.js';
@@ -44,9 +44,12 @@ export default function AccountHistory({ account, onSelect, onNew }) {
   // el documento viva en la de origen
   const rows = useMemo(() => [...transactions.filter((t) => t.accountId === account.id || t.toAccountId === account.id)].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0)), [transactions, account.id]);
 
+  // Sin animación de salida: al cerrar la cuenta, el scroll del gesto todavía
+  // está corrido, así que lo que se va se ve volver al centro antes de irse. Se
+  // va de una y lo que anima es el listado entrando
   return (
     <>
-      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
+      <Animated.View entering={FadeIn.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
         <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle, paddingTop: 10, paddingBottom: 8 }}>Movimientos</Text>
         {rows.length === 0 ? (
           <Text style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>Sin movimientos todavía.</Text>
@@ -96,7 +99,7 @@ export default function AccountHistory({ account, onSelect, onNew }) {
       </Animated.View>
 
       {/* anotar un movimiento: se toca o se arrastra, fijo abajo */}
-      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)} style={{ position: 'absolute', left: windowWidth * 0.05, bottom: barBottom }}>
+      <Animated.View entering={FadeIn.duration(150)} style={{ position: 'absolute', left: windowWidth * 0.05, bottom: barBottom }}>
         {/* en las cuentas de transporte todo es ingreso: el lado del gasto no
           se ofrece */}
         <NewTxSwipe height={barHeight} onNew={onNew} incomeOnly={isRideAccount(account)} />

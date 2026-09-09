@@ -97,11 +97,10 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
   return (
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!localInfo.activeField}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
-          {/* el listado vuelve recién cuando la cuenta terminó de irse: entrando
-              encima, las dos cosas se veían juntas un momento y parecía un
-              parpadeo */}
+          {/* la cuenta se va de una y el listado entra fundiéndose: es la única
+              animación de la vuelta, así no hay dos cosas encimadas */}
           {!localInfo.activeField && (
-            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(150).delay(150) : undefined}>
+            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(180) : undefined}>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Matías</Text>

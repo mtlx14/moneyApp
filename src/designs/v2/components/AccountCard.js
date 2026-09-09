@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Dimensions } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, withDelay, FadeOut } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, withDelay } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { useTheme } from '../../../theme/useTheme';
 import { accountCardByName } from '../../../../data.js';
@@ -82,10 +82,8 @@ export default function AccountCard({ amountValue, account, wide = false }) {
   // imagen entera, en la ancha solo la banda sin sombra
   const faceStyle = wide ? { top: cardHeight * WIDE_FACE_TOP, height: cardHeight * WIDE_FACE_HEIGHT } : { top: 0, height: cardHeight };
 
-  // Entra girando y se va fundiéndose: al cerrar la cuenta, desaparecer de golpe
-  // mientras la lista se funde partía la vuelta en dos
   return (
-    <Animated.View exiting={FadeOut.duration(150)} style={[{ position: 'absolute', width: windowWidth, left: 0 }, blockStyle, animatedStyle]}>
+    <Animated.View style={[{ position: 'absolute', width: windowWidth, left: 0 }, blockStyle, animatedStyle]}>
       <View style={{ width: cardWidth, height: cardHeight }}>
         <Image source={localInfo.imageToRender} contentFit='contain' style={{ width: cardWidth, height: cardHeight }} transition={400}></Image>
         <Animated.View style={[{ position: 'absolute', left: 0, width: cardWidth, justifyContent: 'center', alignItems: 'center' }, faceStyle, opacityAnimatedStyle]}>
