@@ -2,7 +2,7 @@ import { View, Text, Dimensions, Platform, Pressable, ScrollView } from 'react-n
 import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
 import { useEffect, useRef, useState } from 'react';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import AccountCard from '../components/AccountCard.js';
 import { Keyboard } from '../components/Keyboard.js';
 
@@ -69,11 +69,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
     setPorPagarOpen(false);
   };
 
-  // el listado no anima al entrar a la página, solo al volver de una cuenta
-  const cameFromAccount = useRef(false);
-
   const handleOnPressAccount = ({ account }) => {
-    cameFromAccount.current = true;
     if (account.id === POR_PAGAR_ID) {
       setPorPagarOpen((prev) => !prev);
     } else if (account.type === 'sub_account') {
@@ -138,10 +134,10 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
   return (
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!localInfo.activeField}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
-          {/* la cuenta se va de una y el listado entra fundiéndose: es la única
-              animación de la vuelta, así no hay dos cosas encimadas */}
+          {/* sin animación propia: la vuelta la anima GoBackScroll, encendiendo
+              la página con el listado ya puesto */}
           {!localInfo.activeField && (
-            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(180) : undefined}>
+            <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Aylin</Text>
@@ -265,7 +261,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </Animated.View>
+            </View>
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} wide={showHistory} />}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Dimensions, View } from 'react-native';
-import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 
 // Recibe la animación de página y la aplica sobre su propio ScrollView: así el
 // nodo animado es el más externo de la página, como en Inicio. Envuelto en otra
@@ -40,12 +40,15 @@ export default function GoBackScroll({ page = 'home', children, navigate, enteri
   // movimiento), el gesto cierra eso y se queda; si no, sale de la página
   const goBack = () => {
     if (onBackRef.current?.()) {
-      // Primero se cierra lo de adentro y recién en el frame siguiente vuelve el
-      // scroll a su lugar: haciéndolo de una, lo que se estaba yendo se veía
-      // deslizar de vuelta al centro antes de desaparecer. Así lo que se corre es
-      // el contenido nuevo, tapado por su propia entrada
+      // Al cruzar el umbral el scroll queda corrido y el ScrollView lo devuelve a
+      // su lugar con su propia animación de paginado: lo que se está yendo se ve
+      // volver al centro antes de desaparecer. Así que la página se apaga en el
+      // acto, el scroll vuelve a su lugar a oscuras —en el frame siguiente, con
+      // el contenido nuevo ya montado— y recién ahí se enciende de vuelta. Ese
+      // encendido es la animación de la vuelta
+      goBackOpacity.value = 0;
       requestAnimationFrame(() => scrollRef.current?.scrollTo({ x: windowWidth * 0.5, animated: false }));
-      goBackOpacity.value = withTiming(1, { duration: 150 });
+      goBackOpacity.value = withDelay(60, withTiming(1, { duration: 180 }));
       // el gesto se rearma solo cuando el scroll vuelve a su lugar, en el handler
       return;
     }

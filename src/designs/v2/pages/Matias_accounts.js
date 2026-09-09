@@ -53,11 +53,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
   }, [params, accounts]);
 
 
-  // el listado no anima al entrar a la página, solo al volver de una cuenta
-  const cameFromAccount = useRef(false);
-
   const handleOnPressAccount = ({ account }) => {
-    cameFromAccount.current = true;
     setLocalInfo((prev) => ({
       ...prev,
       activeField: account,
@@ -97,10 +93,10 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
   return (
     <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!localInfo.activeField}>
         <Animated.View style={[{ height: windowHeight * 1, width: windowWidth }]}>
-          {/* la cuenta se va de una y el listado entra fundiéndose: es la única
-              animación de la vuelta, así no hay dos cosas encimadas */}
+          {/* sin animación propia: la vuelta la anima GoBackScroll, encendiendo
+              la página con el listado ya puesto */}
           {!localInfo.activeField && (
-            <Animated.View entering={cameFromAccount.current ? FadeIn.duration(180) : undefined}>
+            <View>
               <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
                 <View style={{ width: windowWidth, height: windowHeight * 0.1, justifyContent: 'flex-end', alignItems: 'center' }}>
                   <Text style={{ color: theme.text._1, fontSize: fS.subsTitle, fontWeight: 400 }}>Cuentas Matías</Text>
@@ -207,7 +203,7 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations, pa
                 </View>
                 <View style={{ width: 100, height: windowHeight * 0.3 }}></View>
               </ScrollView>
-            </Animated.View>
+            </View>
           )}
           {/* modals ------------------------------------ */}
           {localInfo.activeField && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} wide={showHistory} />}
