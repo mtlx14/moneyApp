@@ -1,7 +1,7 @@
 import { View, Text, Dimensions, Platform, Pressable, ScrollView } from 'react-native';
 import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Animated from 'react-native-reanimated';
 import AccountCard from '../components/AccountCard.js';
 import { Keyboard } from '../components/Keyboard.js';
@@ -20,7 +20,7 @@ import { CONTENT_LEFT } from '../layout.js';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
+export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, params }) {
   const theme = useTheme();
   const { accounts, balances } = useData();
   const { currentUser } = useAppStorage();
@@ -37,6 +37,24 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
     if (localInfo.activeField) setShowMenu(false);
     else setShowMenu(true);
   }, [localInfo.activeField]);
+
+  // Se puede llegar acá desde el resumen del mes con el movimiento de un pago ya
+  // armado: se abre su cuenta y el modal encima, igual que si se hubiera anotado
+  // a mano desde el historial. El ref evita que se vuelva a abrir al cerrarlo
+  const openedParams = useRef(null);
+  useEffect(() => {
+    if (!params?.newTx || openedParams.current === params || !accounts.length) return;
+    const account = accounts.find((a) => a.id === params.newTx.accountId);
+    if (!account) return;
+    openedParams.current = params;
+    setLocalInfo((prev) => ({
+      ...prev,
+      activeField: account,
+      activeFieldAmount: balances.byAccount[account.id] || 0,
+      selectedTx: params.newTx,
+    }));
+  }, [params, accounts]);
+
 
   const aylinAccounts = accounts.filter((a) => a.type === 'a_account');
 

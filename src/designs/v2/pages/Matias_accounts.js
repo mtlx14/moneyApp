@@ -19,7 +19,7 @@ import { rideBreakdown } from '../../../helpers.js';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) {
+export default function Matias_accounts({ setShowMenu, navigate, nAnimations, params }) {
   const theme = useTheme();
   const { accounts, balances, transactions, categories } = useData();
   const { currentUser } = useAppStorage();
@@ -34,6 +34,24 @@ export default function Matias_accounts({ setShowMenu, navigate, nAnimations }) 
     if (localInfo.activeField) setShowMenu(false);
     else setShowMenu(true);
   }, [localInfo.activeField]);
+
+  // Se puede llegar acá desde el resumen del mes con el movimiento de un pago ya
+  // armado: se abre su cuenta y el modal encima, igual que si se hubiera anotado
+  // a mano desde el historial. El ref evita que se vuelva a abrir al cerrarlo
+  const openedParams = useRef(null);
+  useEffect(() => {
+    if (!params?.newTx || openedParams.current === params || !accounts.length) return;
+    const account = accounts.find((a) => a.id === params.newTx.accountId);
+    if (!account) return;
+    openedParams.current = params;
+    setLocalInfo((prev) => ({
+      ...prev,
+      activeField: account,
+      activeFieldAmount: balances.byAccount[account.id] || 0,
+      selectedTx: params.newTx,
+    }));
+  }, [params, accounts]);
+
 
   const handleOnPressAccount = ({ account }) => {
     setLocalInfo((prev) => ({

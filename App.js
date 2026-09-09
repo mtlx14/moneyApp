@@ -18,10 +18,14 @@ function AppContent() {
   const [showMenu, setShowMenu] = useState(true);
   const [page, setPage] = useState('home');
   const [direction, setDirection] = useState(1);
+  // lo que la página anterior le deja a la que entra (hoy: el movimiento que
+  // deja marcar un gasto en el resumen del mes). Solo lo recibe esa página
+  const [params, setParams] = useState(null);
 
-  const navigate = (newPage, dir = 1) => {
+  const navigate = (newPage, dir = 1, nextParams = null) => {
     setDirection(dir);
     setTimeout(() => {
+      setParams(nextParams);
       setPage(newPage);
     }, 20);
   };
@@ -37,7 +41,7 @@ function AppContent() {
         if (name !== page) return null;
         const Page = pages[name];
 
-        return <Page key={`${design.name}_${name}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} />;
+        return <Page key={`${design.name}_${name}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} params={params} />;
       })}
       {showMenu && <MainMenu page={page} navigate={navigate} />}
     </GradientBackground>

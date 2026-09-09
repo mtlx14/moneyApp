@@ -10,7 +10,6 @@ import UnmarkButton from '../components/UnmarkButton.js';
 import { fS } from '../../../theme/theme.js';
 import { billCategoryId, currentInstallment, defaultTxAccount, getEffectiveDate } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
-import ModalTransaction from '../components/ModalTransaction.js';
 import ModalConfirm from '../components/ModalConfirm.js';
 import { Image } from 'expo-image';
 import GoBackScroll from '../components/GoBackScroll.js';
@@ -26,8 +25,6 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   const [activeField, setActiveField] = useState(null);
   // el gasto que se acaba de marcar y está esperando el sí o el no
   const [billToAnnotate, setBillToAnnotate] = useState(null);
-  // el movimiento nuevo que abre el modal de transacción
-  const [newTx, setNewTx] = useState(null);
 
   // la lista solo anima al volver del modal, no al entrar a la página
   const cameFromModal = useRef(false);
@@ -36,20 +33,25 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
     setActiveField(field);
   };
 
-  // el movimiento que deja el pago: el monto y la descripción del gasto, la
-  // categoría que le toca por tipo (las cuentas en los fijos, la tarjeta en los
-  // planeados) y la cuenta corriente de quien está usando la app. Todo se puede
-  // cambiar en el modal antes de guardar
+  // El movimiento no se anota acá encima: se va a la página de cuentas, se abre
+  // la cuenta con la que se paga y el movimiento queda esperando en su modal,
+  // igual que anotándolo a mano desde el historial. Nace con el monto y la
+  // descripción del gasto y con la categoría que le toca por tipo (las cuentas
+  // en los fijos, la tarjeta en los planeados); todo se puede cambiar ahí
   const annotate = (bill) => {
     setBillToAnnotate(null);
-    setNewTx({
-      label: bill.label,
-      amount: bill.amount,
-      type: 'expense',
-      category: billCategoryId(bill, categories),
-      accountId: defaultTxAccount(accounts, currentUser.name)?.id,
-      // mirando otro mes, el movimiento nace el día 1 de ese mes
-      date: monthOffset === 0 ? new Date() : getEffectiveDate(monthOffset),
+    const account = defaultTxAccount(accounts, currentUser.name);
+    if (!account) return;
+    navigate(account.type === 'm_account' ? 'matias_accounts' : 'aylin_accounts', 1, {
+      newTx: {
+        label: bill.label,
+        amount: bill.amount,
+        type: 'expense',
+        category: billCategoryId(bill, categories),
+        accountId: account.id,
+        // mirando otro mes, el movimiento nace el día 1 de ese mes
+        date: monthOffset === 0 ? new Date() : getEffectiveDate(monthOffset),
+      },
     });
   };
 
@@ -178,8 +180,6 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
 
           {/* al marcar un gasto se pregunta si además se anota el movimiento */}
           {billToAnnotate && <ModalConfirm message={`¿Anotar el movimiento de ${billToAnnotate.label}?`} onConfirm={() => annotate(billToAnnotate)} onCancel={() => setBillToAnnotate(null)} />}
-
-          {newTx && <ModalTransaction tx={newTx} onCancel={() => setNewTx(null)} setShowMenu={setShowMenu} />}
         </Animated.View>
     </GoBackScroll>
   );
