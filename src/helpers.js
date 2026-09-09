@@ -185,6 +185,16 @@ export function hasPendingChanges(appMeta, userName) {
   return !!(appMeta?.aOkDate && appMeta?.mChangesDate && appMeta.aOkDate < appMeta.mChangesDate);
 }
 
+// Categorías --------------------------------------------------------------------
+
+// Las categorías se leen en alfabético y con Otros al final: es el cajón de
+// sastre, no una categoría más. Va por etiqueta, como el resto de los mapas: si
+// se renombra, queda ordenada como cualquier otra
+export function byLabelOtrosLast(a, b) {
+  const isOtros = (label) => Number((label || '').trim().toLowerCase() === 'otros');
+  return isOtros(a.label) - isOtros(b.label) || a.label.localeCompare(b.label, 'es');
+}
+
 // Gastos del resumen del mes ---------------------------------------------------
 
 // la categoría con la que nace el movimiento de un gasto pagado, buscada por

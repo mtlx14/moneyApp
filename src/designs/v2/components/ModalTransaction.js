@@ -6,7 +6,7 @@ import { useData } from '../../../../context';
 import { useAppStorage } from '../../../../appStorageProvider';
 import { TRANSFER_PAIR, TRANSFER_TYPES, TYPES_WITHOUT_CATEGORY, USER_ACCOUNT_TYPE, txTypes } from '../../../../data.js';
 import { fS } from '../../../theme/theme.js';
-import { addsToBalance, confirmDelete, isRideAccount, otherAccountType, rideCategories, txTypeLabel, userOfAccountType } from '../../../helpers.js';
+import { addsToBalance, byLabelOtrosLast, confirmDelete, isRideAccount, otherAccountType, rideCategories, txTypeLabel, userOfAccountType } from '../../../helpers.js';
 import { deleteTransaction, notifyUserTransfer, saveTransaction, updateChanges } from '../../../services.js';
 import Icon from './Icon.js';
 import Caret from './Caret.js';
@@ -23,8 +23,6 @@ const toDate = (value) => {
 // pide autoCapitalize, pero en web eso no existe, así que la primera letra se
 // sube acá, que vale para las dos plataformas
 const capitalize = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
-
-const isOtros = (label) => Number((label || '').trim().toLowerCase() === 'otros');
 
 const pad = (n) => String(n).padStart(2, '0');
 // la fecha se lee dd-mm-yyyy
@@ -338,9 +336,7 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     : Object.entries(categories)
         .filter(([key, c]) => key !== draft.category && (!kindForType || c.kind === 'both' || c.kind === kindForType))
         .map(([key, c]) => ({ key, label: c.label, icon: c }))
-        // alfabético, con Otros siempre al final: es el cajón de sastre, no una
-        // categoría más
-        .sort((a, b) => isOtros(a.label) - isOtros(b.label) || a.label.localeCompare(b.label, 'es'));
+        .sort(byLabelOtrosLast);
 
   const rows = [
     { field: 'label', label: 'Descripción' },

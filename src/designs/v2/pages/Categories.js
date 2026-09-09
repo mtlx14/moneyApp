@@ -9,6 +9,7 @@ import GoBackScroll from '../components/GoBackScroll.js';
 import ModalCategory from '../components/ModalCategory.js';
 import Icon from '../components/Icon.js';
 import { CONTENT_LEFT } from '../layout.js';
+import { byLabelOtrosLast } from '../../../helpers.js';
 
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -44,7 +45,8 @@ export default function Categories({ setShowMenu, navigate, nAnimations }) {
 
   const list = Object.entries(categories)
     .map(([id, category]) => ({ ...category, id }))
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.label.localeCompare(b.label));
+    // el mismo orden que en el modal de movimientos: alfabético y Otros al final
+    .sort(byLabelOtrosLast);
 
   // el modal abierto se come el gesto de volver: primero cierra, después sale
   const handleGoBack = () => {
