@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dimensions, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme.js';
@@ -30,6 +30,17 @@ export default function Categories({ setShowMenu, navigate, nAnimations }) {
     cameFromModal.current = true;
     setEditing(category);
   };
+
+  // En web el teclado del navegador empuja el documento hacia abajo cuando se
+  // escribe el nombre en el modal, y al volver la lista queda cortada a media
+  // pantalla: se ve la mitad de abajo y el resto se fue para arriba. El
+  // documento vuelve a su lugar cada vez que el modal se abre o se cierra, igual
+  // que en Gastos fijos
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const id = setTimeout(() => window.scrollTo(0, 0), 50);
+    return () => clearTimeout(id);
+  }, [editing]);
 
   const list = Object.entries(categories)
     .map(([id, category]) => ({ ...category, id }))
