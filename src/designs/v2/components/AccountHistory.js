@@ -3,7 +3,7 @@ import Icon from './Icon.js';
 import SwipeToDelete from './SwipeToDelete.js';
 import { View, Text, Dimensions, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeOutUp, SlideInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, FadeOutUp, SlideInDown } from 'react-native-reanimated';
 import { useTheme } from '../../../theme/useTheme';
 import { useData } from '../../../../context';
 import { deleteTransaction } from '../../../services.js';
@@ -63,7 +63,7 @@ export default function AccountHistory({ account, onClose, onSelect, onNew }) {
       <Animated.View entering={SlideInDown} exiting={FadeOutUp.duration(150)} style={{ position: 'absolute', left: 0, top: listTop, width: windowWidth, height: windowHeight - listTop - barSpace, paddingHorizontal: windowWidth * 0.05 }}>
         <Text style={{ color: theme.text._3, fontSize: fS.mSummarySubtitle, paddingTop: 10, paddingBottom: 8 }}>Movimientos</Text>
         {rows.length === 0 ? (
-          <Animated.Text entering={FadeIn} style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>
+          <Animated.Text entering={FadeIn} exiting={FadeOut.duration(150)} style={{ color: theme.text._3, fontSize: fS.subsText, paddingVertical: 20 }}>
             Sin movimientos todavía.
           </Animated.Text>
         ) : (
@@ -75,7 +75,10 @@ export default function AccountHistory({ account, onClose, onSelect, onNew }) {
                 const isPositive = signedAmountFor(tx, account.id) > 0;
 
                 return (
-                  <Animated.View key={tx.id} entering={FadeInDown.delay(index * 30)}>
+                  // el exiting no es de adorno: sin él, al desmontarse la lista
+                  // reanimated saca las filas de una y solo se ve irse la caja
+                  // vacía, con el resto desaparecido de golpe
+                  <Animated.View key={tx.id} entering={FadeInDown.delay(index * 30)} exiting={FadeOut.duration(150)}>
                     <SwipeToDelete
                       width={windowWidth * 0.9}
                       height={windowWidth * 0.13}
