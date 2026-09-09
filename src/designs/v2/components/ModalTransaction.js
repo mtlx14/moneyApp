@@ -405,12 +405,15 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     </View>
   );
 
+  // El modal entra en lo mismo que tarda en irse lo que había (los FadeOutUp de
+  // 150 del historial), y después de que se fue: con la duración por defecto, de
+  // 300, se hacía esperar
   return (
-    <Animated.View entering={FadeInDown.delay(150)} style={{ position: 'absolute', width: windowWidth, height: windowHeight, top: 0, left: 0 }}>
+    <Animated.View entering={FadeInDown.duration(150).delay(150)} style={{ position: 'absolute', width: windowWidth, height: windowHeight, top: 0, left: 0 }}>
       {/* un toque fuera de la caja cierra lo que esté abierto y, si no hay nada, el modal */}
       <Pressable onPress={() => (somethingOpen ? closeAll() : onCancel())} style={{ position: 'absolute', top: 0, left: 0, width: windowWidth, height: windowHeight }} />
 
-      <Animated.View layout={LinearTransition} entering={FadeInDown.delay(150)} style={{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'flex-start', alignItems: 'center', paddingTop: topOffset }} pointerEvents='box-none'>
+      <Animated.View layout={LinearTransition} entering={FadeInDown.duration(150).delay(150)} style={{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'flex-start', alignItems: 'center', paddingTop: topOffset }} pointerEvents='box-none'>
         <Animated.View style={[{ flexDirection: 'row', alignItems: 'flex-start' }, shiftStyle]}>
           <View style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
             {visibleRows.map((row, index) => (
