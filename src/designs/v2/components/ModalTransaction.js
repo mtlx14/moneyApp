@@ -164,9 +164,13 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
     dismissSystemKeyboard();
   };
 
-  // una descripción guardada se trae consigo su tipo y su categoría
+  // una descripción guardada se trae consigo su tipo y su categoría. Se llama
+  // desde onPressIn y desde onPress, así que tiene que poder correr dos veces
+  // seguidas sin cambiar nada la segunda: rellena siempre lo mismo
   const pickSet = (set) => {
     clearTimeout(blurTimer.current);
+    clearTimeout(openTimer.current);
+    setAmountKeyboard(false);
     setDraft((prev) => ({ ...prev, label: set.label, type: set.type ?? prev.type, category: set.category ?? prev.category }));
     dismissSystemKeyboard();
     setInputFocused(false);
@@ -461,12 +465,17 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
             {showSuggestions && (
               <>
                 <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }} />
-                <ScrollView keyboardShouldPersistTaps='handled' style={{ height: boxHeight - rowHeight - 1, backgroundColor: theme.bg.tr_05 }}>
+                {/* 'always' y no 'handled': con el teclado abierto, el primer
+                    toque se lo llevaba el scroll para cerrarlo y la fila no se
+                    enteraba */}
+                <ScrollView keyboardShouldPersistTaps='always' style={{ height: boxHeight - rowHeight - 1, backgroundColor: theme.bg.tr_05 }}>
                   {matches.map((set, index) => (
                     <View key={set.key}>
                       {index > 0 && <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }} />}
-                      {/* onPressIn: en web el input pierde el foco antes del onPress */}
-                      <Pressable onPressIn={() => pickSet(set)} style={{ height: rowHeight, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 15 }}>
+                      {/* onPressIn porque en web el input pierde el foco antes del
+                          onPress, y onPress además por si el onPressIn se pierde
+                          entre el blur y el re-render */}
+                      <Pressable onPressIn={() => pickSet(set)} onPress={() => pickSet(set)} style={{ height: rowHeight, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 15 }}>
                         {/* las pastillas del tipo y de la categoría que se van a
                             rellenar con la descripción: se ve qué trae cada una */}
                         {iconBadge(txTypes[set.type])}
