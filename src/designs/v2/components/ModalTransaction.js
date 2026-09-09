@@ -19,6 +19,11 @@ const toDate = (value) => {
   return date && !Number.isNaN(date.getTime()) ? date : null;
 };
 
+// la descripción arranca siempre en mayúscula: en el teclado del sistema lo
+// pide autoCapitalize, pero en web eso no existe, así que la primera letra se
+// sube acá, que vale para las dos plataformas
+const capitalize = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
+
 const pad = (n) => String(n).padStart(2, '0');
 // la fecha se lee dd-mm-yyyy
 const shortDate = (date) => (date ? `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()}` : '—');
@@ -433,7 +438,8 @@ export default function ModalTransaction({ tx, onCancel, setShowMenu }) {
                     <TextInput
                       {...inputFocusProps}
                       value={draft.label}
-                      onChangeText={(text) => setDraft((prev) => ({ ...prev, label: text }))}
+                      onChangeText={(text) => setDraft((prev) => ({ ...prev, label: capitalize(text) }))}
+                      autoCapitalize='sentences'
                       keyboardAppearance='dark'
                       style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
                     />
