@@ -23,7 +23,9 @@ export const CARD_RATIO = 0.9;
 export const WIDE_CARD_TOP = 0.055;
 const SQUARE_BLOCK_HEIGHT = 0.6;
 
-export default function AccountCard({ amountValue, account, wide = false }) {
+// note es una línea chica opcional debajo del monto (la tarjeta de crédito dice
+// ahí lo del mes siguiente)
+export default function AccountCard({ amountValue, account, wide = false, note }) {
   const theme = useTheme();
   const windowHeight = Dimensions.get('window').height;
   const windowWidth = Dimensions.get('window').width;
@@ -80,7 +82,9 @@ export default function AccountCard({ amountValue, account, wide = false }) {
 
   // el texto se centra contra la cara de la tarjeta; en la cuadrada eso es la
   // imagen entera, en la ancha solo la banda sin sombra
-  const faceStyle = wide ? { top: cardHeight * WIDE_FACE_TOP, height: cardHeight * WIDE_FACE_HEIGHT } : { top: 0, height: cardHeight };
+  // con la línea de abajo el bloque de texto crece y queda con poco aire arriba:
+  // se baja un poco, comiéndose parte del espacio de abajo
+  const faceStyle = wide ? { top: cardHeight * WIDE_FACE_TOP, height: cardHeight * WIDE_FACE_HEIGHT, paddingTop: note ? 8 : 0 } : { top: 0, height: cardHeight };
 
   return (
     <Animated.View style={[{ position: 'absolute', width: windowWidth, left: 0 }, blockStyle, animatedStyle]}>
@@ -107,6 +111,7 @@ export default function AccountCard({ amountValue, account, wide = false }) {
           >
             {`${account?.isNegative ? '-' : ''}$${Number(amountValue).toLocaleString('es-CL')}`}
           </Text>
+          {!!note && <Text style={{ textAlign: 'center', color: cardTextColor, opacity: 0.7, fontSize: fS.keyboardBtn * 0.8 }}>{note}</Text>}
         </Animated.View>
       </View>
     </Animated.View>

@@ -214,3 +214,108 @@ export function defaultTxAccount(accounts, userName) {
   const mine = accounts.filter((a) => a.type === type && a.isLedger && !isRideAccount(a));
   return mine.find((a) => a.name === TRANSFER_PAIR[0]) || mine[0];
 }
+
+// Tarjetas de crédito ----------------------------------------------------------
+
+// un mes como número corrido (año * 12 + mes), para contar cuotas restando
+const monthIndex = (date) => date.getFullYear() * 12 + date.getMonth();
+
+const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+// las compras traen Timestamp de firestore, pero una recién escrita puede llegar
+// con la fecha todavía sin resolver
+const purchaseDate = (value) => {
+  const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+};
+
+// El mes en que se paga la primera cuota de una compra. Es el que queda escrito
+// en la compra (firstMonthIndex) y las cuotas se cuentan solo desde ahí. Una
+// compra sin mes escrito usa el sugerido. Sin fecha no hay mes
+export function firstInstallmentIndex(purchase, card) {
+  if (purchase?.firstMonthIndex != null) return purchase.firstMonthIndex;
+  return suggestedFirstInstallmentIndex(purchase, card);
+}
+
+// El mes que se sugiere al anotar una compra, sacado de la fecha y de los días
+// de la tarjeta: lo que se compra hasta el día de facturación entra en el
+// estado de cuenta de ese mes, lo de después en el del mes siguiente. Ese
+// estado se paga el mismo mes si el día de pago viene después de la facturación
+// (factura el 5, paga el 20) o el mes siguiente si viene antes (factura el 20,
+// paga el 5). Una tarjeta sin días usa el 1 para los dos. Es solo el valor con
+// el que nace la fila en el modal: ahí se puede cambiar
+export function suggestedFirstInstallmentIndex(purchase, card) {
+  const date = purchaseDate(purchase?.date);
+  if (!date) return null;
+  const billingDay = card?.billingDay || 1;
+  const paymentDay = card?.paymentDay || 1;
+  const billedIn = monthIndex(date) + (date.getDate() > billingDay ? 1 : 0);
+  return billedIn + (paymentDay > billingDay ? 0 : 1);
+}
+
+// el mes que se mira en Gastos, como número corrido
+export function currentMonthIndex(monthOffset = 0) {
+  return monthIndex(getEffectiveDate(monthOffset));
+}
+
+// "nov 2026", para decir cuándo arranca una compra
+export function monthIndexLabel(index) {
+  if (index == null) return '—';
+  return `${MONTHS_SHORT[index % 12]} ${Math.floor(index / 12)}`;
+}
+
+// la cuota de una compra que se paga en el mes que se mira: 1 es la primera.
+// Fuera de rango (menor que 1 o mayor que las cuotas) es que ese mes no le toca
+export function cardInstallment(purchase, card, monthOffset = 0) {
+  const first = firstInstallmentIndex(purchase, card);
+  if (first == null) return null;
+  return monthIndex(getEffectiveDate(monthOffset)) - first + 1;
+}
+
+// Las compras de una tarjeta separadas por lo que le toca al mes que se mira:
+// las que pagan cuota ese mes y las que todavía no empiezan (una compra recién
+// anotada suele caer en el mes siguiente, y si no se mostrara parecería
+// perdida). Las ya pagadas enteras no salen. El total es la suma de las cuotas
+// del mes: el monto de una compra ya es el valor de su cuota
+export function cardMonth({ card, purchases, monthOffset = 0 }) {
+  const mine = purchases.filter((p) => p.cardId === card.id);
+  const byDate = (a, b) => (purchaseDate(b.date)?.getTime() || 0) - (purchaseDate(a.date)?.getTime() || 0);
+
+  const current = mine
+    .map((purchase) => ({ purchase, installment: cardInstallment(purchase, card, monthOffset) }))
+    .filter(({ purchase, installment }) => installment >= 1 && installment <= (purchase.installments || 1))
+    .sort((a, b) => byDate(a.purchase, b.purchase));
+
+  const upcoming = mine
+    .map((purchase) => ({ purchase, installment: cardInstallment(purchase, card, monthOffset) }))
+    .filter(({ installment }) => installment != null && installment < 1)
+    .sort((a, b) => byDate(a.purchase, b.purchase));
+
+  const total = current.reduce((sum, { purchase }) => sum + (Number(purchase.amount) || 0), 0);
+
+  return { current, upcoming, total };
+}
+
+// El detalle de lo que se paga al pagar una tarjeta: cada compra que paga cuota
+// en el mes que se mira, con su categoría y el número de cuota. Viaja pegado al
+// movimiento del pago (que va con la categoría de la tarjeta) para poder
+// repartirlo después por categoría, en el mismo movimiento o en gráficos. Los
+// montos son los exactos, sin el redondeo de Inicio
+export function cardPaymentDetail({ card, purchases, monthOffset = 0 }) {
+  const { current, total } = cardMonth({ card, purchases, monthOffset });
+
+  return {
+    cardId: card.id,
+    cardName: card.name,
+    monthIndex: currentMonthIndex(monthOffset),
+    total,
+    items: current.map(({ purchase, installment }) => ({
+      purchaseId: purchase.id,
+      label: purchase.label || '',
+      category: purchase.category || null,
+      amount: Number(purchase.amount) || 0,
+      installment,
+      installments: purchase.installments || 1,
+    })),
+  };
+}

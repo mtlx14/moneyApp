@@ -12,7 +12,9 @@ import { updateChanges } from '../../../services.js';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-export default function CheckButton({ bill, onChecked }) {
+// Sirve para los gastos y para las tarjetas de crédito: las dos guardan isPaid
+// en su documento, solo cambia la colección
+export default function CheckButton({ bill, onChecked, collectionName = 'bills' }) {
   const theme = useTheme();
   const [checked, setChecked] = useState(false);
   const [yellow, setYellow] = useState(false);
@@ -39,7 +41,7 @@ export default function CheckButton({ bill, onChecked }) {
     updateChanges({ user: currentUser.name, change: 'bills' });
 
     setDoc(
-      doc(db, 'bills', bill.id),
+      doc(db, collectionName, bill.id),
       {
         isPaid: !checked,
       },

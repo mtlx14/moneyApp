@@ -2,11 +2,13 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, getEffectiveDate, isTransfer, signedAmount, signedAmountFor } from './src/helpers';
+import { amountForMonth, cardMonth, getEffectiveDate, isTransfer, signedAmount, signedAmountFor } from './src/helpers';
 import { defaultCategories } from './data.js';
 import { seedCategories } from './src/services.js';
 
 const DataContext = createContext(null);
+
+const roundUpToThousand = (value) => Math.ceil(value / 1000) * 1000;
 
 const shouldPayNextMonth = (bill, monthOffset = 0) => {
   if (!bill.inMonths || !bill.firstMonth) {
@@ -31,6 +33,9 @@ export const DataProvider = ({ children }) => {
   const [bills, setBills] = useState([]);
   const [appMeta, setAppMeta] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  // las tarjetas de crédito y sus compras
+  const [cards, setCards] = useState([]);
+  const [cardPurchases, setCardPurchases] = useState([]);
   // mapa id -> categoría. Arranca con las de código y lo pisa la colección
   const [categories, setCategories] = useState(defaultCategories);
 
@@ -53,6 +58,14 @@ export const DataProvider = ({ children }) => {
       setTransactions(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
 
+    const unsubCards = onSnapshot(collection(db, 'cards'), (snap) => {
+      setCards(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
+    const unsubCardPurchases = onSnapshot(collection(db, 'cardPurchases'), (snap) => {
+      setCardPurchases(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+
     // Las categorías vivían en código y ahora se editan desde la app. La primera
     // vez que la colección aparece vacía se escribe la semilla de data.js: los
     // ids son fijos, así que si los dos teléfonos lo hacen a la vez escriben lo
@@ -72,6 +85,8 @@ export const DataProvider = ({ children }) => {
       unsubAppMeta();
       unsubTransactions();
       unsubCategories();
+      unsubCards();
+      unsubCardPurchases();
     };
   }, []);
 
@@ -133,8 +148,22 @@ export const DataProvider = ({ children }) => {
     };
     subscriptions.toPay = subscriptions.total - billsSub.filter((b) => b.isPaid).reduce((a, b) => a + b.amount, 0);
 
+    // Las tarjetas de crédito cuentan como un gasto más: lo que suman las cuotas
+    // del mes, y se descuenta de lo por pagar cuando se marca pagada en Gastos.
+    // El mes siguiente se calcula igual, corrido un mes: entran las compras que
+    // empiezan y salen las que terminan. En Inicio van redondeadas a miles, siempre
+    // hacia arriba; adentro de la tarjeta se ve el monto exacto
+    const cardTotals = cards.map((card) => ({
+      id: card.id,
+      label: card.name,
+      emoji: card.emoji || '💳',
+      isPaid: !!card.isPaid,
+      amount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset }).total),
+      nextAmount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset: monthOffset + 1 }).total),
+    }));
+
     const billsBalances = {
-      toPay: bills.filter((b) => (b.type === 'fixed' || b.type === 'planned') && !b.isPaid).reduce((a, b) => a + b.amount, 0) + subscriptions.toPay,
+      toPay: bills.filter((b) => (b.type === 'fixed' || b.type === 'planned') && !b.isPaid).reduce((a, b) => a + b.amount, 0) + subscriptions.toPay + cardTotals.filter((c) => !c.isPaid).reduce((a, c) => a + c.amount, 0),
       subscriptions,
     };
     const totalAfterPayments = matiasTotal + aylinTotal - billsBalances.toPay;
@@ -148,12 +177,17 @@ export const DataProvider = ({ children }) => {
       if (b.type !== 'planned') return false;
       return shouldPayNextMonth(b, monthOffset);
     });
+    // las tarjetas del mes siguiente, con lo que suman sus cuotas de ese mes
+    nextMonth.cards = cardTotals;
     nextMonth.afterPayments =
-      nextMonth.beforePayments - nextMonth.bills.reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) - bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0);
+      nextMonth.beforePayments -
+      nextMonth.bills.reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) -
+      bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) -
+      cardTotals.reduce((a, c) => a + c.nextAmount, 0);
 
     return { byAccount, m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
-  }, [accounts, bills, appMeta, transactions, monthOffset]);
-  return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances, categories }}>{children}</DataContext.Provider>;
+  }, [accounts, bills, appMeta, transactions, cards, cardPurchases, monthOffset]);
+  return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances, categories, cards, cardPurchases }}>{children}</DataContext.Provider>;
 };
 
 export const useData = () => useContext(DataContext);

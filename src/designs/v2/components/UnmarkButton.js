@@ -8,7 +8,7 @@ import { fS } from '../../../theme/theme.js';
 export default function UnmarkButton({ billToUpdate }) {
   const windowWidth = Dimensions.get('window').width;
   const theme = useTheme();
-  const { bills } = useData();
+  const { bills, cards } = useData();
 
   const handleOnPress = () => {
     if (billToUpdate === 'monthly_summary') {
@@ -24,6 +24,10 @@ export default function UnmarkButton({ billToUpdate }) {
             },
           );
         }
+      }
+      // las tarjetas se marcan en la misma lista, así que se desmarcan con ella
+      for (const card of cards.filter((c) => c.isPaid)) {
+        setDoc(doc(db, 'cards', card.id), { isPaid: false }, { merge: true });
       }
     } else if (billToUpdate === 'subs') {
       const totalOfSubs = bills.filter((b) => b.type === 'sub').reduce((a, b) => a + b.amount, 0);

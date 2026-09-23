@@ -271,6 +271,11 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
                 <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
               </Pressable>
+              {/* primero las tarjetas, después de los fijos, con lo que suman sus cuotas del mes siguiente: la fila
+                  se cierra si ese mes no pagan nada */}
+              {(balances?.nextMonth?.cards || []).map((card) => (
+                <NextMonthBillRow key={card.id} bill={{ ...card, amount: card.nextAmount }} included={card.nextAmount > 0} monthOffset={monthOffset} />
+              ))}
               {/* se montan todos los planeados y cada fila se abre o cierra según si entra en el mes siguiente */}
               {bills
                 .filter((b) => b.type === 'planned')

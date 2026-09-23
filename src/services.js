@@ -172,10 +172,69 @@ export function saveTransaction({ tx }) {
       category: tx.category || deleteField(),
       // solo las transferencias tienen destino; en el resto se borra
       toAccountId: TRANSFER_TYPES.includes(tx.type) && tx.toAccountId ? tx.toAccountId : deleteField(),
+      // el pago de una tarjeta de crédito guarda lo que pagó cada compra y con qué
+      // categoría (ver cardPaymentDetail). No se muestra todavía: queda para las
+      // estadísticas. Editar el movimiento lo conserva tal cual
+      cardPayment: tx.cardPayment || deleteField(),
       date: Timestamp.fromDate(tx.date instanceof Date ? tx.date : new Date(tx.date)),
     },
     { merge: true },
   );
 
   return ref.id;
+}
+
+// Tarjetas de crédito -----------------------------------------------------------
+
+// Alta y edición del mismo lado, como los movimientos: sin id es nueva. Los días
+// de facturación y de pago son los que ubican cada cuota en su mes
+export function saveCard({ card }) {
+  const ref = card.id ? doc(db, 'cards', card.id) : doc(collection(db, 'cards'));
+
+  setDoc(
+    ref,
+    {
+      name: card.name.trim(),
+      emoji: card.emoji || '💳',
+      billingDay: Number(card.billingDay),
+      paymentDay: Number(card.paymentDay),
+      order: card.order ?? 0,
+    },
+    { merge: true },
+  );
+
+  return ref.id;
+}
+
+// la tarjeta se va con sus compras: sin ella no tienen dónde verse
+export function deleteCard({ card, purchases = [] }) {
+  purchases.filter((p) => p.cardId === card.id).forEach((p) => deleteDoc(doc(db, 'cardPurchases', p.id)));
+  deleteDoc(doc(db, 'cards', card.id));
+}
+
+// El monto es el valor de la cuota, no el total: es lo que sale en el estado de
+// cuenta, ya con el interés. Una compra al contado es una cuota
+export function saveCardPurchase({ purchase }) {
+  const ref = purchase.id ? doc(db, 'cardPurchases', purchase.id) : doc(collection(db, 'cardPurchases'));
+
+  setDoc(
+    ref,
+    {
+      cardId: purchase.cardId,
+      label: (purchase.label || '').trim(),
+      amount: Number(purchase.amount),
+      installments: Math.max(1, Number(purchase.installments) || 1),
+      category: purchase.category || deleteField(),
+      date: Timestamp.fromDate(purchase.date instanceof Date ? purchase.date : new Date(purchase.date)),
+      // el mes de la primera cuota escrito a mano; sin él se calcula de la fecha
+      firstMonthIndex: purchase.firstMonthIndex ?? deleteField(),
+    },
+    { merge: true },
+  );
+
+  return ref.id;
+}
+
+export function deleteCardPurchase({ purchase }) {
+  deleteDoc(doc(db, 'cardPurchases', purchase.id));
 }
