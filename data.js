@@ -120,38 +120,53 @@ export const defaultCategories = {
 };
 
 // Paleta del selector de categorías: los colores que ya usaban las categorías
-// semilla más vecinos suyos, todos del mismo peso para que la lista se lea
-// pareja sobre el papel. Van de a seis por fila, así que conviene que sean
-// múltiplo de seis: son veinticuatro, cuatro filas justas.
+// semilla, sus vecinos y una tanda de tonos oscuros profundos. Van de a seis
+// por fila y cada fila es una familia, siguiendo la rueda de color de una fila
+// a la otra; los neutros al final. Son treinta y seis, seis filas justas: si se
+// agregan, que sea de a seis y en su familia.
 export const CATEGORY_COLORS = [
-  // azules y fríos
-  '#4A7FC1',
-  '#3E6EA8',
-  '#5A6E8A',
-  '#5B7D8C',
-  '#6E9AA8',
+  // azules
   '#5FA3B5',
-  // verdes
-  '#4E9E8F',
-  '#5E9A70',
-  '#7FA05A',
-  '#96A84E',
-  '#6E7A72',
-  '#8A8378',
-  // cálidos
-  '#C29B4A',
-  '#B8873B',
-  '#D08C3E',
-  '#C97B5A',
-  '#D96F4C',
-  '#B05248',
-  // rojos, rosados y morados
-  '#C4485F',
-  '#A85A7A',
-  '#9B5FA8',
-  '#7A6FA8',
+  '#6E9AA8',
+  '#1E5F74',
+  '#5B7D8C',
+  '#3E6EA8',
+  '#4A7FC1',
+  // índigos y morados
+  '#1F3A68',
   '#6A5FB8',
+  '#7A6FA8',
+  '#43307A',
+  '#6B2A7A',
+  '#9B5FA8',
+  // rosados y rojos
+  '#8A2455',
+  '#A85A7A',
+  '#C4485F',
+  '#8E2B2B',
+  '#B05248',
+  '#D96F4C',
+  // naranjas y amarillos
+  '#C97B5A',
+  '#8C4A1E',
+  '#D08C3E',
+  '#B8873B',
+  '#C29B4A',
+  '#8A6A12',
+  // verdes
+  '#96A84E',
+  '#4A6B1F',
+  '#7FA05A',
+  '#5E9A70',
+  '#1F6B52',
+  '#4E9E8F',
+  // neutros
+  '#8A8378',
   '#7E6A58',
+  '#5C4033',
+  '#6E7A72',
+  '#5A6E8A',
+  '#2E2F3A',
 ];
 
 // Iconos que ofrece el selector. Es una lista curada, no todo Material Symbols:
