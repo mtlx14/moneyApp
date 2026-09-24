@@ -159,7 +159,6 @@ export const DataProvider = ({ children }) => {
       emoji: card.emoji || '💳',
       isPaid: !!card.isPaid,
       amount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset }).total),
-      nextAmount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset: monthOffset + 1 }).total),
     }));
 
     const billsBalances = {
@@ -167,25 +166,35 @@ export const DataProvider = ({ children }) => {
       subscriptions,
     };
     const totalAfterPayments = matiasTotal + aylinTotal - billsBalances.toPay;
-    const nextMonth = {};
-
     const salaries = (byAccount['account_aylin_salary'] || 0) + (byAccount['account_matias_salary'] || 0);
 
-    nextMonth.beforePayments = totalAfterPayments + salaries;
+    // Proyección del mes que está `ahead` meses después del que se mira: parte de
+    // lo que queda del mes anterior, le suma los sueldos y le descuenta los fijos,
+    // las suscripciones, los planeados que caen ese mes y las cuotas de las
+    // tarjetas de ese mes
+    const projectMonth = (ahead, startBalance) => {
+      const target = monthOffset + ahead;
+      const beforePayments = startBalance + salaries;
+      const fixedTotal = bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, target), 0);
+      // shouldPayNextMonth mira el mes que sigue al que recibe
+      const planned = bills.filter((b) => b.type === 'planned' && shouldPayNextMonth(b, target - 1));
+      const monthCards = cards.map((card) => ({
+        id: card.id,
+        label: card.name,
+        emoji: card.emoji || '💳',
+        amount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset: target }).total),
+      }));
+      const afterPayments = beforePayments - fixedTotal - planned.reduce((a, b) => a + amountForMonth(b, target), 0) - monthCards.reduce((a, c) => a + c.amount, 0);
 
-    nextMonth.bills = bills.filter((b) => {
-      if (b.type !== 'planned') return false;
-      return shouldPayNextMonth(b, monthOffset);
-    });
-    // las tarjetas del mes siguiente, con lo que suman sus cuotas de ese mes
-    nextMonth.cards = cardTotals;
-    nextMonth.afterPayments =
-      nextMonth.beforePayments -
-      nextMonth.bills.reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) -
-      bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0) -
-      cardTotals.reduce((a, c) => a + c.nextAmount, 0);
+      return { startBalance, beforePayments, fixedTotal, bills: planned, cards: monthCards, afterPayments };
+    };
 
-    return { byAccount, m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth };
+    // el mes siguiente parte de lo que queda este mes, y el subsiguiente de lo que
+    // queda el siguiente
+    const nextMonth = projectMonth(1, totalAfterPayments);
+    const monthAfter = projectMonth(2, nextMonth.afterPayments);
+
+    return { byAccount, m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth, monthAfter };
   }, [accounts, bills, appMeta, transactions, cards, cardPurchases, monthOffset]);
   return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances, categories, cards, cardPurchases }}>{children}</DataContext.Provider>;
 };

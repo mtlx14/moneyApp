@@ -14,7 +14,7 @@ import { okTransfers, updateAccountBalance, updateChanges } from '../../../servi
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../../../theme/theme.js';
-import { amountForMonth, hasPendingChanges, monthAndYear } from '../../../helpers.js';
+import { hasPendingChanges, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import ModalConfirm from '../components/ModalConfirm.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
@@ -36,7 +36,7 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
     activeFieldAmount: null,
   });
 
-  // página visible del scroll horizontal: 0 mes actual, 1 proyección del mes siguiente
+  // página visible del scroll horizontal: 0 mes actual, 1 y 2 proyección de los dos meses siguientes
   const [page, setPage] = useState(0);
 
   const [showChanges, setShowChanges] = useState([]);
@@ -94,6 +94,87 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
     }
   };
   if (!isReady) return null;
+
+  // Página de proyección del mes que está `ahead` meses después del que se mira:
+  // lo que queda del mes anterior más los sueldos, menos los gastos de ese mes
+  const renderProjection = (projection, ahead, startLabel) => {
+    // las filas cuentan cuotas y montos para el mes que sigue al que reciben
+    const rowOffset = monthOffset + ahead - 1;
+    const rowStyle = { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' };
+    const textStyle = { color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text };
+    const separator = <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>;
+    const totalBoxStyle = {
+      backgroundColor: theme.bg.tr_1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 2,
+      paddingVertical: 10,
+      marginHorizontal: -windowWidth * 0.03,
+      borderRadius: 10,
+      padding: windowWidth * 0.03,
+    };
+
+    return (
+      <View>
+        <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
+          <AnimatedSwapTextL value={projection.afterPayments} />
+          <Text style={textStyle}>Saldo después de pagar cuentas</Text>
+        </Animated.View>
+        <View style={{ width: windowWidth, height: windowHeight * 0.72, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+          <View>
+            <View style={rowStyle}>
+              <Text style={textStyle}>{'💷' + '  ' + startLabel}</Text>
+
+              <AnimatedSwapTextS value={projection.startBalance || 0} />
+            </View>
+
+            {separator}
+
+            <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={rowStyle}>
+              <Text style={textStyle}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
+
+              <AnimatedSwapTextS type={'income'} value={balances.byAccount['account_aylin_salary'] || 0} />
+            </Pressable>
+            {separator}
+
+            <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={rowStyle}>
+              <Text style={textStyle}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
+
+              <AnimatedSwapTextS type={'income'} value={balances.byAccount['account_matias_salary'] || 0} />
+            </Pressable>
+          </View>
+          <View style={totalBoxStyle}>
+            <Text style={textStyle}>{'💶' + '  ' + 'Saldo Total'}</Text>
+            <AnimatedSwapTextS value={projection.beforePayments} />
+          </View>
+          {/* Lo único que crece es esta lista, así que es lo único que scrollea:
+              los saldos de arriba y el total de abajo quedan fijos. */}
+          <FadingScroll>
+            <Pressable style={{ ...rowStyle, marginTop: 20 }}>
+              <Text style={{ ...textStyle, color: theme.text._3 }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
+
+              <AnimatedSwapTextS type={'debt'} value={projection.fixedTotal} />
+            </Pressable>
+            {/* primero las tarjetas, después de los fijos, con lo que suman sus cuotas de ese mes: la fila
+                se cierra si ese mes no pagan nada */}
+            {(projection.cards || []).map((card) => (
+              <NextMonthBillRow key={card.id} bill={card} included={card.amount > 0} monthOffset={rowOffset} />
+            ))}
+            {/* se montan todos los planeados y cada fila se abre o cierra según si entra en ese mes */}
+            {bills
+              .filter((b) => b.type === 'planned')
+              .map((bill) => {
+                return <NextMonthBillRow key={bill.id} bill={bill} included={!!projection.bills?.some((b) => b.id === bill.id)} monthOffset={rowOffset} />;
+              })}
+          </FadingScroll>
+          <View style={totalBoxStyle}>
+            <Text style={textStyle}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+            <AnimatedSwapTextS value={projection.afterPayments} />
+          </View>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <Animated.View style={{ height: windowHeight, width: windowWidth }} entering={nAnimations.en} exiting={nAnimations.ex}>
@@ -219,87 +300,10 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             </View>
           </View>
         </View>
-        {/* NEXT MONTH */}
-        <View>
-          <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
-            <AnimatedSwapTextL value={balances.nextMonth.afterPayments} />
-            <Text style={{ color: theme.text._2, fontWeight: theme.fw.home_acc_text, fontSize: fS.homeSubText }}>Saldo después de pagar cuentas</Text>
-          </Animated.View>
-          <View style={{ width: windowWidth, height: windowHeight * 0.72, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
-            <View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💷' + '  ' + 'Saldo actual'}</Text>
-
-                <AnimatedSwapTextS value={balances.totalAfterPayments || 0} />
-              </View>
-
-              <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
-
-              <Pressable onPress={() => handleAccountPress({ accountId: 'account_aylin_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🌸' + '  ' + 'Sueldo Aylin'}</Text>
-
-                <AnimatedSwapTextS type={'income'} value={balances.byAccount['account_aylin_salary'] || 0} />
-              </Pressable>
-              <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025 }}></View>
-
-              <Pressable onPress={() => handleAccountPress({ accountId: 'account_matias_salary' })} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden' }}>
-                <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🚀' + '  ' + 'Sueldo Matías'}</Text>
-
-                <AnimatedSwapTextS type={'income'} value={balances.byAccount['account_matias_salary'] || 0} />
-              </Pressable>
-            </View>
-            <View
-              style={{
-                backgroundColor: theme.bg.tr_1,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 2,
-                paddingVertical: 10,
-                marginHorizontal: -windowWidth * 0.03,
-                borderRadius: 10,
-                padding: windowWidth * 0.03,
-              }}
-            >
-              <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo Total'}</Text>
-              <AnimatedSwapTextS value={balances.nextMonth.beforePayments} />
-            </View>
-            {/* Lo único que crece es esta lista, así que es lo único que scrollea:
-                los saldos de arriba y el total de abajo quedan fijos. */}
-            <FadingScroll>
-              <Pressable style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, overflow: 'hidden', marginTop: 20 }}>
-                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🧾' + '  ' + 'Gastos fijos'}</Text>
-
-                <AnimatedSwapTextS type={'debt'} value={bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, monthOffset + 1), 0)} />
-              </Pressable>
-              {/* primero las tarjetas, después de los fijos, con lo que suman sus cuotas del mes siguiente: la fila
-                  se cierra si ese mes no pagan nada */}
-              {(balances?.nextMonth?.cards || []).map((card) => (
-                <NextMonthBillRow key={card.id} bill={{ ...card, amount: card.nextAmount }} included={card.nextAmount > 0} monthOffset={monthOffset} />
-              ))}
-              {/* se montan todos los planeados y cada fila se abre o cierra según si entra en el mes siguiente */}
-              {bills
-                .filter((b) => b.type === 'planned')
-                .map((bill) => {
-                  return <NextMonthBillRow key={bill.id} bill={bill} included={!!balances?.nextMonth?.bills?.some((b) => b.id === bill.id)} monthOffset={monthOffset} />;
-                })}
-            </FadingScroll>
-            <View
-              style={{
-                backgroundColor: theme.bg.tr_1,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 2,
-                paddingVertical: 10,
-                marginHorizontal: -windowWidth * 0.03,
-                borderRadius: 10,
-                padding: windowWidth * 0.03,
-              }}
-            >
-              <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'💶' + '  ' + 'Saldo después de pagar cuentas'}</Text>
-              <AnimatedSwapTextS value={balances.nextMonth.afterPayments} />
-            </View>
-          </View>
-        </View>
+        {/* MES SIGUIENTE: parte de lo que queda este mes */}
+        {renderProjection(balances.nextMonth, 1, 'Saldo actual')}
+        {/* MES SUBSIGUIENTE: parte de lo que queda el mes siguiente */}
+        {renderProjection(balances.monthAfter, 2, 'Saldo mes anterior')}
       </ScrollView>
 
       {/* modals ------------------------------------ */}
