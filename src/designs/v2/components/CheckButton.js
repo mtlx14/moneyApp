@@ -14,7 +14,7 @@ const windowHeight = Dimensions.get('window').height;
 
 // Sirve para los gastos y para las tarjetas de crédito: las dos guardan isPaid
 // en su documento, solo cambia la colección
-export default function CheckButton({ bill, onChecked, collectionName = 'bills' }) {
+export default function CheckButton({ bill, collectionName = 'bills' }) {
   const theme = useTheme();
   const [checked, setChecked] = useState(false);
   const [yellow, setYellow] = useState(false);
@@ -49,10 +49,6 @@ export default function CheckButton({ bill, onChecked, collectionName = 'bills' 
     );
 
     setChecked((prev) => !prev);
-
-    // solo al marcar: el pago recién hecho es el que se puede anotar como
-    // movimiento. Desmarcar no pregunta nada
-    if (!checked) onChecked?.(bill);
   };
   return (
     <Pressable onPress={() => handleOnPress()} style={{ height: windowWidth * 0.1 - 10, aspectRatio: 1 / 1, backgroundColor: checked ? (yellow ? theme.bg.yellow : theme.bg.check) : theme.bg.tr_1, borderRadius: 5, justifyContent: 'center', alignItems: 'center' }}>

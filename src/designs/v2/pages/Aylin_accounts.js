@@ -1,7 +1,7 @@
 import { View, Text, Dimensions, Platform, Pressable, ScrollView } from 'react-native';
 import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Animated from 'react-native-reanimated';
 import AccountCard from '../components/AccountCard.js';
 import { Keyboard } from '../components/Keyboard.js';
@@ -9,8 +9,6 @@ import { Keyboard } from '../components/Keyboard.js';
 import AnimatedSwapTextS from '../components/AnimatedSwapTextS.js';
 import { updateAccountBalance, updateChanges, updateSubAccount } from '../../../services.js';
 import ModalTransferAccount from '../components/ModalTransferAccount.js';
-import AccountHistory from '../components/AccountHistory.js';
-import ModalTransaction from '../components/ModalTransaction.js';
 import { fS } from '../../../theme/theme.js';
 import GoBackScroll from '../components/GoBackScroll.js';
 import CollapsibleRow from '../components/CollapsibleRow.js';
@@ -20,7 +18,7 @@ import { CONTENT_LEFT } from '../layout.js';
 const windowHeight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
 
-export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, params }) {
+export default function Aylin_accounts({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
   const { accounts, balances } = useData();
   const { currentUser } = useAppStorage();
@@ -30,31 +28,12 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
     activeFieldAmount: null,
     subAccountToSave: null,
     showModalTransferAccount: false,
-    selectedTx: null,
   });
 
   useEffect(() => {
     if (localInfo.activeField) setShowMenu(false);
     else setShowMenu(true);
   }, [localInfo.activeField]);
-
-  // Se puede llegar acá desde el resumen del mes con el movimiento de un pago ya
-  // armado: se abre su cuenta y el modal encima, igual que si se hubiera anotado
-  // a mano desde el historial. El ref evita que se vuelva a abrir al cerrarlo
-  const openedParams = useRef(null);
-  useEffect(() => {
-    if (!params?.newTx || openedParams.current === params || !accounts.length) return;
-    const account = accounts.find((a) => a.id === params.newTx.accountId);
-    if (!account) return;
-    openedParams.current = params;
-    setLocalInfo((prev) => ({
-      ...prev,
-      activeField: account,
-      activeFieldAmount: balances.byAccount[account.id] || 0,
-      selectedTx: params.newTx,
-    }));
-  }, [params, accounts]);
-
 
   const aylinAccounts = accounts.filter((a) => a.type === 'a_account');
 
@@ -93,29 +72,18 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
     }
   };
 
-  // las cuentas migradas al ledger muestran sus movimientos en vez del teclado:
-  // ahí el saldo ya no se escribe a mano, sale de las transacciones. Por eso el
-  // monto de la tarjeta lo lee de balances y no del estado local, que se copia
-  // al abrir la cuenta y se quedaba viejo al anotar o borrar un movimiento
-  const showHistory = !!localInfo.activeField?.isLedger;
-
   const closeField = () =>
     setLocalInfo((prev) => ({
       ...prev,
       activeField: null,
       activeFieldAmount: null,
       subAccountToSave: null,
-      selectedTx: null,
     }));
 
-  // el gesto de volver primero deshace el paso de adentro: el detalle de un
-  // movimiento vuelve a la lista, y la cuenta abierta vuelve al listado. Solo
+  // el gesto de volver primero deshace el paso de adentro: el modal de
+  // transferir vuelve a la cuenta, y la cuenta abierta vuelve al listado. Solo
   // desde el listado se sale de la página
   const handleGoBack = () => {
-    if (localInfo.selectedTx) {
-      setLocalInfo((prev) => ({ ...prev, selectedTx: null }));
-      return true;
-    }
     if (localInfo.showModalTransferAccount) {
       setLocalInfo((prev) => ({ ...prev, showModalTransferAccount: false }));
       return true;
@@ -264,9 +232,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
             </View>
           )}
           {/* modals ------------------------------------ */}
-          {localInfo.activeField && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountCard amountValue={showHistory ? balances.byAccount[localInfo.activeField.id] || 0 : localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} wide={showHistory} />}
-          {showHistory && !localInfo.showModalTransferAccount && !localInfo.selectedTx && <AccountHistory account={localInfo.activeField} onSelect={(tx) => setLocalInfo((prev) => ({ ...prev, selectedTx: tx }))} onNew={(type) => setLocalInfo((prev) => ({ ...prev, selectedTx: { accountId: prev.activeField.id, type, amount: 0, label: '', date: new Date() } }))} />}
-          {localInfo.selectedTx && <ModalTransaction tx={localInfo.selectedTx} onCancel={() => setLocalInfo((prev) => ({ ...prev, selectedTx: null }))} />}
+          {localInfo.activeField && !localInfo.showModalTransferAccount && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} setLocalInfoMAccount={setLocalInfo} />}
           {localInfo.showModalTransferAccount && (
             <ModalTransferAccount
               accounts={aylinAccounts.filter((a) => a.id !== localInfo.activeField.forAccount && !a.isNegative)}
@@ -303,7 +269,7 @@ export default function Aylin_accounts({ setShowMenu, navigate, nAnimations, par
 
           {/* teclado ------------------------------------ */}
 
-          {localInfo.activeField && !showHistory && (
+          {localInfo.activeField && (
             <Keyboard
               showCancel={localInfo.activeField.hasSubAccount ? (localInfo.subAccountToSave && localInfo.activeFieldAmount > 0 ? false : true) : false}
               showDelete={localInfo.activeField.type === 'sub_account'}

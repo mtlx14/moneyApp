@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, cardMonth, getEffectiveDate, isTransfer, signedAmount, signedAmountFor } from './src/helpers';
+import { amountForMonth, cardMonth, getEffectiveDate } from './src/helpers';
 import { defaultCategories } from './data.js';
 import { seedCategories } from './src/services.js';
 
@@ -52,8 +52,8 @@ export const DataProvider = ({ children }) => {
       setAppMeta(snap.docs.map((d) => ({ id: d.id, ...d.data() }))[0]);
     });
 
-    // la colección entera: hoy son unos pocos docs y el saldo de una cuenta es
-    // la suma de TODAS sus transacciones, no solo las del mes que se mira
+    // los movimientos ya no mueven saldos: quedan solo para que la página de
+    // categorías sepa cuáles están en uso
     const unsubTransactions = onSnapshot(collection(db, 'transactions'), (snap) => {
       setTransactions(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
@@ -90,32 +90,16 @@ export const DataProvider = ({ children }) => {
     };
   }, []);
 
-  // saldo aportado por las transacciones de cada cuenta, ya con signo
-  const txByAccount = useMemo(() => {
-    const map = {};
-    transactions.forEach((tx) => {
-      map[tx.accountId] = (map[tx.accountId] || 0) + signedAmount(tx);
-      // la transferencia es un solo documento: le suma a la cuenta de destino
-      // lo que le restó a la de origen
-      if (isTransfer(tx) && tx.toAccountId) map[tx.toAccountId] = (map[tx.toAccountId] || 0) + tx.amount;
-    });
-    return map;
-  }, [transactions]);
+  // el saldo de una cuenta es el número escrito a mano con el teclado
+  const balanceOf = (account) => account?.balance || 0;
 
-  // única puerta de entrada al saldo de una cuenta. Las cuentas con isLedger lo
-  // sacan de sus transacciones; las que quedaron fuera de la migración (los
-  // contenedores, Bencina, los sueldos) siguen con el número escrito a mano
-  const balanceOf = (account) => (account?.isLedger ? txByAccount[account.id] || 0 : account?.balance || 0);
-
-  // saldos por dueño. Ya no hay sub-cuentas: las de transporte pasaron a ser
-  // movimientos con categoría dentro de su cuenta, así que cada cuenta se lee
-  // sola. Las marcadas como isNegative guardan en positivo lo que se debe, por
-  // eso se descuentan dos veces del total
+  // saldos por dueño: las cuentas propias más lo que sumen sus sub-cuentas,
+  // descontando las marcadas como isNegative (guardan en positivo lo que se debe)
   const accountsByType = (type, excludeIds = []) => {
     const map = {};
 
     accounts
-      .filter((a) => a.type === type && !excludeIds.includes(a.id))
+      .filter((a) => a.type === type && !a.hasSubAccount && !excludeIds.includes(a.id))
       .forEach((a) => {
         map[a.id] = {
           id: a.id,
@@ -123,8 +107,23 @@ export const DataProvider = ({ children }) => {
           balance: balanceOf(a),
         };
       });
+    accounts
+      .filter((a) => a.type === 'sub_account')
+      .forEach((a) => {
+        const parent = accounts.find((account) => account.id === a.forAccount);
+        if (!parent || parent.type !== type) return;
 
-    const total = Object.values(map).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.type === type && a.isNegative && !excludeIds.includes(a.id)).reduce((sum, acc) => sum + balanceOf(acc), 0) * 2;
+        if (!map[a.forAccount]) {
+          map[a.forAccount] = {
+            id: a.forAccount,
+            name: parent.name,
+            balance: 0,
+          };
+        }
+        map[a.forAccount].balance += balanceOf(a);
+      });
+
+    const total = Object.values(map).reduce((sum, acc) => sum + (acc.balance || 0), 0) - accounts.filter((a) => a.type === type && a.isNegative && !a.hasSubAccount && !excludeIds.includes(a.id)).reduce((sum, acc) => sum + balanceOf(acc), 0) * 2;
 
     return { map, total };
   };
@@ -195,7 +194,7 @@ export const DataProvider = ({ children }) => {
     const monthAfter = projectMonth(2, nextMonth.afterPayments);
 
     return { byAccount, m_account, a_account, matiasTotal, aylinTotal, billsBalances, totalAfterPayments, nextMonth, monthAfter };
-  }, [accounts, bills, appMeta, transactions, cards, cardPurchases, monthOffset]);
+  }, [accounts, bills, appMeta, cards, cardPurchases, monthOffset]);
   return <DataContext.Provider value={{ accounts, bills, appMeta, transactions, balances, categories, cards, cardPurchases }}>{children}</DataContext.Provider>;
 };
 

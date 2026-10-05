@@ -10,13 +10,12 @@ import { Keyboard } from '../components/Keyboard.js';
 import AccountCard from '../components/AccountCard.js';
 
 import UserTag from '../components/UserTag.js';
-import { okTransfers, updateAccountBalance, updateChanges } from '../../../services.js';
+import { updateAccountBalance, updateChanges } from '../../../services.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fS } from '../../../theme/theme.js';
 import { hasPendingChanges, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
-import ModalConfirm from '../components/ModalConfirm.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
 import FadingScroll from '../components/FadingScroll.js';
 import HomeMenu from '../components/HomeMenu.js';
@@ -55,21 +54,6 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       setShowChanges([]);
     }
   }, [appMeta, currentUser]);
-
-  // Las transferencias que le mandó el otro y todavía no vio. Anotarlas deja
-  // también el aviso verde de cambios, así que primero se lee ese y el detalle
-  // sale recién al darle Ok. Si el aviso ya se había aceptado antes, salen solas
-  // en vez de quedarse esperando uno que no va a volver
-  //
-  // Se mira changesPending y no showChanges, que se llena en un efecto: con un
-  // render de atraso el modal alcanzaba a asomarse antes que el aviso verde
-  const receivedTransfers = (currentUser.name === 'matias' ? appMeta?.mTransfers : appMeta?.aTransfers) || [];
-  // al darle Ok se va de una, sin esperar a que vuelva el documento
-  const [transfersSeen, setTransfersSeen] = useState(false);
-  useEffect(() => {
-    if (receivedTransfers.length === 0) setTransfersSeen(false);
-  }, [receivedTransfers.length]);
-  const showTransfers = receivedTransfers.length > 0 && !changesPending && !transfersSeen && !localInfo.activeField;
 
   const activeFieldOpacity = useSharedValue(1);
   const activeFieldOpacityAnimatedStyle = useAnimatedStyle(() => ({
@@ -323,15 +307,6 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       )}
       {localInfo.activeField && <AccountCard amountValue={localInfo.activeFieldAmount} account={localInfo.activeField} />}
       {showChanges?.length > 0 && <OkToChanges user={currentUser} setShowChanges={setShowChanges} />}
-
-      {/* lo que le transfirió el otro: monto y cuenta, y un Ok que lo da por leído */}
-      {showTransfers && (
-        <ModalConfirm
-          message={receivedTransfers.map((t) => `${t.from} te transfirió $${Number(t.amount).toLocaleString('es-CL')} a tu ${t.accountName}`).join('\n\n')}
-          confirmLabel='Ok'
-          onConfirm={() => (setTransfersSeen(true), okTransfers({ user: currentUser }))}
-        />
-      )}
 
       {/* teclado ------------------------------------ */}
 

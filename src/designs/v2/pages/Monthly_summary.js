@@ -8,9 +8,8 @@ import Animated, { FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutR
 import CheckButton from '../components/CheckButton.js';
 import UnmarkButton from '../components/UnmarkButton.js';
 import { fS } from '../../../theme/theme.js';
-import { billCategoryId, cardMonth, cardPaymentDetail, currentInstallment, defaultTxAccount, getEffectiveDate } from '../../../helpers.js';
+import { cardMonth, currentInstallment } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
-import ModalConfirm from '../components/ModalConfirm.js';
 import ModalCard from '../components/ModalCard.js';
 import Icon from '../components/Icon.js';
 import { saveCard } from '../../../services.js';
@@ -23,11 +22,9 @@ const windowWidth = Dimensions.get('window').width;
 
 export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) {
   const theme = useTheme();
-  const { accounts, balances, bills, categories, cards, cardPurchases } = useData();
-  const { monthOffset, currentUser } = useAppStorage();
+  const { balances, bills, cards, cardPurchases } = useData();
+  const { monthOffset } = useAppStorage();
   const [activeField, setActiveField] = useState(null);
-  // el gasto que se acaba de marcar y está esperando el sí o el no
-  const [billToAnnotate, setBillToAnnotate] = useState(null);
   // la tarjeta nueva que se está armando en su modal; las que ya existen se
   // editan desde adentro de cada una
   const [newCard, setNewCard] = useState(null);
@@ -50,30 +47,6 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
       return true;
     }
     return false;
-  };
-
-  // El movimiento no se anota acá encima: se va a la página de cuentas, se abre
-  // la cuenta con la que se paga y el movimiento queda esperando en su modal,
-  // igual que anotándolo a mano desde el historial. Nace con el monto y la
-  // descripción del gasto y con la categoría que le toca por tipo (las cuentas
-  // en los fijos, la tarjeta en los planeados); todo se puede cambiar ahí
-  const annotate = (bill) => {
-    setBillToAnnotate(null);
-    const account = defaultTxAccount(accounts, currentUser.name);
-    if (!account) return;
-    navigate(account.type === 'm_account' ? 'matias_accounts' : 'aylin_accounts', 1, {
-      newTx: {
-        label: bill.label,
-        amount: bill.amount,
-        type: 'expense',
-        category: billCategoryId(bill, categories),
-        accountId: account.id,
-        // mirando otro mes, el movimiento nace el día 1 de ese mes
-        date: monthOffset === 0 ? new Date() : getEffectiveDate(monthOffset),
-        // el pago de una tarjeta lleva el detalle de sus cuotas (ver cardPaymentDetail)
-        ...(bill.cardPayment ? { cardPayment: bill.cardPayment } : {}),
-      },
-    });
   };
 
   return (
@@ -150,7 +123,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                             >
                               {`$${(bill.type === 'fixed' ? bill.amount : balances.billsBalances.subscriptions.toPay).toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} onChecked={setBillToAnnotate} />
+                            <CheckButton bill={bill} />
                           </View>
                         </Pressable>
                       );
@@ -176,9 +149,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                           </View>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
                             <Text style={{ color: theme.text._2, fontSize: fS.subsText }}>{`$${total.toLocaleString('es-CL')}`}</Text>
-                            {/* al marcarla se ofrece anotar el pago, como un planeado:
-                                con el total del mes y la categoría de la tarjeta */}
-                            <CheckButton bill={card} collectionName='cards' onChecked={() => setBillToAnnotate({ label: card.name, amount: total, type: 'planned', cardPayment: cardPaymentDetail({ card, purchases: cardPurchases, monthOffset }) })} />
+                            <CheckButton bill={card} collectionName='cards' />
                           </View>
                         </Pressable>
                       );
@@ -223,7 +194,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                             >
                               {`$${bill.amount.toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} onChecked={setBillToAnnotate} />
+                            <CheckButton bill={bill} />
                           </View>
                         </Pressable>
                       );
@@ -241,9 +212,6 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
               </Animated.View>
             </Animated.View>
           )}
-
-          {/* al marcar un gasto se pregunta si además se anota el movimiento */}
-          {billToAnnotate && <ModalConfirm message={`¿Anotar el movimiento de ${billToAnnotate.label}?`} onConfirm={() => annotate(billToAnnotate)} onCancel={() => setBillToAnnotate(null)} />}
         </Animated.View>
     </GoBackScroll>
   );

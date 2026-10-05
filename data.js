@@ -34,74 +34,6 @@ export const themes = {
 
 export const DEFAULT_THEME = 'beige';
 
-// Tipos de movimiento. La transacción guarda solo la clave.
-// El ícono y el color son fijos por tipo: no se eligen, solo identifican.
-// Ojo con los nombres: las letras tienen que estar en el subset de la fuente
-// (ver Icon.js) o el glifo sale en blanco.
-export const txTypes = {
-  initial: { label: 'Saldo inicial', icon: 'wallet', color: '#8A8378' },
-  // el verde y el rojo son los de la pantalla de Gastos (bg.check y bg.danger)
-  income: { label: 'Ingreso', icon: 'savings', color: '#4DBD6B' },
-  expense: { label: 'Gasto', icon: 'receipt', color: '#D55858' },
-  transfer: { label: 'Transferencia', icon: 'swap_horiz', color: '#6E9AA8' },
-  // Transferencia al otro usuario. Adentro es igual que la de arriba —sale de
-  // una cuenta y entra en otra, no es ingreso ni gasto—, lo único distinto es
-  // que la cuenta de destino es del otro. La etiqueta se arma con el nombre de
-  // quien recibe (ver txTypeLabel), esta es solo el respaldo
-  user_transfer: { label: 'Tr. a otro usuario', icon: 'swap_horiz', color: '#7A6FA8' },
-  adjustment: { label: 'Ajuste', icon: 'healing', color: '#9A9183' },
-};
-
-// Saldo inicial, transferencia y ajuste NO son categorías: son tipos, y los
-// movimientos de esos tipos no llevan categoría ninguna. El ícono y el color se
-// los pone su entrada de txTypes.
-export const TYPES_WITHOUT_CATEGORY = ['initial', 'transfer', 'user_transfer', 'adjustment'];
-
-// Los dos tipos que mueven plata de una cuenta a otra: un solo documento que
-// resta en la de origen y suma en la de destino. Todo lo que mire toAccountId
-// tiene que mirar los dos
-export const TRANSFER_TYPES = ['transfer', 'user_transfer'];
-
-// Los dos usuarios y el tipo de cuenta que lleva cada uno. Las cuentas guardan
-// el tipo, así que de una cuenta se sabe de quién es y al revés
-export const USER_ACCOUNT_TYPE = { matias: 'm_account', aylin: 'a_account' };
-export const ACCOUNT_TYPE_USER = {
-  m_account: { name: 'matias', label: 'Matías' },
-  a_account: { name: 'aylin', label: 'Aylin' },
-};
-
-// Las transferencias van solo entre estas dos cuentas del mismo dueño, así que
-// elegido el origen el destino es la otra y no hay nada que elegir. Van por
-// **nombre de Firestore**, como el resto de los mapas de este archivo: si el
-// nombre no coincide, esa cuenta simplemente no transfiere.
-export const TRANSFER_PAIR = ['Cuenta corriente', 'Efectivo'];
-
-// Las cuentas de las apps de transporte. Antes tenían sub-cuentas (Uber, Didi,
-// Cabify); hoy eso son transacciones con categoría. Solo llevan **ingresos** y
-// solo de las categorías de abajo, y en el listado de cuentas se abren mostrando
-// cuánto puso cada una. Van por id de Firestore.
-export const RIDE_ACCOUNTS = ['m_account_to_be_paid', 'm_account_currently'];
-
-// Por **etiqueta** de la categoría, como el resto de los mapas de este archivo:
-// si la categoría no existe o se renombra, simplemente no aparece. El orden es
-// el que se ve dentro de la cuenta. El emoji es el que tenían las sub-cuentas y
-// vive acá, no en el movimiento: así la fila se ve igual aunque el movimiento
-// cambie de cuenta.
-export const RIDE_CATEGORIES = [
-  { label: 'Uber', emoji: '🚗' },
-  { label: 'Didi', emoji: '🛻' },
-  { label: 'Cabify', emoji: '🚙' },
-];
-
-// Al marcar un gasto como pagado se ofrece anotar el movimiento, y nace con la
-// categoría que le toca por tipo: los fijos son las cuentas de la casa y los
-// planeados se pagan con la tarjeta. Va por **etiqueta**, como el resto de los
-// mapas de este archivo: si no existe, el modal abre sin categoría.
-export const BILL_CATEGORIES = {
-  fixed: 'Cuentas',
-  planned: 'Tarjeta de crédito',
-};
-
 // Categorías de transacciones. Ya viven en Firestore (colección 'categories');
 // esto es solo la semilla: si la colección está vacía, el contexto la escribe
 // con estas y de ahí en adelante manda la base. Se editan desde la página de
@@ -113,7 +45,7 @@ export const defaultCategories = {
   cat_super: { label: 'Supermercado', icon: 'shopping_cart', color: '#5E9A70', kind: 'expense' },
   cat_salidas: { label: 'Salidas', icon: 'local_bar', color: '#C29B4A', kind: 'expense' },
   cat_otros: { label: 'Otros', icon: 'inventory_2', color: '#8A8378', kind: 'both' },
-  // las de las apps de transporte, ver RIDE_CATEGORIES
+  // las de las apps de transporte
   cat_uber: { label: 'Uber', icon: 'local_taxi', color: '#5B7D8C', kind: 'income' },
   cat_didi: { label: 'Didi', icon: 'local_taxi', color: '#D08C3E', kind: 'income' },
   cat_cabify: { label: 'Cabify', icon: 'local_taxi', color: '#7A6FA8', kind: 'income' },

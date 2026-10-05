@@ -1,6 +1,5 @@
 import { Alert, Platform } from 'react-native';
 import { Timestamp } from 'firebase/firestore';
-import { ACCOUNT_TYPE_USER, BILL_CATEGORIES, RIDE_ACCOUNTS, RIDE_CATEGORIES, TRANSFER_PAIR, TRANSFER_TYPES, USER_ACCOUNT_TYPE, txTypes } from '../data.js';
 
 export function getEffectiveDate(monthOffset = 0) {
   const d = new Date();
@@ -91,90 +90,6 @@ export function monthKeyOf(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-// el saldo inicial y los ingresos suman; el resto (gastos, ajustes, transferencias) resta
-export function addsToBalance(tx) {
-  return tx?.type === 'income' || tx?.type === 'initial';
-}
-
-// mueve plata de una cuenta a otra: la propia o, entre usuarios, la del otro
-export function isTransfer(tx) {
-  return TRANSFER_TYPES.includes(tx?.type);
-}
-
-// el nombre del tipo como se lee en el modal: la transferencia entre usuarios
-// dice a quién va, el resto usa la etiqueta de txTypes
-export function txTypeLabel(type, otherUserLabel) {
-  if (type === 'user_transfer' && otherUserLabel) return `Tr. a ${otherUserLabel}`;
-  return txTypes[type]?.label || type;
-}
-
-// el usuario dueño de un tipo de cuenta, y el otro
-export function userOfAccountType(accountType) {
-  return ACCOUNT_TYPE_USER[accountType];
-}
-
-export function otherAccountType(accountType) {
-  return accountType === 'm_account' ? 'a_account' : accountType === 'a_account' ? 'm_account' : null;
-}
-
-// el monto de una transacción con su signo
-export function signedAmount(tx) {
-  return addsToBalance(tx) ? tx.amount : -tx.amount;
-}
-
-// lo que aporta una transacción a una cuenta en particular: una transferencia
-// resta en la de origen y suma en la de destino, el resto solo toca la suya
-export function signedAmountFor(tx, accountId) {
-  if (isTransfer(tx) && tx.toAccountId === accountId) return tx.amount;
-  return signedAmount(tx);
-}
-
-// saldo que aportan un conjunto de transacciones
-export function sumTransactions(transactions) {
-  return transactions.reduce((total, tx) => total + signedAmount(tx), 0);
-}
-
-// Cuentas de las apps de transporte -------------------------------------------
-
-// Por pagar y Currently no llevan cualquier movimiento: solo ingresos y solo de
-// las categorías de RIDE_CATEGORIES (antes eran sub-cuentas). Ver data.js.
-export function isRideAccount(account) {
-  return RIDE_ACCOUNTS.includes(account?.id);
-}
-
-// las categorías de transporte que existen hoy en la base, en el orden de
-// RIDE_CATEGORIES. Devuelve [id, categoría], con el emoji de data.js sumado a la
-// categoría: es lo que muestra la fila del listado de cuentas
-export function rideCategories(categories) {
-  return RIDE_CATEGORIES.map(({ label, emoji }) => {
-    const found = Object.entries(categories).find(([, c]) => c.label === label);
-    return found && [found[0], { ...found[1], emoji }];
-  }).filter(Boolean);
-}
-
-// lo que puso cada app dentro de una cuenta de transporte: la suma de sus
-// movimientos por categoría. Solo lo abren Por pagar y Currently —el resto de
-// las cuentas no muestra desglose ninguno, aunque tenga un movimiento de esas
-// categorías—, y las que no tienen ninguno quedan fuera, así que una cuenta
-// vacía tampoco muestra nada
-export function rideBreakdown({ account, transactions, categories }) {
-  if (!isRideAccount(account)) return [];
-
-  return rideCategories(categories)
-    .map(([id, category]) => {
-      const rows = transactions.filter((tx) => tx.accountId === account.id && tx.category === id);
-
-      return {
-        id,
-        category,
-        total: rows.reduce((sum, tx) => sum + signedAmountFor(tx, account.id), 0),
-        // el más nuevo, que es el que abre la fila al tocarla
-        lastTx: [...rows].sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0))[0],
-      };
-    })
-    .filter((row) => row.total !== 0);
-}
-
 // Avisos entre los dos ---------------------------------------------------------
 
 // si el otro hizo cambios que este usuario todavía no aceptó: es lo que enciende
@@ -193,26 +108,6 @@ export function hasPendingChanges(appMeta, userName) {
 export function byLabelOtrosLast(a, b) {
   const isOtros = (label) => Number((label || '').trim().toLowerCase() === 'otros');
   return isOtros(a.label) - isOtros(b.label) || a.label.localeCompare(b.label, 'es');
-}
-
-// Gastos del resumen del mes ---------------------------------------------------
-
-// la categoría con la que nace el movimiento de un gasto pagado, buscada por
-// etiqueta en las que hay hoy en la base. Ver BILL_CATEGORIES en data.js
-export function billCategoryId(bill, categories) {
-  const label = BILL_CATEGORIES[bill?.type];
-  if (!label) return undefined;
-  return Object.entries(categories).find(([, c]) => c.label === label)?.[0];
-}
-
-// La cuenta desde la que se paga: siempre una del usuario que está usando la
-// app —Matías nunca anota en las de Aylin ni al revés—, y de esas la cuenta
-// corriente. Si no la tuviera, cualquiera de sus cuentas de ledger que no sea de
-// transporte. Es solo el valor con el que abre el modal, ahí se puede cambiar
-export function defaultTxAccount(accounts, userName) {
-  const type = USER_ACCOUNT_TYPE[userName];
-  const mine = accounts.filter((a) => a.type === type && a.isLedger && !isRideAccount(a));
-  return mine.find((a) => a.name === TRANSFER_PAIR[0]) || mine[0];
 }
 
 // Tarjetas de crédito ----------------------------------------------------------
@@ -294,28 +189,4 @@ export function cardMonth({ card, purchases, monthOffset = 0 }) {
   const total = current.reduce((sum, { purchase }) => sum + (Number(purchase.amount) || 0), 0);
 
   return { current, upcoming, total };
-}
-
-// El detalle de lo que se paga al pagar una tarjeta: cada compra que paga cuota
-// en el mes que se mira, con su categoría y el número de cuota. Viaja pegado al
-// movimiento del pago (que va con la categoría de la tarjeta) para poder
-// repartirlo después por categoría, en el mismo movimiento o en gráficos. Los
-// montos son los exactos, sin el redondeo de Inicio
-export function cardPaymentDetail({ card, purchases, monthOffset = 0 }) {
-  const { current, total } = cardMonth({ card, purchases, monthOffset });
-
-  return {
-    cardId: card.id,
-    cardName: card.name,
-    monthIndex: currentMonthIndex(monthOffset),
-    total,
-    items: current.map(({ purchase, installment }) => ({
-      purchaseId: purchase.id,
-      label: purchase.label || '',
-      category: purchase.category || null,
-      amount: Number(purchase.amount) || 0,
-      installment,
-      installments: purchase.installments || 1,
-    })),
-  };
 }
