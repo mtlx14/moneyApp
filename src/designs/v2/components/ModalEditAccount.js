@@ -203,20 +203,51 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
   const shiftStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -shift * panelProgress.value }] }));
   const panelStyle = useAnimatedStyle(() => ({ opacity: panelProgress.value, transform: [{ translateX: (1 - panelProgress.value) * 25 }] }));
 
+  // Frec. y Día crecen y se achican en alto igual que la fila de mes 2: quedan
+  // siempre montadas y el cuadro las sigue, con el contenido entrando en fade
+  const frequencyProgress = useSharedValue(isFixed ? 1 : 0);
+  const weekdayProgress = useSharedValue(isWeeklyBill ? 1 : 0);
+
+  useEffect(() => {
+    frequencyProgress.value = withTiming(isFixed ? 1 : 0, { duration: 250, easing: Easing.out(Easing.quad) });
+  }, [isFixed]);
+  useEffect(() => {
+    weekdayProgress.value = withTiming(isWeeklyBill ? 1 : 0, { duration: 250, easing: Easing.out(Easing.quad) });
+  }, [isWeeklyBill]);
+
+  const frequencyRowStyle = useAnimatedStyle(() => ({ height: frequencyProgress.value * nextAmountRowHeight, overflow: 'hidden' }));
+  const frequencyContentStyle = useAnimatedStyle(() => ({ opacity: frequencyProgress.value }));
+  const weekdayRowStyle = useAnimatedStyle(() => ({ height: weekdayProgress.value * nextAmountRowHeight, overflow: 'hidden' }));
+  const weekdayContentStyle = useAnimatedStyle(() => ({ opacity: weekdayProgress.value }));
+
   // una fila más del cuadro, con su etiqueta a la izquierda como las de fields
-  const extraRow = (key, label, value, onPress) => (
-    <Animated.View key={key} entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} layout={LinearTransition}>
+  const extraRow = (key, label, value, onPress, visible, rowStyle, contentStyle) => (
+    <Animated.View key={key} pointerEvents={visible ? 'auto' : 'none'} style={rowStyle}>
       <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>
-      <View style={{ alignItems: 'center', height: rowHeight, backgroundColor: theme.bg.tr_05, justifyContent: 'flex-start', flexDirection: 'row' }}>
+      <Animated.View style={[{ alignItems: 'center', height: rowHeight, backgroundColor: theme.bg.tr_05, justifyContent: 'flex-start', flexDirection: 'row' }, contentStyle]}>
         <View style={{ backgroundColor: theme.bg.tr_05, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
           <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>{`${label}:`}</Text>
         </View>
         <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={onPress}>
           <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{value}</Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
+
+  // Hay cambios si algo difiere del gasto guardado. Sin frecuencia es mensual, y
+  // en un mensual el día no cuenta: ir a semanal y volver sin más no es un cambio
+  const comparable = (b) => {
+    if (!b) return b;
+    const { frequency, weekday, ...rest } = b;
+    return frequency === 'weekly' ? { ...rest, frequency, weekday } : rest;
+  };
+  const sameValue = (a, b) => {
+    if (!a || !b) return a === b;
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    return [...keys].every((k) => JSON.stringify(a[k]) === JSON.stringify(b[k]));
+  };
+  const hasChanges = !sameValue(comparable(currentBill), comparable(bills.find((b) => b.id === currentBill.id)));
 
   const Wrap = Platform.OS === 'web' ? View : Pressable;
   const wrapProps = Platform.OS === 'web' ? {} : { onPress: Keyboard.dismiss };
@@ -238,9 +269,9 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
               return (
                 <Animated.View
                   key={field}
-                  // el monto no cambia de posición y su fila de mes 2 anima su propio alto,
-                  // el layout acá le competiría a esa animación
-                  layout={field === 'amount' ? undefined : LinearTransition}
+                  // el monto y el tipo animan el alto de sus filas de abajo (mes 2, y
+                  // frecuencia y día): el layout acá le competiría a esa animación
+                  layout={field === 'amount' || field === 'type' ? undefined : LinearTransition}
                   entering={FadeIn.duration(300)} // Entrada suave
                   exiting={FadeOut.duration(300)}
                 >
@@ -371,8 +402,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
 
                   {/* frecuencia y día, debajo del tipo ------------------------------------ */}
 
-                  {field === 'type' && isFixed && extraRow('frequency', 'Frec.', isWeeklyBill ? 'Semanal' : 'Mensual', toggleFrequency)}
-                  {field === 'type' && isWeeklyBill && extraRow('weekday', 'Día', currentBill.weekday != null ? WEEKDAY_NAMES[currentBill.weekday] : '', openDayPicker)}
+                  {field === 'type' && extraRow('frequency', 'Frec.', isWeeklyBill ? 'Semanal' : 'Mensual', toggleFrequency, isFixed, frequencyRowStyle, frequencyContentStyle)}
+                  {field === 'type' && extraRow('weekday', 'Día', currentBill.weekday != null ? WEEKDAY_NAMES[currentBill.weekday] : '', openDayPicker, isWeeklyBill, weekdayRowStyle, weekdayContentStyle)}
                 </Animated.View>
               );
             })}
@@ -446,7 +477,7 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
             </Animated.View>
             {/* botón confirmar -------------------------- */}
 
-            {(JSON.stringify(currentBill) !== JSON.stringify(bills.find((b) => b.id === currentBill.id)) || getMonth(bill.firstMonth) !== date.m || getYear(bill.firstMonth) !== date.y) &&
+            {(hasChanges || getMonth(bill.firstMonth) !== date.m || getYear(bill.firstMonth) !== date.y) &&
               fields.name.every((field) => (field === 'firstMonth' ? currentBill.firstMonth !== '' && currentBill.firstMonth !== null : currentBill[field] !== '' && currentBill[field] !== 0 && currentBill[field] !== undefined && currentBill[field] !== null)) &&
               ('firstMonth' in currentBill ? currentBill.firstMonth !== '' : true) &&
               (hasNextAmount ? currentBill.nextAmount > 0 : true) &&
