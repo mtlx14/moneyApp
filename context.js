@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, cardMonth, getEffectiveDate } from './src/helpers';
+import { amountForMonth, billAmountForMonth, billToPay, cardMonth, getEffectiveDate } from './src/helpers';
 import { defaultCategories } from './data.js';
 import { seedCategories } from './src/services.js';
 
@@ -161,7 +161,7 @@ export const DataProvider = ({ children }) => {
     }));
 
     const billsBalances = {
-      toPay: bills.filter((b) => (b.type === 'fixed' || b.type === 'planned') && !b.isPaid).reduce((a, b) => a + b.amount, 0) + subscriptions.toPay + cardTotals.filter((c) => !c.isPaid).reduce((a, c) => a + c.amount, 0),
+      toPay: bills.filter((b) => b.type === 'fixed' || b.type === 'planned').reduce((a, b) => a + billToPay(b, monthOffset), 0) + subscriptions.toPay + cardTotals.filter((c) => !c.isPaid).reduce((a, c) => a + c.amount, 0),
       subscriptions,
     };
     const totalAfterPayments = matiasTotal + aylinTotal - billsBalances.toPay;
@@ -174,7 +174,8 @@ export const DataProvider = ({ children }) => {
     const projectMonth = (ahead, startBalance) => {
       const target = monthOffset + ahead;
       const beforePayments = startBalance + salaries;
-      const fixedTotal = bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + amountForMonth(b, target), 0);
+      // los semanales suman una vez por cada semana de ese mes
+      const fixedTotal = bills.filter((b) => b.type === 'fixed' || b.type === 'sub').reduce((a, b) => a + billAmountForMonth(b, target), 0);
       // shouldPayNextMonth mira el mes que sigue al que recibe
       const planned = bills.filter((b) => b.type === 'planned' && shouldPayNextMonth(b, target - 1));
       const monthCards = cards.map((card) => ({

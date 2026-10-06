@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 
-import { Alert, Dimensions, Keyboard, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Dimensions, Keyboard, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../../../theme/useTheme';
 import Animated, { useSharedValue, withDelay, withTiming, Easing, useAnimatedStyle, FadeInDown, LinearTransition, FadeInRight, FadeOutRight, SlideInRight, SlideOutRight, FadeOut, FadeIn } from 'react-native-reanimated';
 import { useEffect, useRef, useState } from 'react';
@@ -9,7 +9,7 @@ import Caret from './Caret.js';
 import { useData } from '../../../../context';
 import { deleteBill, updateBill } from '../../../services';
 import { Image } from 'expo-image';
-import { createTimestamp, getMonth, getNextMonth, getYear, getYearOfNextMonth } from '../../../helpers';
+import { WEEKDAY_NAMES, createTimestamp, getMonth, getNextMonth, getYear, getYearOfNextMonth } from '../../../helpers';
 import { Keyboard as CustomKeyboard } from './Keyboard';
 
 export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
@@ -21,6 +21,9 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
   const [currentBill, setCurrentBill] = useState(bill);
   const [amountKeyboard, setAmountKeyboard] = useState(null); // 'amount' | 'nextAmount'
   const [hasNextAmount, setHasNextAmount] = useState(bill.nextAmount != null);
+  // la caja de la derecha con los días de la semana, para un fijo semanal
+  const [pickingDay, setPickingDay] = useState(false);
+  const [boxHeight, setBoxHeight] = useState(0);
   const [date, setDate] = useState({
     m: getMonth(bill.firstMonth),
     y: getYear(bill.firstMonth),
@@ -111,12 +114,13 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
     },
   };
 
-  // hay teclado en pantalla, sea el custom o el del sistema
-  const keyboardOpen = !!amountKeyboard || inputFocused;
+  // hay teclado en pantalla, sea el custom o el del sistema, o la caja de los días
+  const keyboardOpen = !!amountKeyboard || inputFocused || pickingDay;
 
   const closeKeyboards = () => {
     clearTimeout(openTimer.current);
     setAmountKeyboard(null);
+    setPickingDay(false);
     if (Platform.OS === 'web') document.activeElement?.blur?.();
     else Keyboard.dismiss();
   };
@@ -158,6 +162,64 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
     });
   };
 
+  // Frecuencia: solo los gastos fijos la tienen. Todos los que ya existían son
+  // mensuales; uno semanal pide además el día, que se elige en la caja de la
+  // derecha. Al pasar a semanal sin día, la caja se abre sola
+  const isFixed = currentBill.type === 'fixed';
+  const isWeeklyBill = isFixed && currentBill.frequency === 'weekly';
+
+  const toggleFrequency = () => {
+    closeKeyboards();
+    const toWeekly = currentBill.frequency !== 'weekly';
+    setCurrentBill((prev) => ({ ...prev, frequency: toWeekly ? 'weekly' : 'monthly' }));
+    if (toWeekly && currentBill.weekday == null) setPickingDay(true);
+  };
+
+  const openDayPicker = () => {
+    clearTimeout(openTimer.current);
+    setAmountKeyboard(null);
+    if (Platform.OS === 'web') document.activeElement?.blur?.();
+    else Keyboard.dismiss();
+    setPickingDay((prev) => !prev);
+  };
+
+  // la caja de los días se funde desde la derecha y corre la grande, como en el
+  // modal de las compras de la tarjeta
+  const rowHeight = windowWidth * 0.12;
+  const gap = 10;
+  const edge = 20;
+  const panelWidth = windowWidth * 0.44;
+  // de lunes a domingo, sin el que ya está elegido
+  const dayOptions = [1, 2, 3, 4, 5, 6, 0].filter((d) => d !== currentBill.weekday);
+  const panelHeight = Math.min(dayOptions.length * (rowHeight + 1) - 1, boxHeight || Infinity);
+  // la fila del día va después del tipo y de la frecuencia (y de mes 2, si está)
+  const dayRowTop = (fields.name.indexOf('type') + 2 + (hasNextAmount ? 1 : 0)) * (rowHeight + 1);
+  const panelTop = Math.max(0, Math.min(dayRowTop, boxHeight - panelHeight));
+  const shift = windowWidth * 0.9 + gap + panelWidth - (windowWidth - edge);
+  const panelProgress = useSharedValue(0);
+
+  useEffect(() => {
+    panelProgress.value = withTiming(pickingDay ? 1 : 0, { duration: 180, easing: Easing.out(Easing.quad) });
+  }, [pickingDay]);
+
+  const shiftStyle = useAnimatedStyle(() => ({ transform: [{ translateX: -shift * panelProgress.value }] }));
+  const panelStyle = useAnimatedStyle(() => ({ opacity: panelProgress.value, transform: [{ translateX: (1 - panelProgress.value) * 25 }] }));
+
+  // una fila más del cuadro, con su etiqueta a la izquierda como las de fields
+  const extraRow = (key, label, value, onPress) => (
+    <Animated.View key={key} entering={FadeIn.duration(300)} exiting={FadeOut.duration(300)} layout={LinearTransition}>
+      <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }}></View>
+      <View style={{ alignItems: 'center', height: rowHeight, backgroundColor: theme.bg.tr_05, justifyContent: 'flex-start', flexDirection: 'row' }}>
+        <View style={{ backgroundColor: theme.bg.tr_05, height: '100%', justifyContent: 'center', paddingLeft: 15, paddingRight: 10, width: '25%' }}>
+          <Text style={{ color: theme.text._2, fontSize: fS.modalTransfer }}>{`${label}:`}</Text>
+        </View>
+        <Pressable style={{ flex: 1, height: '100%', justifyContent: 'center' }} onPress={onPress}>
+          <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10 }}>{value}</Text>
+        </Pressable>
+      </View>
+    </Animated.View>
+  );
+
   const Wrap = Platform.OS === 'web' ? View : Pressable;
   const wrapProps = Platform.OS === 'web' ? {} : { onPress: Keyboard.dismiss };
 
@@ -170,7 +232,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
       <Wrap {...wrapProps} pointerEvents={keyboardOpen ? 'box-none' : 'auto'}>
         <Animated.View layout={LinearTransition} entering={FadeInDown} pointerEvents={keyboardOpen ? 'box-none' : 'auto'} style={[{ width: windowWidth, height: windowHeight * 0.6, justifyContent: 'center', alignItems: 'center' }]}>
           {/* <BlurView intensity={30} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}> */}
-          <Animated.View layout={LinearTransition} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
+          <Animated.View style={[{ flexDirection: 'row', alignItems: 'flex-start' }, shiftStyle]}>
+          <Animated.View layout={LinearTransition} onLayout={(e) => setBoxHeight(e.nativeEvent.layout.height)} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
             {fields.name.map((field, index) => {
               const rField = currentBill[field] ? (currentBill[field] === 'fixed' ? 'Gasto fijo' : currentBill[field] === 'planned' ? 'Gasto planeado' : String(currentBill[field])) : '';
               const isNumber = ['amount', 'order', 'inMonths'].includes(field);
@@ -307,9 +370,29 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                       </Animated.View>
                     </Animated.View>
                   )}
+
+                  {/* frecuencia y día, debajo del tipo ------------------------------------ */}
+
+                  {field === 'type' && isFixed && extraRow('frequency', 'Frec.', isWeeklyBill ? 'Semanal' : 'Mensual', toggleFrequency)}
+                  {field === 'type' && isWeeklyBill && extraRow('weekday', 'Día', currentBill.weekday != null ? WEEKDAY_NAMES[currentBill.weekday] : '', openDayPicker)}
                 </Animated.View>
               );
             })}
+            {pickingDay && <Pressable onPress={() => setPickingDay(false)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />}
+          </Animated.View>
+
+          <Animated.View pointerEvents={pickingDay ? 'auto' : 'none'} style={[{ position: 'absolute', left: windowWidth * 0.8 + gap, top: panelTop, width: panelWidth, height: panelHeight, borderRadius: 20, overflow: 'hidden' }, panelStyle]}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {dayOptions.map((day, index) => (
+                <View key={day}>
+                  {index > 0 && <View style={{ width: '100%', height: 1, backgroundColor: theme.bg.tr_3 }} />}
+                  <Pressable onPress={() => (setCurrentBill((prev) => ({ ...prev, weekday: day })), setPickingDay(false))} style={{ height: rowHeight, backgroundColor: theme.bg.tr_05, justifyContent: 'center', paddingLeft: 15 }}>
+                    <Text style={{ color: theme.text._1, fontSize: fS.modalTransfer }}>{WEEKDAY_NAMES[day]}</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          </Animated.View>
           </Animated.View>
           {/* </BlurView> */}
 
@@ -368,7 +451,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
             {(JSON.stringify(currentBill) !== JSON.stringify(bills.find((b) => b.id === currentBill.id)) || getMonth(bill.firstMonth) !== date.m || getYear(bill.firstMonth) !== date.y) &&
               fields.name.every((field) => (field === 'firstMonth' ? currentBill.firstMonth !== '' && currentBill.firstMonth !== null : currentBill[field] !== '' && currentBill[field] !== 0 && currentBill[field] !== undefined && currentBill[field] !== null)) &&
               ('firstMonth' in currentBill ? currentBill.firstMonth !== '' : true) &&
-              (hasNextAmount ? currentBill.nextAmount > 0 : true) && (
+              (hasNextAmount ? currentBill.nextAmount > 0 : true) &&
+              (isWeeklyBill ? currentBill.weekday != null : true) && (
                 <Animated.View layout={LinearTransition} entering={SlideInRight} exiting={SlideOutRight}>
                   <Pressable
                     onPress={() => (

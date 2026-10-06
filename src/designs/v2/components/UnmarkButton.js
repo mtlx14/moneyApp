@@ -13,11 +13,13 @@ export default function UnmarkButton({ billToUpdate }) {
   const handleOnPress = () => {
     if (billToUpdate === 'monthly_summary') {
       for (const bill of bills.filter((b) => b.type === 'fixed' || b.type === 'planned')) {
-        if (bill.isPaid) {
+        // los semanales también se quedan sin semanas marcadas
+        if (bill.isPaid || bill.paidWeeks?.length) {
           setDoc(
             doc(db, 'bills', bill.id),
             {
               isPaid: false,
+              ...(bill.paidWeeks?.length ? { paidWeeks: [] } : {}),
             },
             {
               merge: true,

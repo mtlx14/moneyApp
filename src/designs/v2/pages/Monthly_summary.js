@@ -8,9 +8,10 @@ import Animated, { FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutR
 import CheckButton from '../components/CheckButton.js';
 import UnmarkButton from '../components/UnmarkButton.js';
 import { fS } from '../../../theme/theme.js';
-import { cardMonth, currentInstallment } from '../../../helpers.js';
+import { billToPay, cardMonth, currentInstallment, isWeekly } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
 import ModalCard from '../components/ModalCard.js';
+import ModalWeeks from '../components/ModalWeeks.js';
 import Icon from '../components/Icon.js';
 import { saveCard } from '../../../services.js';
 import { Image } from 'expo-image';
@@ -28,6 +29,8 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   // la tarjeta nueva que se está armando en su modal; las que ya existen se
   // editan desde adentro de cada una
   const [newCard, setNewCard] = useState(null);
+  // el gasto semanal cuyas semanas se están marcando
+  const [weeksBillId, setWeeksBillId] = useState(null);
 
   // la lista solo anima al volver del modal, no al entrar a la página
   const cameFromModal = useRef(false);
@@ -42,6 +45,10 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
 
   // el modal de la tarjeta nueva se come el gesto de volver: primero cierra
   const handleGoBack = () => {
+    if (weeksBillId) {
+      setWeeksBillId(null);
+      return true;
+    }
     if (newCard) {
       setNewCard(null);
       return true;
@@ -50,7 +57,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
   };
 
   return (
-    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!newCard}>
+    <GoBackScroll entering={nAnimations.en} exiting={nAnimations.ex} navigate={navigate} onBack={handleGoBack} innerStep={!!newCard || !!weeksBillId}>
         <Animated.View style={[{ height: windowHeight * 1.2, width: windowWidth }]}>
           {activeField ? (
             <ModalEditAccount bill={activeField} onCancel={() => setActiveField(null)} setShowMenu={setShowMenu} />
@@ -121,9 +128,9 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                                 fontSize: fS.subsText,
                               }}
                             >
-                              {`$${(bill.type === 'fixed' ? bill.amount : balances.billsBalances.subscriptions.toPay).toLocaleString('es-CL')}`}
+                              {`$${(bill.type === 'fixed' ? (isWeekly(bill) ? billToPay(bill, monthOffset) : bill.amount) : balances.billsBalances.subscriptions.toPay).toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} />
+                            <CheckButton bill={bill} onPress={(b) => setWeeksBillId(b.id)} />
                           </View>
                         </Pressable>
                       );
@@ -212,6 +219,9 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
               </Animated.View>
             </Animated.View>
           )}
+
+          {/* las semanas de un gasto fijo semanal, cada una con su check */}
+          {weeksBillId && <ModalWeeks billId={weeksBillId} onClose={() => setWeeksBillId(null)} setShowMenu={setShowMenu} />}
         </Animated.View>
     </GoBackScroll>
   );

@@ -14,7 +14,56 @@ export function amountForMonth(bill, targetOffset = 0) {
   return targetOffset >= 1 && bill.nextAmount ? bill.nextAmount : bill.amount;
 }
 
-const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+// Gastos semanales ------------------------------------------------------------
+
+// Un gasto fijo puede ser semanal: guarda frequency 'weekly' y el día de la
+// semana (weekday, 0 domingo … 6 sábado, como Date.getDay). Sin frequency es
+// mensual, que es lo que eran todos antes. El monto de uno semanal es lo que se
+// paga cada semana, así que el del mes es ese por las veces que cae el día
+export function isWeekly(bill) {
+  return bill?.type === 'fixed' && bill?.frequency === 'weekly' && bill?.weekday != null;
+}
+
+export const WEEKDAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+// clave de una fecha como se guarda en paidWeeks: '2026-10-06'
+export function dayKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// las fechas en que cae el día de la semana dentro del mes que está a
+// monthOffset meses del actual
+export function weekdayDates(weekday, monthOffset = 0) {
+  const first = getEffectiveDate(monthOffset);
+  const date = new Date(first.getFullYear(), first.getMonth(), 1 + ((weekday - first.getDay() + 7) % 7));
+  const dates = [];
+  while (date.getMonth() === first.getMonth()) {
+    dates.push(new Date(date));
+    date.setDate(date.getDate() + 7);
+  }
+  return dates;
+}
+
+// las semanas de un gasto semanal en el mes que se mira, cada una con si ya se
+// pagó. Las marcas se guardan por fecha, así que las de otros meses no cuentan
+export function billWeeks(bill, monthOffset = 0) {
+  const paid = bill.paidWeeks || [];
+  return weekdayDates(bill.weekday, monthOffset).map((date) => ({ date, key: dayKey(date), paid: paid.includes(dayKey(date)) }));
+}
+
+// lo que suma un gasto en un mes: el mensual una vez, el semanal una por semana
+export function billAmountForMonth(bill, targetOffset = 0) {
+  const amount = amountForMonth(bill, targetOffset);
+  return isWeekly(bill) ? amount * weekdayDates(bill.weekday, targetOffset).length : amount;
+}
+
+// lo que falta pagar de un gasto en el mes que se mira
+export function billToPay(bill, monthOffset = 0) {
+  if (isWeekly(bill)) return bill.amount * billWeeks(bill, monthOffset).filter((w) => !w.paid).length;
+  return bill.isPaid ? 0 : bill.amount;
+}
+
+const MONTH_NAMES =['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 export function monthName(monthOffset = 0) {
   return MONTH_NAMES[getEffectiveDate(monthOffset).getMonth()];

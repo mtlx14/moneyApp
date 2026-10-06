@@ -44,6 +44,11 @@ export function updateBill({ bill }) {
   );
 }
 
+// las semanas marcadas de un gasto semanal, y si con eso queda pagado entero
+export function updateBillWeeks({ bill, paidWeeks, isPaid }) {
+  setDoc(doc(db, 'bills', bill.id), { paidWeeks, isPaid }, { merge: true });
+}
+
 export function deleteBill({ bill }) {
   deleteDoc(doc(db, 'bills', bill.id));
 }

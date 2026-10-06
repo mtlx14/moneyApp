@@ -8,34 +8,44 @@ import db from '../../../../conection.js';
 import { useData } from '../../../../context.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { updateChanges } from '../../../services.js';
+import { billWeeks, isWeekly } from '../../../helpers.js';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 // Sirve para los gastos y para las tarjetas de crédito: las dos guardan isPaid
-// en su documento, solo cambia la colección
-export default function CheckButton({ bill, collectionName = 'bills' }) {
+// en su documento, solo cambia la colección. Un gasto semanal no se marca acá:
+// el toque abre sus semanas (onPress) y el check queda amarillo mientras falten
+export default function CheckButton({ bill, collectionName = 'bills', onPress }) {
   const theme = useTheme();
   const [checked, setChecked] = useState(false);
   const [yellow, setYellow] = useState(false);
   const { bills } = useData();
-  const { currentUser } = useAppStorage();
+  const { currentUser, monthOffset } = useAppStorage();
+
+  const weekly = isWeekly(bill);
+  const weeks = weekly ? billWeeks(bill, monthOffset) : [];
+  const paidWeeks = weeks.filter((w) => w.paid).length;
+  // las suscripciones van igual: amarillo mientras falte alguna, verde con todas
+  const subs = bills.filter((b) => b.type === 'sub');
+  const paidSubs = subs.filter((s) => s.isPaid).length;
 
   useEffect(() => {
-    if (bill.label !== 'Suscripciones') {
+    if (weekly) {
+      setChecked(paidWeeks > 0);
+      setYellow(paidWeeks > 0 && paidWeeks < weeks.length);
+    } else if (bill.label !== 'Suscripciones') {
       if (bill.isPaid !== checked) setChecked(bill.isPaid);
+      // por si dejó de ser semanal con semanas a medio marcar
+      setYellow(false);
     } else {
-      if (bills.filter((b) => b.type === 'sub').some((s) => s.isPaid)) {
-        setChecked(true);
-        setYellow(true);
-      } else {
-        setChecked(false);
-        setYellow(false);
-      }
+      setChecked(paidSubs > 0);
+      setYellow(paidSubs > 0 && paidSubs < subs.length);
     }
-  }, [bill.isPaid]);
+  }, [bill.isPaid, weekly, paidWeeks, weeks.length, paidSubs, subs.length]);
 
   const handleOnPress = () => {
+    if (weekly) return onPress?.(bill);
     if (bill.label === 'Suscripciones') return;
 
     updateChanges({ user: currentUser.name, change: 'bills' });
