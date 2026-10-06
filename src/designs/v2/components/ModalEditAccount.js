@@ -163,16 +163,14 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
   };
 
   // Frecuencia: solo los gastos fijos la tienen. Todos los que ya existían son
-  // mensuales; uno semanal pide además el día, que se elige en la caja de la
-  // derecha. Al pasar a semanal sin día, la caja se abre sola
+  // mensuales; uno semanal pide además el día, que se elige tocando su fila en
+  // la caja de la derecha
   const isFixed = currentBill.type === 'fixed';
   const isWeeklyBill = isFixed && currentBill.frequency === 'weekly';
 
   const toggleFrequency = () => {
     closeKeyboards();
-    const toWeekly = currentBill.frequency !== 'weekly';
-    setCurrentBill((prev) => ({ ...prev, frequency: toWeekly ? 'weekly' : 'monthly' }));
-    if (toWeekly && currentBill.weekday == null) setPickingDay(true);
+    setCurrentBill((prev) => ({ ...prev, frequency: prev.frequency === 'weekly' ? 'monthly' : 'weekly' }));
   };
 
   const openDayPicker = () => {
