@@ -98,13 +98,19 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
       padding: windowWidth * 0.03,
     };
 
+    // El bloque termina arriba del mes que va al pie (bottom: insets.bottom + 12,
+    // más su línea y un respiro): así el total de abajo nunca queda encima del
+    // mes, y si la lista no entra es ella la que se achica y scrollea
+    const monthLabelSpace = insets.bottom + 12 + fS.userTagName * 1.4 + 16;
+    const projectionHeight = windowHeight * 0.75 - monthLabelSpace;
+
     return (
       <View>
         <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.25, justifyContent: 'flex-end', alignItems: 'center' }, activeFieldOpacityAnimatedStyle]}>
           <AnimatedSwapTextL value={projection.afterPayments} />
           <Text style={textStyle}>Saldo después de pagar cuentas</Text>
         </Animated.View>
-        <View style={{ width: windowWidth, height: windowHeight * 0.72, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
+        <View style={{ width: windowWidth, height: projectionHeight, position: 'relative', paddingHorizontal: windowWidth * 0.1, paddingLeft: CONTENT_LEFT_HOME, opacity: localInfo.activeField ? 0 : 1, justifyContent: 'center' }}>
           <View>
             <View style={rowStyle}>
               <Text style={textStyle}>{'💷' + '  ' + startLabel}</Text>
