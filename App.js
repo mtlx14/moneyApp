@@ -23,12 +23,17 @@ function AppContent() {
   // lo que la página anterior le deja a la que entra (hoy: la tarjeta de
   // crédito que se abre desde el resumen del mes). Solo lo recibe esa página
   const [params, setParams] = useState(null);
+  // cuenta las navegaciones y va en la key de la página: así ir a la página en
+  // la que ya se está (tocarla en el menú) la arma de nuevo desde su vista
+  // principal, en vez de dejarla donde quedó (las semanas de un gasto, un modal)
+  const [visit, setVisit] = useState(0);
 
   const navigate = (newPage, dir = 1, nextParams = null) => {
     setDirection(dir);
     setTimeout(() => {
       setParams(nextParams);
       setPage(newPage);
+      setVisit((prev) => prev + 1);
     }, 20);
   };
 
@@ -43,7 +48,7 @@ function AppContent() {
         if (name !== page) return null;
         const Page = pages[name];
 
-        return <Page key={`${design.name}_${name}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} params={params} />;
+        return <Page key={`${design.name}_${name}_${visit}`} setShowMenu={setShowMenu} navigate={navigate} nAnimations={nAnimations} params={params} />;
       })}
       {showMenu && <MainMenu page={page} navigate={navigate} />}
     </GradientBackground>

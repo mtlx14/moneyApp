@@ -3,7 +3,7 @@ import { useTheme } from '../../../theme/useTheme.js';
 import { useData } from '../../../../context.js';
 import { useAppStorage } from '../../../../appStorageProvider.js';
 import { useEffect, useRef, useState } from 'react';
-import Animated, { FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutRight, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing as REasing, FadeIn, FadeInDown, FadeOut, runOnJS, SlideInRight, SlideOutRight, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import CheckButton from '../components/CheckButton.js';
 import UnmarkButton from '../components/UnmarkButton.js';
@@ -11,7 +11,7 @@ import { fS } from '../../../theme/theme.js';
 import { billToPay, cardMonth, currentInstallment, isWeekly } from '../../../helpers.js';
 import ModalEditAccount from '../components/ModalEditAccount.js';
 import ModalCard from '../components/ModalCard.js';
-import ModalWeeks from '../components/ModalWeeks.js';
+import BillWeeks from '../components/BillWeeks.js';
 import Icon from '../components/Icon.js';
 import { saveCard } from '../../../services.js';
 import { Image } from 'expo-image';
@@ -43,10 +43,37 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
     setNewCard({ name: '', order: cards.length });
   };
 
-  // el modal de la tarjeta nueva se come el gesto de volver: primero cierra
+  // La lista y las semanas se cambian con un mismo valor: 0 es la lista, 1 las
+  // semanas. La que se va se funde corriéndose un poco hacia la izquierda y
+  // recién en la segunda mitad entra la otra, fundiéndose desde la derecha (al
+  // volver, lo mismo al revés). Deslizarlas enteras se veía mal, y las
+  // animaciones de entrada y salida de reanimated no corrían acá adentro. Al
+  // cerrar, las semanas siguen montadas hasta que terminan de irse
+  const weeksProgress = useSharedValue(0);
+  const slide = { duration: 320, easing: REasing.inOut(REasing.quad) };
+  const fadeTravel = 30;
+  const openWeeks = (bill) => {
+    setWeeksBillId(bill.id);
+    weeksProgress.value = withTiming(1, slide);
+  };
+  const closeWeeks = () => {
+    weeksProgress.value = withTiming(0, slide, (finished) => {
+      if (finished) runOnJS(setWeeksBillId)(null);
+    });
+  };
+  const listSlideStyle = useAnimatedStyle(() => {
+    const out = Math.min(1, weeksProgress.value * 2);
+    return { opacity: 1 - out, transform: [{ translateX: -out * fadeTravel }] };
+  });
+  const weeksSlideStyle = useAnimatedStyle(() => {
+    const inn = Math.max(0, weeksProgress.value * 2 - 1);
+    return { opacity: inn, transform: [{ translateX: (1 - inn) * fadeTravel }] };
+  });
+
+  // las semanas y el modal de la tarjeta nueva se comen el gesto de volver: primero cierran
   const handleGoBack = () => {
     if (weeksBillId) {
-      setWeeksBillId(null);
+      closeWeeks();
       return true;
     }
     if (newCard) {
@@ -72,8 +99,11 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
               }}
             />
           ) : (
-            // dos FadeInDown anidados igual que el modal: el recorrido se suma y las
-            // opacidades se multiplican, con uno solo la entrada no coincide
+            <>
+            {/* la lista se funde hacia la izquierda cuando entran las semanas */}
+            <Animated.View pointerEvents={weeksBillId ? 'none' : 'auto'} style={listSlideStyle}>
+            {/* dos FadeInDown anidados igual que el modal: el recorrido se suma y las
+                opacidades se multiplican, con uno solo la entrada no coincide */}
             <Animated.View entering={cameFromModal.current ? FadeInDown : undefined}>
               <Animated.View entering={cameFromModal.current ? FadeInDown : undefined}>
                 <ScrollView style={Platform.OS === 'web' ? { height: windowHeight, width: windowWidth } : undefined}>
@@ -130,7 +160,7 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                             >
                               {`$${(bill.type === 'fixed' ? (isWeekly(bill) ? billToPay(bill, monthOffset) : bill.amount) : balances.billsBalances.subscriptions.toPay).toLocaleString('es-CL')}`}
                             </Text>
-                            <CheckButton bill={bill} onPress={(b) => setWeeksBillId(b.id)} />
+                            <CheckButton bill={bill} onPress={openWeeks} />
                           </View>
                         </Pressable>
                       );
@@ -218,10 +248,16 @@ export default function Monthly_summary({ setShowMenu, navigate, nAnimations }) 
                 </ScrollView>
               </Animated.View>
             </Animated.View>
-          )}
+            </Animated.View>
 
-          {/* las semanas de un gasto fijo semanal, cada una con su check */}
-          {weeksBillId && <ModalWeeks billId={weeksBillId} onClose={() => setWeeksBillId(null)} setShowMenu={setShowMenu} />}
+            {/* las semanas del gasto semanal, que entran fundiéndose desde la derecha */}
+            {weeksBillId && (
+              <Animated.View style={[{ position: 'absolute', top: 0, left: 0, width: windowWidth }, weeksSlideStyle]}>
+                <BillWeeks billId={weeksBillId} onBack={closeWeeks} />
+              </Animated.View>
+            )}
+            </>
+          )}
         </Animated.View>
     </GoBackScroll>
   );
