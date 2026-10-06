@@ -9,12 +9,12 @@ import { fS } from '../../../theme/theme.js';
 
 // Versión gris de la tarjeta sin marca, para que se despegue del papel: la
 // blanca original desaparecía sobre el fondo claro. Lleva texto oscuro.
-const LIGHT_CARD = require('../../../../assets/images/card_light.png');
+const LIGHT_CARD = require('../../../../assets/images/card_light.webp');
 
 // Tarjeta ancha, solo para la tarjeta de crédito: es más baja, así que deja
 // lugar a la lista de compras. El resto de las tarjetas son cuadradas y se
 // siguen eligiendo por nombre/tipo cuando la cuenta se edita con el teclado.
-const WIDE_CARD = require('../../../../assets/images/card_wide.png');
+const WIDE_CARD = require('../../../../assets/images/card_wide.webp');
 // Proporción del archivo, que se respeta siempre: el alto sale del ancho.
 export const WIDE_CARD_ASPECT = 482 / 172;
 // La tarjeta dibujada no ocupa el PNG entero: abajo lleva sombra. Estas
@@ -49,14 +49,14 @@ export default function AccountCard({ amountValue, account, wide = false, note, 
       : accountCardByName[account.type]?.[account.name]
         ? accountCardByName[account.type][account.name]
         : account.id === 'account_aylin'
-          ? require('../../../../assets/images/card_pink-purple.png')
+          ? require('../../../../assets/images/card_pink-purple.webp')
           : account.id === 'account_matias'
-            ? require('../../../../assets/images/card_black-blue.png')
+            ? require('../../../../assets/images/card_black-blue.webp')
             : account.id === 'account_aylin_salary' || account.type === 'a_account'
-              ? require('../../../../assets/images/card_pink-purple.png')
+              ? require('../../../../assets/images/card_pink-purple.webp')
               : account.hasSubAccount
                 ? LIGHT_CARD
-                : require('../../../../assets/images/card_black-blue.png'),
+                : require('../../../../assets/images/card_black-blue.webp'),
   });
 
   const subAccounts = account.hasSubAccount ? accounts.filter((a) => a.type === 'sub_account' && a.forAccount === account.id && !a.isActive) : [];

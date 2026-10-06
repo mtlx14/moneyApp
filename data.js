@@ -4,18 +4,33 @@ import { beigeTheme, blueGreenTheme, blueTheme, darkTheme, graphiteBluePurpleThe
 // Firestore: si no coincide, no pasa nada y se usa la tarjeta por defecto.
 export const accountCardByName = {
   m_account: {
-    Bencina: require('./assets/images/card_blue.png'),
-    Efectivo: require('./assets/images/card_green.png'),
-    'Cuenta corriente': require('./assets/images/card_purple-green.png'),
+    Bencina: require('./assets/images/card_blue.webp'),
+    Efectivo: require('./assets/images/card_green.webp'),
+    'Cuenta corriente': require('./assets/images/card_purple-green.webp'),
   },
 };
 
 export const subAccountCard = {
-  Bencina: require('./assets/images/card_blue.png'),
-  Cabify: require('./assets/images/card_purple-green.png'),
-  Didi: require('./assets/images/card_orange.png'),
-  Uber: require('./assets/images/card_black.png'),
+  Bencina: require('./assets/images/card_blue.webp'),
+  Cabify: require('./assets/images/card_purple-green.webp'),
+  Didi: require('./assets/images/card_orange.webp'),
+  Uber: require('./assets/images/card_black.webp'),
 };
+
+// Todas las tarjetas que se dibujan. En la web cada imagen se descargaba recién
+// al abrir su cuenta y la tarjeta tardaba en aparecer: App las precarga al
+// arrancar. Si se agrega una tarjeta, va también acá.
+export const CARD_IMAGES = [
+  require('./assets/images/card_black-blue.webp'),
+  require('./assets/images/card_black.webp'),
+  require('./assets/images/card_blue.webp'),
+  require('./assets/images/card_green.webp'),
+  require('./assets/images/card_light.webp'),
+  require('./assets/images/card_orange.webp'),
+  require('./assets/images/card_pink-purple.webp'),
+  require('./assets/images/card_purple-green.webp'),
+  require('./assets/images/card_wide.webp'),
+];
 
 // Todos los temas son variantes de color del mismo diseño. El primero, beige,
 // es el que se usa por defecto; los demás vienen de la paleta anterior.

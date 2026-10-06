@@ -2,10 +2,12 @@ import { useFonts } from 'expo-font';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
+import { Asset } from 'expo-asset';
 
 import { DataProvider } from './context.js';
 import { AppStorageProvider } from './appStorageProvider.js';
 import { useDesign } from './src/designs/index.js';
+import { CARD_IMAGES } from './data.js';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,8 +20,8 @@ function AppContent() {
   const [showMenu, setShowMenu] = useState(true);
   const [page, setPage] = useState('home');
   const [direction, setDirection] = useState(1);
-  // lo que la página anterior le deja a la que entra (hoy: el movimiento que
-  // deja marcar un gasto en el resumen del mes). Solo lo recibe esa página
+  // lo que la página anterior le deja a la que entra (hoy: la tarjeta de
+  // crédito que se abre desde el resumen del mes). Solo lo recibe esa página
   const [params, setParams] = useState(null);
 
   const navigate = (newPage, dir = 1, nextParams = null) => {
@@ -61,6 +63,10 @@ export default function App() {
     };
 
     prepare();
+
+    // las tarjetas se bajan de entrada y no al abrir cada cuenta; si falla no
+    // pasa nada, se cargan como antes cuando aparecen
+    Asset.loadAsync(CARD_IMAGES).catch(() => {});
   }, []);
 
   return (
