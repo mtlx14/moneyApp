@@ -38,7 +38,8 @@
       }
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      "./plugins/withPodsDeploymentTarget"
     ]
   }
 }
