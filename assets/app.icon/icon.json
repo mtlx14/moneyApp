@@ -13,17 +13,14 @@
           "name" : "chip"
         },
         {
+          "glass" : true,
           "image-name" : "bars.svg",
-          "name" : "bars"
+          "name" : "bars",
+          "opacity" : 1
         },
         {
-          "image-name" : "card_bg 2.svg",
-          "name" : "card_bg 2"
-        },
-        {
-          "hidden" : true,
-          "image-name" : "card_bg.svg",
-          "name" : "card_bg"
+          "image-name" : "money 3.svg",
+          "name" : "money 3"
         },
         {
           "image-name" : "bg.svg",
