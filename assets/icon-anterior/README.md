@@ -9,3 +9,13 @@ Este era el ícono de la app antes del 17-10-2026, cuando iOS pasó a usar el í
 - `favicon.png`: favicon de la web.
 
 Para volver a usarlo en iOS, borra `"icon": "./assets/app.icon"` de la sección `ios` en `app.json`.
+
+## Web
+
+El 17-10-2026 la web también cambió al ícono verde nuevo, exportado de `moneyAppWeb.icon` con Icon Composer. Los anteriores están en `web/`:
+
+![Ícono web anterior](./web/icon-web.png)
+
+- `web/apple-touch-icon.png`: el que se ve al agregar la web al inicio desde Safari (va en `public/`).
+- `web/icon-web.png`: la versión 1024×1024 del mismo (va en `assets/`).
+- `favicon.png` (arriba): el favicon anterior de la web.
