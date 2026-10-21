@@ -1,0 +1,46 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.77783,0.62354,0.97559,1.00000",
+      "display-p3:0.48315,0.35938,0.79688,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "chip.svg",
+          "name" : "chip"
+        },
+        {
+          "glass" : true,
+          "image-name" : "bars.svg",
+          "name" : "bars",
+          "opacity" : 1
+        },
+        {
+          "image-name" : "money 3.svg",
+          "name" : "money 3"
+        },
+        {
+          "image-name" : "bg.svg",
+          "name" : "bg"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
