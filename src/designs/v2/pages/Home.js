@@ -41,6 +41,10 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
   // desglose por fecha de lo por pagar, abajo del saldo después de pagar cuentas
   const [showDueDays, setShowDueDays] = useState(false);
+  // dónde queda la caja dentro de su bloque, para saber cuánto espacio libre
+  // hay debajo: desde su borde de abajo hasta el mes que va al pie
+  const [dueBoxY, setDueBoxY] = useState(0);
+  const dueSpace = Math.max(0, windowHeight - (windowHeight * 0.25 + dueBoxY + windowWidth * 0.1) - (insets.bottom + 12 + fS.userTagName * 1.4 + 16));
 
   const [showChanges, setShowChanges] = useState([]);
   const changesOpacity = useSharedValue(1);
@@ -276,49 +280,56 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 <AnimatedSwapTextS type={'debt'} value={`${balances.billsBalances.toPay || 0}`} />
               </Pressable>
             </View>
-            <Pressable
-              onPress={() => setShowDueDays((prev) => !prev)}
-              style={{
-                backgroundColor: theme.bg.tr_05,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 0,
-                height: windowWidth * 0.1,
-                alignItems: 'center',
-                marginHorizontal: -windowWidth * 0.03,
-                borderRadius: 10,
-                padding: windowWidth * 0.03,
-              }}
-            >
-              <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
-              <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
-            </Pressable>
+            {/* La caja y su desglose: el desglose cuelga debajo, fuera del flujo, y
+                ocupa el espacio libre que hay abajo. Así abrirlo no mueve lo de
+                arriba, que está centrado */}
+            <View onLayout={(e) => setDueBoxY(e.nativeEvent.layout.y)} style={{ position: 'relative', zIndex: 1 }}>
+              <Pressable
+                onPress={() => setShowDueDays((prev) => !prev)}
+                style={{
+                  backgroundColor: theme.bg.tr_05,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginTop: 0,
+                  height: windowWidth * 0.1,
+                  alignItems: 'center',
+                  marginHorizontal: -windowWidth * 0.03,
+                  borderRadius: 10,
+                  padding: windowWidth * 0.03,
+                }}
+              >
+                <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
+                <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
+              </Pressable>
 
-            {/* lo por pagar separado por el día en que vence, con lo que queda después de cada fecha:
-                no todo se paga a fin de mes ------------------------------------ */}
-            <CollapsibleRow open={showDueDays}>
-              <FadingScroll style={{ maxHeight: windowHeight * 0.24 }}>
-                {(balances.billsBalances.byDueDay || []).map((group, index) => (
-                  <View key={group.day} style={{ marginTop: index === 0 ? 14 : 6 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 }}>
-                      <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'📅' + '  ' + group.label}</Text>
-                      <AnimatedSwapTextS type={'debt'} value={group.total} />
-                    </View>
-                    {group.items.map((item) => (
-                      <View key={item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, paddingLeft: 28 }}>
-                        <Text numberOfLines={1} style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, flexShrink: 1 }}>{`${item.emoji || '🧾'}  ${item.label}`}</Text>
-                        <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85 }}>{`$${item.amount.toLocaleString('es-CL')}`}</Text>
+              {/* lo por pagar en los cortes del 1, 10, 15 y último día, con lo que queda después de
+                  cada uno: no todo se paga a fin de mes ------------------------------------ */}
+              <View style={{ position: 'absolute', top: windowWidth * 0.1, left: 0, right: 0 }}>
+                <CollapsibleRow open={showDueDays}>
+                  <FadingScroll style={{ maxHeight: dueSpace }}>
+                    {(balances.billsBalances.byDueDay || []).map((group, index) => (
+                      <View key={group.day} style={{ marginTop: index === 0 ? 14 : 6 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 }}>
+                          <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'📅' + '  ' + group.label}</Text>
+                          <AnimatedSwapTextS type={'debt'} value={group.total} />
+                        </View>
+                        {group.items.map((item) => (
+                          <View key={item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, paddingLeft: 28 }}>
+                            <Text numberOfLines={1} style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, flexShrink: 1 }}>{`${item.emoji || '🧾'}  ${item.label}`}</Text>
+                            <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85 }}>{`$${item.amount.toLocaleString('es-CL')}`}</Text>
+                          </View>
+                        ))}
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 3 }}>
+                          <Text style={{ color: group.balanceAfter < 0 ? theme.text.red : theme.text.green, fontSize: fS.homeSubText * 0.85 }}>{`Queda $${group.balanceAfter.toLocaleString('es-CL')}`}</Text>
+                        </View>
+                        <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025, marginTop: 6 }}></View>
                       </View>
                     ))}
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 3 }}>
-                      <Text style={{ color: group.balanceAfter < 0 ? theme.text.red : theme.text.green, fontSize: fS.homeSubText * 0.85 }}>{`Queda $${group.balanceAfter.toLocaleString('es-CL')}`}</Text>
-                    </View>
-                    <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025, marginTop: 6 }}></View>
-                  </View>
-                ))}
-                {!balances.billsBalances.byDueDay?.length && <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, marginTop: 14, textAlign: 'center' }}>No queda nada por pagar este mes</Text>}
-              </FadingScroll>
-            </CollapsibleRow>
+                    {!balances.billsBalances.byDueDay?.length && <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, marginTop: 14, textAlign: 'center' }}>No queda nada por pagar este mes</Text>}
+                  </FadingScroll>
+                </CollapsibleRow>
+              </View>
+            </View>
           </View>
         </View>
         {/* MES SIGUIENTE: parte de lo que queda este mes */}

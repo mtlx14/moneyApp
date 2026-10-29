@@ -358,8 +358,8 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                         {...inputFocusProps}
                         style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
                         value={rField}
-                        // el día de pago es opcional: vacío vence a fin de mes
-                        placeholder={field === 'payDay' ? 'Fin de mes' : undefined}
+                        // el día de pago es opcional: vacío vence el 1
+                        placeholder={field === 'payDay' ? '1' : undefined}
                         placeholderTextColor={theme.text._3}
                         keyboardType={isNumber ? 'numeric' : 'default'}
                         keyboardAppearance='dark'
