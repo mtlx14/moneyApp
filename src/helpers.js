@@ -63,6 +63,55 @@ export function billToPay(bill, monthOffset = 0) {
   return bill.isPaid ? 0 : bill.amount;
 }
 
+// Vencimientos -----------------------------------------------------------------
+
+// el día del mes que se mira en que vence un pago: sin día, o con uno que ese
+// mes no tiene (un 31 en noviembre), vence a fin de mes
+export function dueDayOf(day, monthOffset = 0) {
+  const first = getEffectiveDate(monthOffset);
+  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  return day >= 1 && day < last ? Math.floor(day) : last;
+}
+
+// Lo que falta pagar del mes que se mira, agrupado por el día en que vence: los
+// fijos y planeados por su payDay (sin día van a fin de mes), los semanales por
+// cada semana sin pagar, las suscripciones por su payDay y las tarjetas por su
+// día de pago. Cada grupo lleva lo que queda del saldo después de pagarlo, así
+// se ve si alcanza fecha a fecha. Suma lo mismo que billsBalances.toPay
+export function paymentsByDueDay({ bills, cards, startBalance = 0, monthOffset = 0 }) {
+  const items = [];
+  bills.forEach((bill) => {
+    if (bill.type === 'sub') {
+      if (!bill.isPaid) items.push({ id: bill.id, label: bill.label, emoji: bill.emoji, amount: bill.amount, day: dueDayOf(bill.payDay, monthOffset) });
+    } else if (isWeekly(bill)) {
+      billWeeks(bill, monthOffset)
+        .filter((w) => !w.paid)
+        .forEach((w) => items.push({ id: `${bill.id}_${w.key}`, label: bill.label, emoji: bill.emoji, amount: bill.amount, day: w.date.getDate() }));
+    } else if (bill.type === 'fixed' || bill.type === 'planned') {
+      const amount = billToPay(bill, monthOffset);
+      if (amount > 0) items.push({ id: bill.id, label: bill.label, emoji: bill.emoji, amount, day: dueDayOf(bill.payDay, monthOffset) });
+    }
+  });
+  cards.filter((c) => !c.isPaid && c.amount > 0).forEach((card) => items.push({ id: card.id, label: card.label, emoji: card.emoji, amount: card.amount, day: dueDayOf(card.paymentDay, monthOffset) }));
+
+  const last = dueDayOf(0, monthOffset);
+  const groups = [];
+  items
+    .sort((a, b) => a.day - b.day || b.amount - a.amount)
+    .forEach((item) => {
+      const group = groups[groups.length - 1];
+      if (group?.day === item.day) group.items.push(item);
+      else groups.push({ day: item.day, label: item.day === last ? 'Fin de mes' : `Día ${item.day}`, items: [item] });
+    });
+
+  let balance = startBalance;
+  return groups.map((group) => {
+    const total = group.items.reduce((a, i) => a + i.amount, 0);
+    balance -= total;
+    return { ...group, total, balanceAfter: balance };
+  });
+}
+
 const MONTH_NAMES =['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 export function monthName(monthOffset = 0) {

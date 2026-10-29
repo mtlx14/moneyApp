@@ -18,6 +18,7 @@ import { hasPendingChanges, monthAndYear } from '../../../helpers.js';
 import OkToChanges from '../components/OkToChanges.js';
 import NextMonthBillRow from '../components/NextMonthBillRow.js';
 import FadingScroll from '../components/FadingScroll.js';
+import CollapsibleRow from '../components/CollapsibleRow.js';
 import HomeMenu from '../components/HomeMenu.js';
 import { CONTENT_LEFT_HOME } from '../layout.js';
 
@@ -37,6 +38,9 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
 
   // página visible del scroll horizontal: 0 mes actual, 1 y 2 proyección de los dos meses siguientes
   const [page, setPage] = useState(0);
+
+  // desglose por fecha de lo por pagar, abajo del saldo después de pagar cuentas
+  const [showDueDays, setShowDueDays] = useState(false);
 
   const [showChanges, setShowChanges] = useState([]);
   const changesOpacity = useSharedValue(1);
@@ -272,7 +276,8 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
                 <AnimatedSwapTextS type={'debt'} value={`${balances.billsBalances.toPay || 0}`} />
               </Pressable>
             </View>
-            <View
+            <Pressable
+              onPress={() => setShowDueDays((prev) => !prev)}
               style={{
                 backgroundColor: theme.bg.tr_05,
                 flexDirection: 'row',
@@ -287,7 +292,33 @@ export default function Home({ setShowMenu, navigate, nAnimations }) {
             >
               <Text style={{ color: theme.text._3, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'🤑' + '  ' + 'Saldo después de pagar cuentas'}</Text>
               <AnimatedSwapTextS type={'green'} value={balances.totalAfterPayments || 0} />
-            </View>
+            </Pressable>
+
+            {/* lo por pagar separado por el día en que vence, con lo que queda después de cada fecha:
+                no todo se paga a fin de mes ------------------------------------ */}
+            <CollapsibleRow open={showDueDays}>
+              <FadingScroll style={{ maxHeight: windowHeight * 0.24 }}>
+                {(balances.billsBalances.byDueDay || []).map((group, index) => (
+                  <View key={group.day} style={{ marginTop: index === 0 ? 14 : 6 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 }}>
+                      <Text style={{ color: theme.text._2, fontSize: fS.homeSubText, fontWeight: theme.fw.home_acc_text }}>{'📅' + '  ' + group.label}</Text>
+                      <AnimatedSwapTextS type={'debt'} value={group.total} />
+                    </View>
+                    {group.items.map((item) => (
+                      <View key={item.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, paddingLeft: 28 }}>
+                        <Text numberOfLines={1} style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, flexShrink: 1 }}>{`${item.emoji || '🧾'}  ${item.label}`}</Text>
+                        <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85 }}>{`$${item.amount.toLocaleString('es-CL')}`}</Text>
+                      </View>
+                    ))}
+                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 3 }}>
+                      <Text style={{ color: group.balanceAfter < 0 ? theme.text.red : theme.text.green, fontSize: fS.homeSubText * 0.85 }}>{`Queda $${group.balanceAfter.toLocaleString('es-CL')}`}</Text>
+                    </View>
+                    <View style={{ backgroundColor: theme.bg.tr_1, width: windowWidth * 0.85, height: 1, marginLeft: -windowWidth * 0.025, marginTop: 6 }}></View>
+                  </View>
+                ))}
+                {!balances.billsBalances.byDueDay?.length && <Text style={{ color: theme.text._3, fontSize: fS.homeSubText * 0.85, marginTop: 14, textAlign: 'center' }}>No queda nada por pagar este mes</Text>}
+              </FadingScroll>
+            </CollapsibleRow>
           </View>
         </View>
         {/* MES SIGUIENTE: parte de lo que queda este mes */}

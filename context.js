@@ -2,7 +2,7 @@ import { createContext, use, useContext, useEffect, useMemo, useState } from 're
 import { collection, onSnapshot } from 'firebase/firestore';
 import db from './conection';
 import { useAppStorage } from './appStorageProvider';
-import { amountForMonth, billAmountForMonth, billToPay, cardMonth, getEffectiveDate } from './src/helpers';
+import { amountForMonth, billAmountForMonth, billToPay, cardMonth, getEffectiveDate, paymentsByDueDay } from './src/helpers';
 import { defaultCategories } from './data.js';
 import { seedCategories } from './src/services.js';
 
@@ -157,6 +157,7 @@ export const DataProvider = ({ children }) => {
       label: card.name,
       emoji: card.emoji || '💳',
       isPaid: !!card.isPaid,
+      paymentDay: card.paymentDay || 1,
       amount: roundUpToThousand(cardMonth({ card, purchases: cardPurchases, monthOffset }).total),
     }));
 
@@ -165,6 +166,8 @@ export const DataProvider = ({ children }) => {
       subscriptions,
     };
     const totalAfterPayments = matiasTotal + aylinTotal - billsBalances.toPay;
+    // lo mismo que toPay pero separado por fecha de vencimiento, para el desglose de Inicio
+    billsBalances.byDueDay = paymentsByDueDay({ bills, cards: cardTotals, startBalance: matiasTotal + aylinTotal, monthOffset });
     const salaries = (byAccount['account_aylin_salary'] || 0) + (byAccount['account_matias_salary'] || 0);
 
     // Proyección del mes que está `ahead` meses después del que se mira: parte de

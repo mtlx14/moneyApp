@@ -30,7 +30,7 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
   });
   console.log(date);
 
-  const [fields, setFields] = useState({ name: ['label', 'emoji', 'amount', 'order', 'type'], label: ['Nombre', 'Emoji', 'Monto', 'Orden', 'Tipo'] });
+  const [fields, setFields] = useState({ name: ['label', 'emoji', 'amount', 'order', 'type', 'payDay'], label: ['Nombre', 'Emoji', 'Monto', 'Orden', 'Tipo', 'Día pago'] });
 
   useEffect(() => {
     console.log();
@@ -265,7 +265,9 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
           <Animated.View layout={LinearTransition} onLayout={(e) => setBoxHeight(e.nativeEvent.layout.height)} style={{ width: windowWidth * 0.8, borderRadius: 20, overflow: 'hidden' }}>
             {fields.name.map((field, index) => {
               const rField = currentBill[field] ? (currentBill[field] === 'fixed' ? 'Gasto fijo' : currentBill[field] === 'planned' ? 'Gasto planeado' : String(currentBill[field])) : '';
-              const isNumber = ['amount', 'order', 'inMonths'].includes(field);
+              const isNumber = ['amount', 'order', 'inMonths', 'payDay'].includes(field);
+              // un semanal ya vence el día de cada semana
+              if (field === 'payDay' && isWeeklyBill) return null;
               return (
                 <Animated.View
                   key={field}
@@ -356,12 +358,15 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
                         {...inputFocusProps}
                         style={{ color: theme.text._1, fontSize: fS.modalTransfer, paddingLeft: 10, flex: 1, height: '100%' }}
                         value={rField}
+                        // el día de pago es opcional: vacío vence a fin de mes
+                        placeholder={field === 'payDay' ? 'Fin de mes' : undefined}
+                        placeholderTextColor={theme.text._3}
                         keyboardType={isNumber ? 'numeric' : 'default'}
                         keyboardAppearance='dark'
                         onChangeText={(text) =>
                           setCurrentBill((prev) => ({
                             ...prev,
-                            [field]: isNumber ? Number(text) : text,
+                            [field]: field === 'payDay' ? Math.min(Number(text.replace(/\D/g, '')), 31) : isNumber ? Number(text) : text,
                           }))
                         }
                       ></TextInput>
@@ -478,7 +483,7 @@ export default function ModalEditAccount({ bill = {}, onCancel, setShowMenu }) {
             {/* botón confirmar -------------------------- */}
 
             {(hasChanges || getMonth(bill.firstMonth) !== date.m || getYear(bill.firstMonth) !== date.y) &&
-              fields.name.every((field) => (field === 'firstMonth' ? currentBill.firstMonth !== '' && currentBill.firstMonth !== null : currentBill[field] !== '' && currentBill[field] !== 0 && currentBill[field] !== undefined && currentBill[field] !== null)) &&
+              fields.name.every((field) => (field === 'payDay' ? true : field === 'firstMonth' ? currentBill.firstMonth !== '' && currentBill.firstMonth !== null : currentBill[field] !== '' && currentBill[field] !== 0 && currentBill[field] !== undefined && currentBill[field] !== null)) &&
               ('firstMonth' in currentBill ? currentBill.firstMonth !== '' : true) &&
               (hasNextAmount ? currentBill.nextAmount > 0 : true) &&
               (isWeeklyBill ? currentBill.weekday != null : true) && (
